@@ -1,0 +1,11 @@
+build
+bin
+obj
+Release
+Debug
+*.pdb
+*.user
+*.suo
+*.swp
+*.swo
+*.ncb

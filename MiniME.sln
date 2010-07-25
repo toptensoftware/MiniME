@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiniME", "MiniME\MiniME.csproj", "{947703CB-0944-4609-A4C3-B85B90DF50E1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mm", "mm\mm.csproj", "{692B99CE-C938-43AE-9F1F-1DA24557FD14}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiniMETestCases", "MiniMETestCases\MiniMETestCases.csproj", "{76CC33AD-D621-431C-8366-C5D4A1C428A9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{947703CB-0944-4609-A4C3-B85B90DF50E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{947703CB-0944-4609-A4C3-B85B90DF50E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{947703CB-0944-4609-A4C3-B85B90DF50E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{947703CB-0944-4609-A4C3-B85B90DF50E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{692B99CE-C938-43AE-9F1F-1DA24557FD14}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{692B99CE-C938-43AE-9F1F-1DA24557FD14}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{692B99CE-C938-43AE-9F1F-1DA24557FD14}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{692B99CE-C938-43AE-9F1F-1DA24557FD14}.Release|Any CPU.Build.0 = Release|Any CPU
+		{76CC33AD-D621-431C-8366-C5D4A1C428A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76CC33AD-D621-431C-8366-C5D4A1C428A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76CC33AD-D621-431C-8366-C5D4A1C428A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76CC33AD-D621-431C-8366-C5D4A1C428A9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

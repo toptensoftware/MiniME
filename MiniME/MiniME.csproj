@@ -1,0 +1,89 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{947703CB-0944-4609-A4C3-B85B90DF50E1}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MiniME</RootNamespace>
+    <AssemblyName>MiniME</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ast\StatementTryCatchFinally.cs" />
+    <Compile Include="ast\StatementWith.cs" />
+    <Compile Include="ast\StatementForEach.cs" />
+    <Compile Include="ast\StatementLabel.cs" />
+    <Compile Include="ast\StatementWhile.cs" />
+    <Compile Include="ast\StatementDoWhile.cs" />
+    <Compile Include="ast\StatementBreakContinue.cs" />
+    <Compile Include="ast\StatementSwitch.cs" />
+    <Compile Include="ast\StatementExpression.cs" />
+    <Compile Include="ast\StatementVariableDeclaration.cs" />
+    <Compile Include="ast\StatementFor.cs" />
+    <Compile Include="ast\StatementIfElse.cs" />
+    <Compile Include="ast\ExpressionNode.cs" />
+    <Compile Include="ast\StatementReturnThrow.cs" />
+    <Compile Include="ast\Node.cs" />
+    <Compile Include="ast\Parameter.cs" />
+    <Compile Include="ast\Statement.cs" />
+    <Compile Include="ast\StatementBlock.cs" />
+    <Compile Include="SymbolFrequency.cs" />
+    <Compile Include="SymbolScope.cs" />
+    <Compile Include="SymbolUsageVisitor.cs" />
+    <Compile Include="SymbolDeclarationVisitor.cs" />
+    <Compile Include="Utils.cs" />
+    <Compile Include="SymbolManager.cs" />
+    <Compile Include="CompileError.cs" />
+    <Compile Include="Compiler.cs" />
+    <Compile Include="Parser.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StringScanner.cs" />
+    <Compile Include="Tokenizer.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
