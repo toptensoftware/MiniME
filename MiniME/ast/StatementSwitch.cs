@@ -37,7 +37,11 @@ namespace MiniME.ast
 		{
 			dest.Append("switch(");
 			TestExpression.Render(dest);
-			dest.Append("){");
+			dest.Append(')');
+			dest.StartLine();
+			dest.Append('{');
+			dest.Indent();
+			dest.StartLine();
 			foreach (var c in Cases)
 			{
 				if (c.Value != null)
@@ -50,8 +54,13 @@ namespace MiniME.ast
 				{
 					dest.Append("default:");
 				}
+				dest.Indent();
+				dest.StartLine();
 				c.Code.Render(dest);
+				dest.Unindent();
 			}
+			dest.Unindent();
+			dest.StartLine();
 			dest.Append("}");
 			return false;
 		}

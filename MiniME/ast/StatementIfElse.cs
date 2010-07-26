@@ -31,16 +31,19 @@ namespace MiniME.ast
 			dest.Append("if(");
 			Condition.Render(dest);
 			dest.Append(")");
-			bool retv=TrueStatement.Render(dest);
+			bool retv=TrueStatement.RenderIndented(dest);
 			if (FalseStatement != null)
 			{
 				if (retv)
 					dest.Append(';');
 
+				dest.StartLine();
+
 				dest.Append("else");
 				if (FalseStatement.GetType() != typeof(StatementBlock))
 					dest.Append(' ');
-				retv=FalseStatement.Render(dest);
+
+				retv = FalseStatement.RenderIndented(dest);
 			}
 			return retv;
 		}

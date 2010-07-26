@@ -55,6 +55,12 @@ namespace MiniME.ast
 
 				dest.StartLine();
 				bNeedSemicolon=s.Render(dest);
+
+				if (bNeedSemicolon && dest.Formatted)
+				{
+					dest.Append(';');
+					bNeedSemicolon = false;
+				}
 			}
 			if (GlobalScope)
 			{

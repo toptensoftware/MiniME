@@ -4,6 +4,19 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
+/*
+ * TODO:
+ * 
+ * - Prevent obfuscation when 'with' or 'eval' detected
+ * - Obfuscation of catch block exception variable
+ * - Optimization of constants
+ * - Collapse variables declarations into a single var statement
+ * - Diagnostic mode to reparse generated content
+ * - Unit test cases
+ * - Comments to prevent use of symbols //mm-reserve:top
+ * 
+ */
+
 namespace MiniME
 {
 	public class Compiler
@@ -58,10 +71,18 @@ namespace MiniME
 				statements.Visit(new SymbolUsageVisitor(rootScope));
 				rootScope.PrepareSymbolRanks();
 
-				rootScope.Dump(0);
+//				rootScope.Dump(0);
 
 				RenderContext r = new RenderContext();
 				rootScope.ClaimSymbols(r);
+
+				// Claim all 2 and 3 letter reserved words/keywords
+				// (based on list here: http://www.quackit.com/javascript/javascript_reserved_words.cfm)
+				string[] words = new string[] {"if", "in", "do", "for", "new", "var", "int", "try", "NaN", "ref", "sun", "top" };
+				foreach (var s in words)
+				{
+					r.Symbols.ClaimSymbol(s);
+				}
 
 				r.Formatted = true;
 //				r.DebugInfo = true;

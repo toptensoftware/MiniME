@@ -16,6 +16,14 @@ namespace MiniME.ast
 	{
 		public abstract void Dump(int indent);
 		public abstract bool Render(RenderContext dest);
+		public bool RenderIndented(RenderContext dest)
+		{
+			dest.Indent();
+			dest.StartLine();
+			bool b=Render(dest);
+			dest.Unindent();
+			return b;
+		}
 
 		public void Visit(IVisitor visitor)
 		{
