@@ -34,6 +34,10 @@ namespace MiniME
 
 		public void PrepareSymbolRanks()
 		{
+			// Quit if no point
+			if (ContainsEvil)
+				return;
+
 			// Calculate base rank based on local frequency
 			UpdateRanks(Symbols, Symbols.Sort());
 
@@ -66,6 +70,17 @@ namespace MiniME
 
 		public void ObfuscateSymbols(RenderContext ctx)
 		{
+			// Quit if obfuscation prevented by evil
+			if (ContainsEvil)
+			{
+				if (ctx.DebugInfo)
+				{
+					ctx.StartLine();
+					ctx.AppendFormat("// Obfuscation prevented by evil");
+				}
+				return;
+			}
+
 			int rankPos = -1;
 			foreach (var i in Symbols.Sort())
 			{
@@ -142,5 +157,6 @@ namespace MiniME
 		public SymbolFrequency Symbols = new SymbolFrequency();
 		public List<SymbolScope> NestedScopes = new List<SymbolScope>();
 		public SymbolFrequency m_AllSymbols;
+		public bool ContainsEvil;		// Contains a 'with' or 'eval'
 	}
 }

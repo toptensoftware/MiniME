@@ -1,126 +1,22 @@
-﻿var a;
-
-function b()
+﻿function test()
 {
-}
-
-function test(x, y, z)
-{
-    var i;
-    var j;
-    var k;
-    
-    k=k+k+k+k+x;
-    this.blah++;
-    
-    function child1(x)
+    function sub()
     {
-        i=(j+k)/x;
-        alert("Hello World");
-        this.variable=this.variable+this.offset*3;
-        nested_again(x);
-        
-        if (i==0)
-        {
-            alert(x);
-            alert(y);
-        }
-        else
-        {
-            alert(i);
-            alert(i);
-        }
-        
-        for (var i=0; i<100; i++)
-        {
-            alert(i);
-            alert(i);
-        }
-        
-        for (var i=0; i<100; i++)
-        {
-            alert(i);
-        }
-        
-        while (true)
+        with(blah)
         {
             DoSomething();
-            DoSomething();
-        }
-        while (true)
-        {
-            DoSomething();
-        }
-        
-        do
-        {
-            Something();
-        }
-        while (true);
-        
-        do
-        {
-            Something();
-            Something();
-        }
-        while (true);
-        
-        if (Something)
-        {
-            if (SomethingElse)
-            {
-                DoNothing();
-            }
-            DoNothingAgain();
-        }
-        
-        
-        function nested_again(z)
-        {
-            return z+k+k+k+k+k+k+k+k+k+k+k+k;
         }
     }
-    function child2(p,q)
+    
+    function sub2()
     {
-        return p+q;
+        return eval("sub()");
     }
     
-    var something_else=23;
+    function sub3(param1, param2)
+    {
+        return param1 + param2;
+    }
     
-    child1(i);
-    child2(j,k);
-}
-
-var c;
-
-
-switch (x)
-{
-    case 0:
-        blah();
-        break;
-        
-    case 1:
-        blah();
-        blah();
-        blha();
-        break;
-        
-    default:
-        return 100;
-}
-
-with (x)
-{
-    blah();
-}
-
-try
-{
-    blah();
-    Blah();
-}
-catch (e)
-{
-    alert(e);
+    sub();
 }

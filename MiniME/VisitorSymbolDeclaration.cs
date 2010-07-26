@@ -5,9 +5,9 @@ using System.Text;
 
 namespace MiniME
 {
-	class SymbolDeclarationVisitor : ast.IVisitor
+	class VisitorSymbolDeclaration : ast.IVisitor
 	{
-		public SymbolDeclarationVisitor(SymbolScope rootScope)
+		public VisitorSymbolDeclaration(SymbolScope rootScope)
 		{
 			m_Scopes.Push(rootScope);
 		}
@@ -33,6 +33,7 @@ namespace MiniME
 				// Enter scope
 				m_Scopes.Push(fn.Scope);
 
+				return;
 			}
 
 			// Is it a CatchClause?
@@ -52,30 +53,54 @@ namespace MiniME
 				m_Scopes.Push(cc.Scope);
 
 				DefineSymbol(cc.ExceptionVariable);
+
+				return;
 			}
 
 			if (n.GetType() == typeof(ast.StatementVariableDeclaration))
 			{
 				var v = (ast.StatementVariableDeclaration)n;
 				DefineSymbol(v.Name);
+				return;
 			}
 
 			if (n.GetType() == typeof(ast.Parameter))
 			{
 				var p = (ast.Parameter)n;
 				DefineSymbol(p.Name);
+				return;
+			}
+
+			if (n.GetType() == typeof(ast.StatementWith))
+			{
+				m_Scopes.Peek().ContainsEvil = true;
+				return;
+			}
+
+			if (n.GetType() == typeof(ast.ExprNodeMember))
+			{
+				var m = (ast.ExprNodeMember)n;
+				if (m.Lhs == null && m.Name == "eval")
+				{
+					m_Scopes.Peek().ContainsEvil = true;
+				}
+				return;
 			}
 		}
 
 		public void OnLeaveNode(MiniME.ast.Node n)
 		{
-			if (n.GetType() == typeof(ast.ExprNodeFunction))
+			if (n.GetType() == typeof(ast.ExprNodeFunction) || n.GetType() == typeof(ast.CatchClause))
 			{
+				// Check if scope contained evil eval
+				bool bEvil = m_Scopes.Peek().ContainsEvil;
+
+				// Pop the stack
 				m_Scopes.Pop();
-			}
-			if (n.GetType() == typeof(ast.CatchClause))
-			{
-				m_Scopes.Pop();
+
+				// Propagate evil
+				if (bEvil)
+					m_Scopes.Peek().ContainsEvil = true;
 			}
 		}
 

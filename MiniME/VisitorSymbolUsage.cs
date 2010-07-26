@@ -5,9 +5,9 @@ using System.Text;
 
 namespace MiniME
 {
-	class SymbolUsageVisitor : ast.IVisitor
+	class VisitorSymbolUsage : ast.IVisitor
 	{
-		public SymbolUsageVisitor(SymbolScope rootScope)
+		public VisitorSymbolUsage(SymbolScope rootScope)
 		{
 			m_Scopes.Push(rootScope);
 		}

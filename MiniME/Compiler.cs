@@ -8,7 +8,6 @@ using System.IO;
  * TODO:
  * 
  * - Prevent obfuscation when 'with' or 'eval' detected
- * - Obfuscation of catch block exception variable
  * - Optimization of constants
  * - Collapse variables declarations into a single var statement
  * - Diagnostic mode to reparse generated content
@@ -67,8 +66,8 @@ namespace MiniME
 
 				//statements.Dump(0);
 				SymbolScope rootScope = new SymbolScope(null);
-				statements.Visit(new SymbolDeclarationVisitor(rootScope));
-				statements.Visit(new SymbolUsageVisitor(rootScope));
+				statements.Visit(new VisitorSymbolDeclaration(rootScope));
+				statements.Visit(new VisitorSymbolUsage(rootScope));
 				rootScope.PrepareSymbolRanks();
 
 //				rootScope.Dump(0);
