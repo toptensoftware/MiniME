@@ -36,10 +36,14 @@ namespace MiniME.ast
 			}
 		}
 
-		public override bool Render(StringBuilder dest)
+		public override bool Render(RenderContext dest)
 		{
 			if (GlobalScope)
+			{
+				dest.StartLine();
 				dest.Append('{');
+				dest.Indent();
+			}
 
 			bool bNeedSemicolon = false;
 			for (var i=0; i<Content.Count; i++)
@@ -49,10 +53,13 @@ namespace MiniME.ast
 
 				var s = Content[i];
 
+				dest.StartLine();
 				bNeedSemicolon=s.Render(dest);
 			}
 			if (GlobalScope)
 			{
+				dest.Unindent();
+				dest.StartLine();
 				dest.Append('}');
 				return false;
 			}

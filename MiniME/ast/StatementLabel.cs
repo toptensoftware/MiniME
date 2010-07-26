@@ -16,7 +16,7 @@ namespace MiniME.ast
 		{
 			writeLine(indent, "Label `{0}`:", Label);
 		}
-		public override bool Render(StringBuilder dest)
+		public override bool Render(RenderContext dest)
 		{
 			dest.Append(Label);
 			dest.Append(':');

@@ -56,12 +56,17 @@ namespace MiniME
 				SymbolScope rootScope = new SymbolScope(null);
 				statements.Visit(new SymbolDeclarationVisitor(rootScope));
 				statements.Visit(new SymbolUsageVisitor(rootScope));
+				rootScope.PrepareSymbolRanks();
 
 				rootScope.Dump(0);
 
-				StringBuilder sb = new StringBuilder();
-				statements.Render(sb);
-				Console.WriteLine(sb.ToString());
+				RenderContext r = new RenderContext();
+				rootScope.ClaimSymbols(r);
+
+				r.Formatted = true;
+//				r.DebugInfo = true;
+				statements.Render(r);
+				Console.WriteLine(r.FinalScript());
 			}
 		}
 

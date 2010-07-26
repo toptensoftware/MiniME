@@ -30,7 +30,7 @@ namespace MiniME.ast
 	{
 		public abstract OperatorPrecedence GetPrecedence();
 
-		public void WrapAndRender(StringBuilder dest, ExpressionNode other)
+		public void WrapAndRender(RenderContext dest, ExpressionNode other)
 		{
 			if (other.GetPrecedence() > this.GetPrecedence())
 			{
@@ -78,14 +78,18 @@ namespace MiniME.ast
 			return OperatorPrecedence.member;
 		}
 
-		public override bool Render(StringBuilder dest)
+		public override bool Render(RenderContext dest)
 		{
 			if (Lhs != null)
 			{
 				WrapAndRender(dest, Lhs);
 				dest.Append(".");
+				dest.Append(Name);
 			}
-			dest.Append(Name);
+			else
+			{
+				dest.Append(dest.Symbols.GetObfuscatedSymbol(Name));
+			}
 			return true;
 		}
 
@@ -124,7 +128,7 @@ namespace MiniME.ast
 			return OperatorPrecedence.call;
 		}
 
-		public override bool Render(StringBuilder dest)
+		public override bool Render(RenderContext dest)
 		{
 			WrapAndRender(dest, Lhs);
 			dest.Append("(");
@@ -171,7 +175,7 @@ namespace MiniME.ast
 			return OperatorPrecedence.member;
 		}
 
-		public override bool Render(StringBuilder dest)
+		public override bool Render(RenderContext dest)
 		{
 			WrapAndRender(dest, Lhs);
 			dest.Append("[");
@@ -202,9 +206,7 @@ namespace MiniME.ast
 
 		public override void Dump(int indent)
 		{
-			StringBuilder sb=new StringBuilder();
-			Render(sb);
-			writeLine(indent, "literal - {0} - {1}", Value.GetType().ToString(), sb.ToString());
+			writeLine(indent, "literal - {0}", Value.GetType().ToString());
 		}
 
 		public override OperatorPrecedence GetPrecedence()
@@ -212,7 +214,7 @@ namespace MiniME.ast
 			return OperatorPrecedence.terminal;
 		}
 
-		public static void RenderValue(StringBuilder dest, object Value)
+		public static void RenderValue(RenderContext dest, object Value)
 		{
 			if (Value.GetType() == typeof(string))
 			{
@@ -325,7 +327,7 @@ namespace MiniME.ast
 
 		}
 
-		public override bool Render(StringBuilder dest)
+		public override bool Render(RenderContext dest)
 		{
 			RenderValue(dest, Value);
 			return true;
@@ -361,7 +363,7 @@ namespace MiniME.ast
 			return OperatorPrecedence.terminal;
 		}
 
-		public override bool Render(StringBuilder dest)
+		public override bool Render(RenderContext dest)
 		{
 			dest.Append(RegEx);
 			return true;
@@ -390,9 +392,7 @@ namespace MiniME.ast
 
 		public override void Dump(int indent)
 		{
-			StringBuilder sb = new StringBuilder();
-			Render(sb);
-			writeLine(indent, "{0} - {1}", Op.ToString(), sb.ToString());
+			writeLine(indent, "{0}", Op.ToString());
 			Lhs.Dump(indent + 1);
 			Rhs.Dump(indent + 1);
 		}
@@ -465,7 +465,7 @@ namespace MiniME.ast
 			}
 		}
 
-		public override bool Render(StringBuilder dest)
+		public override bool Render(RenderContext dest)
 		{
 			WrapAndRender(dest, Lhs);
 
@@ -567,7 +567,7 @@ namespace MiniME.ast
 
 		}
 
-		public override bool Render(StringBuilder dest)
+		public override bool Render(RenderContext dest)
 		{
 			switch (Op)
 			{
@@ -643,7 +643,7 @@ namespace MiniME.ast
 			return OperatorPrecedence.negation;
 		}
 
-		public override bool Render(StringBuilder dest)
+		public override bool Render(RenderContext dest)
 		{
 			WrapAndRender(dest, Lhs);
 			switch (Op)
@@ -704,7 +704,7 @@ namespace MiniME.ast
 		public List<ExpressionNode> Expressions = new List<ExpressionNode>();
 
 
-		public override bool Render(StringBuilder dest)
+		public override bool Render(RenderContext dest)
 		{
 			dest.Append('[');
 			foreach (var e in Expressions)
@@ -762,7 +762,7 @@ namespace MiniME.ast
 			return OperatorPrecedence.terminal;
 		}
 
-		public override bool Render(StringBuilder dest)
+		public override bool Render(RenderContext dest)
 		{
 			dest.Append('{');
 			for (var i = 0; i < Values.Count; i++)
@@ -823,7 +823,7 @@ namespace MiniME.ast
 			return OperatorPrecedence.conditional;
 		}
 
-		public override bool Render(StringBuilder dest)
+		public override bool Render(RenderContext dest)
 		{
 			WrapAndRender(dest, Condition);
 			dest.Append('?');
@@ -863,7 +863,7 @@ namespace MiniME.ast
 			return OperatorPrecedence.comma;
 		}
 
-		public override bool Render(StringBuilder dest)
+		public override bool Render(RenderContext dest)
 		{
 			for (int i = 0; i < Expressions.Count; i++)
 			{
@@ -916,13 +916,24 @@ namespace MiniME.ast
 			return OperatorPrecedence.terminal;
 		}
 
-		public override bool Render(StringBuilder dest)
+		public override bool Render(RenderContext dest)
 		{
+			// Enter a new symbol scope
+			dest.Symbols.EnterScope();
+
+			// Render the function
+			Scope.ObfuscateSymbols(dest);
+
+			if (dest.Formatted)
+			{
+				dest.StartLine();
+			}
+
 			dest.Append("function");
 			if (Name != null)
 			{
 				dest.Append(' ');
-				dest.Append(Name);
+				dest.Append(dest.Symbols.GetObfuscatedSymbol(Name));
 			}
 			dest.Append('(');
 			for (int i = 0; i < Parameters.Count; i++)
@@ -933,6 +944,10 @@ namespace MiniME.ast
 			}
 			dest.Append(")");
 			Body.Render(dest);
+
+
+			// Leave the symbol scope
+			dest.Symbols.LeaveScope();
 			return true;
 		}
 

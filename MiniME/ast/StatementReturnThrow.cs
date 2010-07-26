@@ -27,7 +27,7 @@ namespace MiniME.ast
 			}
 		}
 
-		public override bool Render(StringBuilder dest)
+		public override bool Render(RenderContext dest)
 		{
 			dest.Append(Op.ToString().Substring(3));
 			if (Value!=null)

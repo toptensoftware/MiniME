@@ -19,7 +19,7 @@ namespace MiniME.ast
 			Code.Dump(indent + 1);
 		}
 
-		public override bool Render(StringBuilder dest)
+		public override bool Render(RenderContext dest)
 		{
 			dest.Append("with(");
 			Expression.Render(dest);

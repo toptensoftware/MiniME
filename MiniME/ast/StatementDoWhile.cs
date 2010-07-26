@@ -18,7 +18,7 @@ namespace MiniME.ast
 			writeLine(indent, "while:");
 			Condition.Dump(indent + 1);
 		}
-		public override bool Render(StringBuilder dest)
+		public override bool Render(RenderContext dest)
 		{
 			dest.Append("do ");
 			Code.Render(dest);

@@ -14,7 +14,7 @@ namespace MiniME
 			map[str] = freq + 1;
 		}
 
-		internal static void IncrementX(this Dictionary<string, int> map, string str, int Count)
+		internal static void Increment(this Dictionary<string, int> map, string str, int Count)
 		{
 			int freq = 0;
 			map.TryGetValue(str, out freq);

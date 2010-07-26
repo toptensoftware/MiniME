@@ -23,9 +23,9 @@ namespace MiniME.ast
 		{
 			write(indent, ToString());
 		}
-		public override bool Render(StringBuilder dest)
+		public override bool Render(RenderContext dest)
 		{
-			dest.Append(Name);
+			dest.Append(dest.Symbols.GetObfuscatedSymbol(Name));
 			return true;
 		}
 

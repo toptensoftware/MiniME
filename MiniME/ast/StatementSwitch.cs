@@ -33,7 +33,7 @@ namespace MiniME.ast
 			}
 		}
 
-		public override bool Render(StringBuilder dest)
+		public override bool Render(RenderContext dest)
 		{
 			dest.Append("switch(");
 			TestExpression.Render(dest);

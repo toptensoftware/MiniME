@@ -787,6 +787,9 @@ namespace MiniME
 
 			t.SkipRequired(Token.closeBrace);
 
+			if (!bCanReduce)
+				return block;
+
 			block.RemoveRedundant();
 
 			if (block.Content.Count == 1)

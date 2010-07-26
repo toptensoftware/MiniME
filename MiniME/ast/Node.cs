@@ -15,7 +15,7 @@ namespace MiniME.ast
 	abstract class Node
 	{
 		public abstract void Dump(int indent);
-		public abstract bool Render(StringBuilder dest);
+		public abstract bool Render(RenderContext dest);
 
 		public void Visit(IVisitor visitor)
 		{

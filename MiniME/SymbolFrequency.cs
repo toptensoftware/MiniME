@@ -5,64 +5,108 @@ using System.Text;
 
 namespace MiniME
 {
-	class SymbolFrequency
+	class SymbolFrequency : Dictionary<string, Symbol>
 	{
+		public bool FindSymbol(string name, Symbol.ScopeType scope, out Symbol retv)
+		{
+			return this.TryGetValue(name + "." + scope.ToString(), out retv);
+		}
+
+		public Symbol AddSymbol(Symbol s)
+		{
+			Add(s.Name + "." + s.Scope.ToString(), s);
+			return s;
+		}
+
 		public void DefineSymbol(string str)
 		{
-			LocalSymbols.Increment(str);
+			Symbol s;
+			if (!FindSymbol(str, Symbol.ScopeType.local, out s))
+			{
+				s = AddSymbol(new Symbol(str, Symbol.ScopeType.local));
+			}
+			s.Frequency++;
 		}
 
 		public void UseSymbol(string str)
 		{
-			if (LocalSymbols.ContainsKey(str))
+			Symbol s;
+			if (!FindSymbol(str, Symbol.ScopeType.local, out s))
 			{
-				LocalSymbols.Increment(str);
+				if (!FindSymbol(str, Symbol.ScopeType.outer, out s))
+				{
+					s = AddSymbol(new Symbol(str, Symbol.ScopeType.outer));
+				}
 			}
-			else
-			{
-				ExternalSymbols.Increment(str);
-			}
+			s.Frequency++;
 		}
 
 		public void CopyFrom(SymbolFrequency other)
 		{
-			LocalSymbols.Clear();
-			ExternalSymbols.Clear();
+			this.Clear();
 
-			foreach (var i in other.LocalSymbols)
+			foreach (var i in other)
 			{
-				LocalSymbols.Add(i.Key, i.Value);
-			}
-			foreach (var i in other.ExternalSymbols)
-			{
-				ExternalSymbols.Add(i.Key, i.Value);
+				AddSymbol(new Symbol(i.Value));
 			}
 		}
 		public void MergeSymbols(SymbolFrequency other)
 		{
-			foreach (var s in other.LocalSymbols)
+			foreach (var i in other)
 			{
-				LocalSymbols.Increment(s.Key, s.Count);
+				Symbol s;
+				switch (i.Value.Scope)
+				{
+					case Symbol.ScopeType.inner:
+					case Symbol.ScopeType.local:
+						if (!FindSymbol(i.Value.Name, Symbol.ScopeType.inner, out s))
+							s = AddSymbol(new Symbol(i.Value.Name, Symbol.ScopeType.inner));
+						break;
+
+					case Symbol.ScopeType.outer:
+					default:
+						if (!FindSymbol(i.Value.Name, Symbol.ScopeType.local, out s))
+						{
+							if (!FindSymbol(i.Value.Name, Symbol.ScopeType.outer, out s))
+							{
+								s=AddSymbol(new Symbol(i.Value.Name, Symbol.ScopeType.outer));
+							}
+						}
+						break;
+				}
+
+				s.Frequency += i.Value.Frequency;
+			}
+		}
+		public List<Symbol> Sort()
+		{
+			var l = new List<Symbol>();
+			foreach (var i in this)
+			{
+				l.Add(i.Value);
 			}
 
+			l.Sort(delegate(Symbol s1, Symbol s2) 
+				{
+					int Compare=s2.Frequency-s1.Frequency;
+					if (Compare == 0)
+						Compare = s1.Rank - s2.Rank;
+					if (Compare==0)
+						Compare=String.Compare(s1.Name, s2.Name);
+					if (Compare==0)
+						Compare=s2.Scope-s2.Scope;
+					return Compare;
+				});
+
+			return l;
 		}
 
 		public void Dump(int indent)
 		{
-			Utils.WriteIndentedLine(indent, "Local Symbol Frequency:");
-			foreach (var i in LocalSymbols)
+			foreach (var i in this.Sort())
 			{
-				Utils.WriteIndentedLine(indent + 1, "{0}: {1}", i.Key, i.Value);
-			}
-
-			Utils.WriteIndentedLine(indent, "External Symbol Frequency:");
-			foreach (var i in ExternalSymbols)
-			{
-				Utils.WriteIndentedLine(indent + 1, "{0}: {1}", i.Key, i.Value);
+				Utils.WriteIndentedLine(indent, "{0}: {1}x '{2}' {3}", i.Scope.ToString(), i.Frequency, i.Name, i.Scope==Symbol.ScopeType.local ? "#"+i.Rank.ToString() : "");
 			}
 		}
-
-		public Dictionary<string, int> LocalSymbols = new Dictionary<string, int>();
-		public Dictionary<string, int> ExternalSymbols = new Dictionary<string, int>();
 	}
 }

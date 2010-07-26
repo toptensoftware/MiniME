@@ -65,12 +65,14 @@
     <Compile Include="ast\Parameter.cs" />
     <Compile Include="ast\Statement.cs" />
     <Compile Include="ast\StatementBlock.cs" />
+    <Compile Include="RenderContext.cs" />
+    <Compile Include="Symbol.cs" />
     <Compile Include="SymbolFrequency.cs" />
     <Compile Include="SymbolScope.cs" />
     <Compile Include="SymbolUsageVisitor.cs" />
     <Compile Include="SymbolDeclarationVisitor.cs" />
     <Compile Include="Utils.cs" />
-    <Compile Include="SymbolManager.cs" />
+    <Compile Include="SymbolAllocator.cs" />
     <Compile Include="CompileError.cs" />
     <Compile Include="Compiler.cs" />
     <Compile Include="Parser.cs" />

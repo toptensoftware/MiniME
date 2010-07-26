@@ -17,7 +17,7 @@ namespace MiniME.ast
 			writeLine(indent, "Expression:");
 			Expression.Dump(indent + 1);
 		}
-		public override bool Render(StringBuilder dest)
+		public override bool Render(RenderContext dest)
 		{
 			return Expression.Render(dest);
 		}

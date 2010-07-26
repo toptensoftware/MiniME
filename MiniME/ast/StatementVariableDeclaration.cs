@@ -25,10 +25,10 @@ namespace MiniME.ast
 			}
 		}
 
-		public override bool Render(StringBuilder dest)
+		public override bool Render(RenderContext dest)
 		{
 			dest.Append("var ");
-			dest.Append(Name);
+			dest.Append(dest.Symbols.GetObfuscatedSymbol(Name));
 			if (InitialValue != null)
 			{
 				dest.Append("=");
