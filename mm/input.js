@@ -52,6 +52,29 @@ function test(x, y, z)
             DoSomething();
         }
         
+        do
+        {
+            Something();
+        }
+        while (true);
+        
+        do
+        {
+            Something();
+            Something();
+        }
+        while (true);
+        
+        if (Something)
+        {
+            if (SomethingElse)
+            {
+                DoNothing();
+            }
+            DoNothingAgain();
+        }
+        
+        
         function nested_again(z)
         {
             return z+k+k+k+k+k+k+k+k+k+k+k+k;
@@ -69,3 +92,35 @@ function test(x, y, z)
 }
 
 var c;
+
+
+switch (x)
+{
+    case 0:
+        blah();
+        break;
+        
+    case 1:
+        blah();
+        blah();
+        blha();
+        break;
+        
+    default:
+        return 100;
+}
+
+with (x)
+{
+    blah();
+}
+
+try
+{
+    blah();
+    Blah();
+}
+catch (e)
+{
+    alert(e);
+}

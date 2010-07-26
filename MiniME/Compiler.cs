@@ -85,7 +85,7 @@ namespace MiniME
 				}
 
 				r.Formatted = true;
-//				r.DebugInfo = true;
+				r.DebugInfo = true;
 				statements.Render(r);
 				Console.WriteLine(r.FinalScript());
 			}

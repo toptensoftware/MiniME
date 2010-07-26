@@ -41,9 +41,9 @@ namespace MiniME.ast
 			dest.StartLine();
 			dest.Append('{');
 			dest.Indent();
-			dest.StartLine();
 			foreach (var c in Cases)
 			{
+				dest.StartLine();
 				if (c.Value != null)
 				{
 					dest.Append("case");
@@ -54,10 +54,7 @@ namespace MiniME.ast
 				{
 					dest.Append("default:");
 				}
-				dest.Indent();
-				dest.StartLine();
-				c.Code.Render(dest);
-				dest.Unindent();
+				c.Code.RenderIndented(dest);
 			}
 			dest.Unindent();
 			dest.StartLine();

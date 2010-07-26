@@ -964,6 +964,5 @@ namespace MiniME.ast
 		public string Name;
 		public List<Parameter> Parameters = new List<Parameter>();
 		public Statement Body;
-		public SymbolScope Scope;
 	}
 }

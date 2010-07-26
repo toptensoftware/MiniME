@@ -39,7 +39,7 @@ namespace MiniME.ast
 			dest.Append(" in ");
 			Collection.Render(dest);
 			dest.Append(")");
-			return CodeBlock.Render(dest);
+			return CodeBlock.RenderIndented(dest);
 		}
 
 		public override void OnVisitChildNodes(IVisitor visitor)

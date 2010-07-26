@@ -713,7 +713,7 @@ namespace MiniME
 
 					while (t.SkipOptional(Token.kw_catch))
 					{
-						var cc=new ast.StatementTryCatchFinally.CatchClause();
+						var cc=new ast.CatchClause();
 
 						// Catch expression
 						t.SkipRequired(Token.openRound);
@@ -735,7 +735,7 @@ namespace MiniME
 
 						// Code block
 						t.Require(Token.openBrace);
-						cc.Code=ParseStatement();
+						cc.Code=ParseStatementBlock(false);
 
 						stmt.CatchClauses.Add(cc);
 					}

@@ -21,12 +21,10 @@ namespace MiniME.ast
 		public override bool Render(RenderContext dest)
 		{
 			dest.Append("do ");
-			dest.Indent();
+			Code.RenderIndented(dest);
+			dest.Append(' ');
 			dest.StartLine();
-			Code.Render(dest);
-			dest.Unindent();
-			dest.StartLine();
-			dest.Append(" while(");
+			dest.Append("while(");
 			Condition.Render(dest);
 			dest.Append(')');
 			return false;

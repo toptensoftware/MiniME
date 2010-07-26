@@ -7,9 +7,9 @@ namespace MiniME
 {
 	class SymbolScope
 	{
-		public SymbolScope(ast.ExprNodeFunction fn)
+		public SymbolScope(ast.Node node)
 		{
-			Function = fn;
+			Node = node;
 		}
 
 		public static void UpdateRanks(SymbolFrequency Symbols, List<Symbol> SymbolsByFreq)
@@ -100,7 +100,7 @@ namespace MiniME
 
 		public void Dump(int indent)
 		{
-			Utils.WriteIndentedLine(indent, "Scope: {0}", Function);
+			Utils.WriteIndentedLine(indent, "Scope: {0}", Node);
 
 			Utils.WriteIndentedLine(indent + 1, "Local:");
 			Symbols.Dump(indent + 2);
@@ -111,7 +111,7 @@ namespace MiniME
 				merged.CopyFrom(Symbols);
 				merged.MergeSymbols(i.AllSymbols);
 
-				Utils.WriteIndentedLine(indent + 1, "Merged for {0}", i.Function);
+				Utils.WriteIndentedLine(indent + 1, "Merged for {0}", i.Node);
 				merged.Dump(indent + 2);
 			}
 
@@ -138,7 +138,7 @@ namespace MiniME
 			}
 		}
 
-		public ast.ExprNodeFunction Function;
+		public ast.Node Node;
 		public SymbolFrequency Symbols = new SymbolFrequency();
 		public List<SymbolScope> NestedScopes = new List<SymbolScope>();
 		public SymbolFrequency m_AllSymbols;

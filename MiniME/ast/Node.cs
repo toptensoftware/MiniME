@@ -18,11 +18,18 @@ namespace MiniME.ast
 		public abstract bool Render(RenderContext dest);
 		public bool RenderIndented(RenderContext dest)
 		{
-			dest.Indent();
-			dest.StartLine();
-			bool b=Render(dest);
-			dest.Unindent();
-			return b;
+			if (dest.Formatted && GetType()!=typeof(StatementBlock))
+			{
+				dest.Indent();
+				dest.StartLine();
+				bool b = Render(dest);
+				dest.Unindent();
+				return b;
+			}
+			else
+			{
+				return Render(dest);
+			}
 		}
 
 		public void Visit(IVisitor visitor)
@@ -48,6 +55,8 @@ namespace MiniME.ast
 			Console.Write(new String(' ', indent*4));
 			Console.WriteLine(str, args);
 		}
+
+		public SymbolScope Scope;		// Only used by function and CatchClause nodes
 	}
 
 }

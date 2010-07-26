@@ -24,7 +24,7 @@ namespace MiniME.ast
 			dest.Append("with(");
 			Expression.Render(dest);
 			dest.Append(")");
-			return Code.Render(dest);
+			return Code.RenderIndented(dest);
 		}
 
 		public override void OnVisitChildNodes(IVisitor visitor)

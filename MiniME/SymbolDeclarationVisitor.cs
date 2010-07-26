@@ -22,10 +22,7 @@ namespace MiniME
 				fn.Scope = new SymbolScope(fn);
 
 				// Add this function to the parent function's list of nested functions
-				if (m_Scopes.Count > 0)
-				{
-					m_Scopes.Peek().NestedScopes.Add(fn.Scope);
-				}
+				m_Scopes.Peek().NestedScopes.Add(fn.Scope);
 
 				// Define a symbol for the new function
 				if (!String.IsNullOrEmpty(fn.Name))
@@ -36,6 +33,25 @@ namespace MiniME
 				// Enter scope
 				m_Scopes.Push(fn.Scope);
 
+			}
+
+			// Is it a CatchClause?
+			if (n.GetType() == typeof(ast.CatchClause))
+			{
+				var cc = (ast.CatchClause)n;
+
+				cc.Scope = new SymbolScope(cc);
+
+				// Add this function to the parent function's list of nested functions
+				if (m_Scopes.Count > 0)
+				{
+					m_Scopes.Peek().NestedScopes.Add(cc.Scope);
+				}
+
+				// Enter scope
+				m_Scopes.Push(cc.Scope);
+
+				DefineSymbol(cc.ExceptionVariable);
 			}
 
 			if (n.GetType() == typeof(ast.StatementVariableDeclaration))
@@ -53,7 +69,11 @@ namespace MiniME
 
 		public void OnLeaveNode(MiniME.ast.Node n)
 		{
-			if (n.GetType()==typeof(ast.ExprNodeFunction))
+			if (n.GetType() == typeof(ast.ExprNodeFunction))
+			{
+				m_Scopes.Pop();
+			}
+			if (n.GetType() == typeof(ast.CatchClause))
 			{
 				m_Scopes.Pop();
 			}
