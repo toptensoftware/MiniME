@@ -7,6 +7,8 @@ var x=function(msg)
 	alert(msg)
 }
 
+sep();
+
 // Non-anonymous function in an expression
 var y=function myfn(z)
 {
@@ -15,5 +17,5 @@ var y=function myfn(z)
 
 // eof
 -----
-var x=function(msg){alert(msg)};var y=function myfn(z){f(z)}
+var x=function(msg){alert(msg)};sep();var y=function myfn(z){f(z)}
 -----

@@ -114,6 +114,7 @@ namespace MiniME
 				statements.Visit(new VisitorSymbolDeclaration(rootScope));
 				statements.Visit(new VisitorSymbolUsage(rootScope));
 			}
+			statements.Visit(new VisitorCombineVarDecl(rootScope));
 			statements.Visit(new VisitorConstDetector(rootScope));
 			rootScope.PrepareSymbolRanks();
 

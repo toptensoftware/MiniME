@@ -424,20 +424,21 @@ namespace MiniME
 		}
  
 		// Parse a single variable declaration
-		ast.StatementVariableDeclaration ParseVarDecl(ParseContext ctx)
+		void ParseVarDecl(ParseContext ctx, ast.StatementVariableDeclaration decl)
 		{
 			// Variable name
 			t.Require(Token.identifier);
-			var decl = new ast.StatementVariableDeclaration(t.identifier);
+			var name = t.identifier;
 			t.Next();
 
 			// Initial value?
+			ast.ExpressionNode InitialValue = null;
 			if (t.SkipOptional(Token.assign))
 			{
-				decl.InitialValue = ParseSingleExpression(ctx);
+				InitialValue = ParseSingleExpression(ctx);
 			}
 
-			return decl;
+			decl.AddDeclaration(name, InitialValue);
 		}
 
 		// Parse a variable declaration statement (which might include
@@ -451,29 +452,18 @@ namespace MiniME
 				t.Next();
 
 				// Parse the first varaible declaration
-				var stmt = ParseVarDecl(ctx);
-
-				// More than one variable?
-				if (t.token != Token.comma)
-				{
-					// No, just return it
-					return stmt;
-				}
-
-				// Create a statement block
-				var multi = new ast.StatementVariableDeclarationMulti();
-
-				// Add the first declaration
-				multi.Variables.Add(stmt);
+				var stmt = new ast.StatementVariableDeclaration();
+				
+				ParseVarDecl(ctx, stmt);
 
 				// Parse other declarations
 				while (t.SkipOptional(Token.comma))
 				{
-					multi.Variables.Add(ParseVarDecl(ctx));
+					ParseVarDecl(ctx, stmt);
 				}
 
 				// End of statement
-				return multi;
+				return stmt;
 			}
 			else
 			{
@@ -644,12 +634,15 @@ namespace MiniME
 
 							if (decl != null)
 							{
-								if (decl.InitialValue != null)
+								if (decl.HasInitialValue())
 								{
-									throw new CompileError("Syntax error - unexpected initializer in object iterating for loop", t);
+									throw new CompileError("Syntax error - unexpected initializer in for-in statement", t);
+								}
+								if (decl.Variables.Count > 1)
+								{
+									throw new CompileError("Syntax error - unexpected multiple iterator variables in for-in statement", t);
 								}
 								stmtForEach.VariableDeclaration = init;
-								stmtForEach.Iterator = new ast.ExprNodeMember(decl.Name);
 							}
 							else
 							{

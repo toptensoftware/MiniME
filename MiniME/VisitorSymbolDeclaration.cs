@@ -45,8 +45,9 @@ namespace MiniME
 			// Define variables in the current scope
 			if (n.GetType() == typeof(ast.StatementVariableDeclaration))
 			{
-				var v = (ast.StatementVariableDeclaration)n;
-				DefineSymbol(v.Name);
+				var vardecl = (ast.StatementVariableDeclaration)n;
+				foreach (var v in vardecl.Variables)
+					DefineSymbol(v.Name);
 				return;
 			}
 

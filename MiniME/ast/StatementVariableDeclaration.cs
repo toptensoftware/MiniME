@@ -7,49 +7,88 @@ namespace MiniME.ast
 {
 	class StatementVariableDeclaration : Statement
 	{
-		public StatementVariableDeclaration(string name)
+		public StatementVariableDeclaration()
 		{
-			Name = name;
 		}
+
+		public void AddDeclaration(string Name, ast.ExpressionNode InitialValue)
+		{
+			var v = new Variable();
+			v.Name = Name;
+			v.InitialValue = InitialValue;
+			Variables.Add(v);
+		}
+
+		public bool HasInitialValue()
+		{
+			foreach (var v in Variables)
+			{
+				if (v.InitialValue != null)
+					return true;
+			}
+			return false;
+		}
+
 
 		public override void Dump(int indent)
 		{
-			if (InitialValue != null)
+			foreach (var v in Variables)
 			{
-				writeLine(indent, "variable `{0}`, initial value:", Name);
-				InitialValue.Dump(indent + 1);
-			}
-			else
-			{
-				writeLine(indent, "variable `{0}`", Name);
+				if (v.InitialValue != null)
+				{
+					writeLine(indent, "variable `{0}`, initial value:", v.Name);
+					v.InitialValue.Dump(indent + 1);
+				}
+				else
+				{
+					writeLine(indent, "variable `{0}`", v.Name);
+				}
 			}
 		}
 
-		public void RenderContent(RenderContext dest)
-		{
-			dest.Append(dest.Symbols.GetObfuscatedSymbol(Name));
-			if (InitialValue != null)
-			{
-				dest.Append("=");
-				InitialValue.Render(dest);
-			}
-		}
 
 		public override bool Render(RenderContext dest)
 		{
 			dest.Append("var ");
-			RenderContent(dest);
+			bool bFirst = true;
+			foreach (var v in Variables)
+			{
+				if (!bFirst)
+				{
+					dest.Append(',');
+				}
+				else
+				{
+					bFirst = false;
+				}
+
+				dest.Append(dest.Symbols.GetObfuscatedSymbol(v.Name));
+				if (v.InitialValue != null)
+				{
+					dest.Append("=");
+					v.InitialValue.Render(dest);
+				}
+			}
 			return true;
 		}
 
 		public override void OnVisitChildNodes(IVisitor visitor)
 		{
-			if (InitialValue!=null)
-				InitialValue.Visit(visitor);
+			foreach (var v in Variables)
+			{
+				if (v.InitialValue != null)
+					v.InitialValue.Visit(visitor);
+			}
 		}
 
-		public string Name;
-		public ExpressionNode InitialValue;
+
+		public class Variable
+		{
+			public string Name;
+			public ExpressionNode InitialValue;
+		}
+
+		public List<Variable> Variables=new List<Variable>();
 
 	}
 }

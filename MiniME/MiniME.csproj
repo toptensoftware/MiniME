@@ -47,7 +47,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ast\StatementVariableDeclarationMulti.cs" />
     <Compile Include="ast\StatementTryCatchFinally.cs" />
     <Compile Include="ast\StatementWith.cs" />
     <Compile Include="ast\StatementForIn.cs" />
@@ -66,6 +65,7 @@
     <Compile Include="ast\Parameter.cs" />
     <Compile Include="ast\Statement.cs" />
     <Compile Include="ast\StatementBlock.cs" />
+    <Compile Include="VisitorCombineVarDecls.cs" />
     <Compile Include="VisitorScopeBuilder.cs" />
     <Compile Include="VisitorConstDetector.cs" />
     <Compile Include="RenderContext.cs" />

@@ -25,14 +25,6 @@ namespace MiniME
 			if (n.GetType() == typeof(ast.StatementVariableDeclaration))
 			{
 				var decl = (ast.StatementVariableDeclaration)n;
-				if (decl.InitialValue != null)
-				{
-					object literal = decl.InitialValue.EvalConstLiteral();
-					if (literal != null)
-					{
-
-					}
-				}
 			}
 
 

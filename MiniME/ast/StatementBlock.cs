@@ -14,6 +14,7 @@ namespace MiniME.ast
 
 		public void RemoveRedundant()
 		{
+			// Fold up contained statement blocks
 			for (int i=0; i<Content.Count; i++)
 			{
 				// Is this a statement block?
@@ -26,6 +27,24 @@ namespace MiniME.ast
 					i--;
 				}
 			}
+		}
+
+		public void CombineVarDecls()
+		{
+			// Combine consecutive variable declarations
+			for (int i = 1; i < Content.Count; i++)
+			{
+				if (Content[i - 1].GetType() == typeof(ast.StatementVariableDeclaration) &&
+					Content[i].GetType() == typeof(ast.StatementVariableDeclaration))
+				{
+					var decl1 = (ast.StatementVariableDeclaration)Content[i - 1];
+					var decl2 = (ast.StatementVariableDeclaration)Content[i];
+					decl1.Variables.AddRange(decl2.Variables);
+					Content.RemoveAt(i);
+					i--;
+				}
+			}
+
 		}
 
 		public override void Dump(int indent)

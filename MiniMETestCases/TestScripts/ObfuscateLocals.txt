@@ -8,5 +8,5 @@ function fn()
 	return local1+local2;
 }
 -----
-function fn(){var a;var b;return a+b}
+function fn(){var a,b;return a+b}
 -----
