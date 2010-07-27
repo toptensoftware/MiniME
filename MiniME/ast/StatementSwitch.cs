@@ -41,8 +41,12 @@ namespace MiniME.ast
 			dest.StartLine();
 			dest.Append('{');
 			dest.Indent();
+			bool bNeedSemicolon=false;
 			foreach (var c in Cases)
 			{
+				if (bNeedSemicolon)
+					dest.Append(';');
+
 				dest.StartLine();
 				if (c.Value != null)
 				{
@@ -54,7 +58,7 @@ namespace MiniME.ast
 				{
 					dest.Append("default:");
 				}
-				c.Code.RenderIndented(dest);
+				bNeedSemicolon=c.Code.RenderIndented(dest);
 			}
 			dest.Unindent();
 			dest.StartLine();
@@ -87,6 +91,7 @@ namespace MiniME.ast
 			public Case(ExpressionNode value)
 			{
 				Value = value;
+				Code.HasBraces = false;
 			}
 			public ExpressionNode Value;
 			public StatementBlock Code = new StatementBlock();
@@ -98,3 +103,4 @@ namespace MiniME.ast
 
 	
 }
+

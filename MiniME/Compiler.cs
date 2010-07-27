@@ -76,7 +76,7 @@ namespace MiniME
 		public string Compile()
 		{
 			var statements = new ast.StatementBlock();
-			statements.GlobalScope = false;
+			statements.HasBraces = false;
 
 			foreach (var file in m_files)
 			{

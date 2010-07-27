@@ -66,6 +66,7 @@ namespace MiniME
 			if (Compiler.MaxLineLength > 0)
 			{
 				m_iLineBreaksDisabled--;
+				System.Diagnostics.Debug.Assert(m_iLineBreaksDisabled >= 0);
 				if (m_iLineBreaksDisabled == 0)
 				{
 					// Swap string builders back again
@@ -81,6 +82,7 @@ namespace MiniME
 
 		public void EnableLineBreaksAfterNextWrite()
 		{
+			System.Diagnostics.Debug.Assert(m_bEnableLineBreaksAfterNextWrite == false);
 			m_bEnableLineBreaksAfterNextWrite = true;
 		}
 
@@ -91,8 +93,8 @@ namespace MiniME
 
 			if (m_bEnableLineBreaksAfterNextWrite)
 			{
-				EnableLineBreaks();
 				m_bEnableLineBreaksAfterNextWrite = false;
+				EnableLineBreaks();
 			}
 		}
 
@@ -103,8 +105,8 @@ namespace MiniME
 
 			if (m_bEnableLineBreaksAfterNextWrite)
 			{
-				EnableLineBreaks();
 				m_bEnableLineBreaksAfterNextWrite = false;
+				EnableLineBreaks();
 			}
 		}
 

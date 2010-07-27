@@ -1,15 +1,20 @@
-﻿if (p.current() == ' ')
+﻿
+function test(ch)
 {
-	if (tabPos < 0)
-		leadingSpaces++;
+    switch (ch)
+    {
+        case 1:
+        case 2:
+        case 3:
+            break;
+        
+        case 5:
+            return "blah";
+            
+          
+    }
+    
+    return "deblah";
 }
-else if (p.current() == '\t')
-{
-	if (tabPos < 0)
-		tabPos = p.position;
-}
-else
-{
-	// Something else, get out
-	break;
-}
+
+alert(test(1));

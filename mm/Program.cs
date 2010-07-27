@@ -119,10 +119,18 @@ namespace mm
 			{
 				new Program().Run(args);
 			}
-			catch (Exception  e)
+			catch (MiniME.CompileError e)
 			{
 				Console.WriteLine(e.Message);
+				System.Environment.ExitCode = 7;
 			}
+				/*
+			catch (Exception e)
+			{
+				Console.WriteLine("Internal error - {0}", e.Message);
+				System.Environment.ExitCode = 9;
+			}
+				 */
 		}
 	}
 }

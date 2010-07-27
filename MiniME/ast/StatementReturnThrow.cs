@@ -29,7 +29,7 @@ namespace MiniME.ast
 
 		public override bool Render(RenderContext dest)
 		{
-			if (Value != null)
+			if (Value == null)
 			{
 				dest.Append(Op.ToString().Substring(3));
 				return true;

@@ -38,7 +38,7 @@ namespace MiniME.ast
 
 		public override bool Render(RenderContext dest)
 		{
-			if (GlobalScope)
+			if (HasBraces)
 			{
 				dest.StartLine();
 				dest.Append('{');
@@ -62,7 +62,7 @@ namespace MiniME.ast
 					bNeedSemicolon = false;
 				}
 			}
-			if (GlobalScope)
+			if (HasBraces)
 			{
 				dest.Unindent();
 				dest.StartLine();
@@ -81,7 +81,7 @@ namespace MiniME.ast
 			}
 		}
 
-		public bool GlobalScope = true;
+		public bool HasBraces = true;
 		public List<Statement> Content=new List<Statement>();
 	}
 }
