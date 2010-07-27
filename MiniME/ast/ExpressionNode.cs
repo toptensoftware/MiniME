@@ -540,8 +540,23 @@ namespace MiniME.ast
 
 			switch (Op)
 			{
-				case Token.add:				dest.Append("+"); break;
-				case Token.subtract:		dest.Append("-"); break;
+				case Token.add:				
+					dest.Append("+");
+
+					// Prevent `lhs + ++rhs` from becoming `lhs+++rhs` (which would incorrectly be interpreted as `lhs++ + rhs`)
+					if (Rhs.GetType() == typeof(ExprNodeUnary) && ((ExprNodeUnary)Rhs).Op == Token.increment)
+						dest.Append(" ");
+					break;
+
+				case Token.subtract:		
+					dest.Append("-");
+
+					// Prevent `lhs - --rhs` from becoming `lhs---rhs` (which would incorrectly be interpreted as `lhs-- - rhs`)
+					// Also prevent `lhs- -rhs` from become `lhs--rhs` (which would incorrectly be interpreted as `lhs-- rhs`)
+					if (Rhs.GetType() == typeof(ExprNodeUnary) && ((ExprNodeUnary)Rhs).Op == Token.decrement || ((ExprNodeUnary)Rhs).Op == Token.subtract)
+						dest.Append(" ");
+					break;
+
 				case Token.multiply:		dest.Append("*"); break;
 				case Token.divide:			dest.Append("/"); break;
 				case Token.modulus: dest.Append("%"); break;
@@ -761,11 +776,15 @@ namespace MiniME.ast
 					break;
 
 				case Token.add:
-					dest.Append('+');
 					break;
 
 				case Token.subtract:
 					dest.Append('-');
+					if (Rhs.GetType() == typeof(ExprNodeUnary) && ((ExprNodeUnary)Rhs).Op == Token.subtract)
+					{
+						// Prevent conversion of '- -' (double negative) to '--' (decrement)
+						dest.Append(' ');
+					}
 					break;
 
 				case Token.increment:
@@ -843,8 +862,8 @@ namespace MiniME.ast
 			return null;
 		}
 
-		ExpressionNode Rhs;
-		Token Op;
+		public ExpressionNode Rhs;
+		public Token Op;
 	}
 
 	class ExprNodePostfix : ExpressionNode

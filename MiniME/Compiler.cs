@@ -7,11 +7,12 @@ using System.IO;
 /*
  * TODO:
  * 
- * - Optimization of constants
  * - Collapse variables declarations into a single var statement
+ * - Optimization of constants
  * - Diagnostic mode to reparse generated content
  * - Unit test cases
  * - Comments to prevent use of symbols //mm-reserve:top
+ * - Preserved comments
  * 
  */
 
