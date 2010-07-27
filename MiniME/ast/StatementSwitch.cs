@@ -29,7 +29,10 @@ namespace MiniME.ast
 					writeLine(indent, "default:");
 				}
 				writeLine(indent, "do:");
-				c.Code.Dump(indent + 1);
+				if (c.Code != null)
+				{
+					c.Code.Dump(indent + 1);
+				}
 			}
 		}
 
@@ -58,7 +61,14 @@ namespace MiniME.ast
 				{
 					dest.Append("default:");
 				}
-				bNeedSemicolon=c.Code.RenderIndented(dest);
+				if (c.Code != null)
+				{
+					bNeedSemicolon = c.Code.RenderIndented(dest);
+				}
+				else
+				{
+					bNeedSemicolon = false;
+				}
 			}
 			dest.Unindent();
 			dest.StartLine();
@@ -73,7 +83,8 @@ namespace MiniME.ast
 			{
 				if (c.Value!=null)
 					c.Value.Visit(visitor);
-				c.Code.Visit(visitor);
+				if (c.Code!=null)
+					c.Code.Visit(visitor);
 			}
 		}
 
@@ -91,10 +102,10 @@ namespace MiniME.ast
 			public Case(ExpressionNode value)
 			{
 				Value = value;
-				Code.HasBraces = false;
 			}
+
 			public ExpressionNode Value;
-			public StatementBlock Code = new StatementBlock();
+			public StatementBlock Code;
 		}
 
 		public ExpressionNode TestExpression;

@@ -606,6 +606,12 @@ namespace MiniME
 						}
 
 						// Parse a statement
+						if (currentCase.Code == null)
+						{
+							currentCase.Code = new ast.StatementBlock();
+							currentCase.Code.HasBraces = false;
+						}
+
 						currentCase.Code.Content.Add(ParseStatement());
 					}
 
