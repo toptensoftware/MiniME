@@ -1,0 +1,25 @@
+﻿for-in loop statement tests
+-----
+// Single statement
+for (var i in c)
+	f(); 
+
+// Compound statement
+for (var i in c)
+{
+	f();
+	f();
+}
+
+// No trailing semicolon
+for (var i in c)
+	f()
+
+// No variable declaration
+for (i in c)
+	f()
+
+// eof
+-----
+for(var i in c)f();for(var i in c){f();f()}for(var i in c)f();for(i in c)f()
+-----

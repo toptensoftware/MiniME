@@ -1,0 +1,24 @@
+﻿do-while statement tests
+-----
+// Single statement
+do 
+	f(); 
+while (c);
+
+// Compound statement
+do 
+{ 
+	f();	
+	f(); 
+} 
+while (c);	
+
+// No trailing semicolon
+do 
+	f(); 
+while (c)
+
+// eof
+-----
+do f();while(c)do{f();f()}while(c)do f();while(c)
+-----

@@ -74,6 +74,14 @@ namespace MiniME
 			m_files.Add(i);
 		}
 
+		public void AddScript(string strName, string strScript)
+		{
+			var i = new FileInfo();
+			i.filename = strName;
+			i.content = strScript;
+			m_files.Add(i);
+		}
+
 		public string Compile()
 		{
 			var statements = new ast.StatementBlock();

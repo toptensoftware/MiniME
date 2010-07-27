@@ -1,0 +1,18 @@
+﻿[Formatted]
+-----
+x=/regex/;
+x=/regex/g;
+x=/regex/i;
+x=/regex/m;
+x=/regex/y;		// This is a firefox extension
+x=/regex/gim;
+x=/\//;			// Escaped forward slash in regex
+-----
+x=/regex/;
+x=/regex/g;
+x=/regex/i;
+x=/regex/m;
+x=/regex/y;
+x=/regex/gim;
+x=/\//;
+-----

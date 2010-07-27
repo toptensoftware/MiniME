@@ -1,0 +1,50 @@
+﻿switch statement tests
+-----
+// typical
+switch (c)
+{
+	case 1:
+		f();
+		break;
+		
+	case 2:
+		f();
+		break;
+	
+	default:
+		f();
+		break;
+}
+
+// Multiple cases
+switch (c)
+{
+	case 1:
+	case 2:
+	case 3:
+		f();
+		break;
+		
+	case 4:
+		f();
+		break;
+	
+	default:
+		f();
+		break;
+}
+
+// Braced case clause (braces can be removed)
+switch (c)
+{
+	case 1:
+	{
+		f();
+		f();
+		break;
+	}
+}
+	
+-----
+switch(c){case 1:f();break;case 2:f();break;default:f();break}switch(c){case 1:case 2:case 3:f();break;case 4:f();break;default:f();break}switch(c){case 1:f();f();break}
+-----

@@ -47,9 +47,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ast\StatementVariableDeclarationMulti.cs" />
     <Compile Include="ast\StatementTryCatchFinally.cs" />
     <Compile Include="ast\StatementWith.cs" />
-    <Compile Include="ast\StatementForEach.cs" />
+    <Compile Include="ast\StatementForIn.cs" />
     <Compile Include="ast\StatementLabel.cs" />
     <Compile Include="ast\StatementWhile.cs" />
     <Compile Include="ast\StatementDoWhile.cs" />

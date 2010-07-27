@@ -1,0 +1,29 @@
+﻿label, break and continue statement tests
+-----
+// Some labels
+label1:
+f();
+label2:
+
+// Break with label
+break label1;
+
+// Continue with label
+continue label1;
+
+// Break without label
+break;
+
+// Continue without label
+continue;
+
+// No semicolon
+break
+notalabel;
+continue
+notalabel;
+
+// eof
+-----
+label1:f();label2:break label1;continue label1;break;continue;break;notalabel;continue;notalabel
+-----

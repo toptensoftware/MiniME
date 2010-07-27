@@ -1,0 +1,19 @@
+﻿function tests
+[NoObfuscate]
+-----
+// Anonymous function in an expression
+var x=function(msg)
+{
+	alert(msg)
+}
+
+// Non-anonymous function in an expression
+var y=function myfn(z)
+{
+	f(z);
+}
+
+// eof
+-----
+var x=function(msg){alert(msg)};var y=function myfn(z){f(z)}
+-----

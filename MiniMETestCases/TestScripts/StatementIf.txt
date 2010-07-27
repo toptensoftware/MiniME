@@ -1,0 +1,21 @@
+﻿if statement tests
+-----
+// Single statement
+if (c)
+	f();
+
+// Compound statement
+if (c)
+{
+	f();
+	f();
+}
+
+// No trailing semicolon
+if (c)
+	f()
+
+// eof
+-----
+if(c)f();if(c){f();f()}if(c)f()
+-----

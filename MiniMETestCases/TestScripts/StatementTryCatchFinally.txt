@@ -1,0 +1,39 @@
+﻿try-catch-finally statement tests
+[NoObfuscate]
+-----
+// try-catch
+try
+{
+	f();
+}
+catch(x)
+{
+	alert(x);
+}
+
+// try-finally
+try
+{
+	f();
+}
+finally
+{
+	g();
+}
+
+// try-catch-finally
+try
+{
+	f();
+}
+catch(x)
+{
+	alert(x);
+}
+finally
+{
+	g();
+}
+-----
+try{f()}catch(x){alert(x)}try{f()}finally{g()}try{f()}catch(x){alert(x)}finally{g()}
+-----

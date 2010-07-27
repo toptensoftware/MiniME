@@ -46,6 +46,7 @@ namespace MiniME.ast
 		{
 			return null;
 		}
+
 	}
 
 	// Represents a method/property/field name
@@ -377,11 +378,20 @@ namespace MiniME.ast
 				return;
 			}
 
-			if (Value.GetType() == typeof(double))
+			if (Value.GetType() == typeof(DoubleLiteral))
 			{
-				double dblVal = (double)Value;
-				dest.Append(dblVal.ToString());
+				dest.Append(((DoubleLiteral)Value).Original);
 				return;
+
+				/*
+				string strGeneral = dblVal.ToString();
+				string strScientific = dblVal.ToString("r");
+				if (strGeneral.Length < strScientific.Length)
+					dest.Append(strGeneral);
+				else
+					dest.Append(strScientific);
+				return;
+				 */
 			}
 
 			if (Value.GetType() == typeof(bool))
@@ -544,8 +554,7 @@ namespace MiniME.ast
 					dest.Append("+");
 
 					// Prevent `lhs + ++rhs` from becoming `lhs+++rhs` (which would incorrectly be interpreted as `lhs++ + rhs`)
-					if (Rhs.GetType() == typeof(ExprNodeUnary) && ((ExprNodeUnary)Rhs).Op == Token.increment)
-						dest.Append(" ");
+					dest.NeedSpaceIf('+');
 					break;
 
 				case Token.subtract:		
@@ -553,8 +562,7 @@ namespace MiniME.ast
 
 					// Prevent `lhs - --rhs` from becoming `lhs---rhs` (which would incorrectly be interpreted as `lhs-- - rhs`)
 					// Also prevent `lhs- -rhs` from become `lhs--rhs` (which would incorrectly be interpreted as `lhs-- rhs`)
-					if (Rhs.GetType() == typeof(ExprNodeUnary) && ((ExprNodeUnary)Rhs).Op == Token.decrement || ((ExprNodeUnary)Rhs).Op == Token.subtract)
-						dest.Append(" ");
+					dest.NeedSpaceIf('-');
 					break;
 
 				case Token.multiply:		dest.Append("*"); break;
@@ -689,10 +697,10 @@ namespace MiniME.ast
 			}
 
 			// Double?
-			if (lhs.GetType() == typeof(double) &&
-				rhs.GetType() == typeof(double))
+			if (lhs.GetType() == typeof(DoubleLiteral) &&
+				rhs.GetType() == typeof(DoubleLiteral))
 			{
-				return Eval((double)lhs, (double)rhs, Op);
+				return Eval(((DoubleLiteral)lhs).Value, ((DoubleLiteral)rhs).Value, Op);
 			}
 
 			// Long?
@@ -780,11 +788,7 @@ namespace MiniME.ast
 
 				case Token.subtract:
 					dest.Append('-');
-					if (Rhs.GetType() == typeof(ExprNodeUnary) && ((ExprNodeUnary)Rhs).Op == Token.subtract)
-					{
-						// Prevent conversion of '- -' (double negative) to '--' (decrement)
-						dest.Append(' ');
-					}
+					dest.NeedSpaceIf('-');
 					break;
 
 				case Token.increment:
@@ -848,9 +852,9 @@ namespace MiniME.ast
 				return null;
 
 			// Double?
-			if (rhs.GetType() == typeof(double))
+			if (rhs.GetType() == typeof(DoubleLiteral))
 			{
-				return Eval((double)rhs, Op);
+				return Eval(((DoubleLiteral)rhs).Value, Op);
 			}
 
 			// Long?

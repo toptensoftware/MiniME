@@ -1,0 +1,21 @@
+﻿for statement tests
+-----
+// Single statement
+for (var i=0; i<9; i++)
+	f(); 
+
+// Compound statement
+for (var i=0; i<9; i++)
+{
+	f();
+	f();
+}
+
+// No trailing semicolon
+for (var i=0; i<9; i++)
+	f()
+
+// eof
+-----
+for(var i=0;i<9;i++)f();for(var i=0;i<9;i++){f();f()}for(var i=0;i<9;i++)f()
+-----

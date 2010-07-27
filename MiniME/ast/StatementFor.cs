@@ -54,10 +54,13 @@ namespace MiniME.ast
 		{
 			if (Initialize!=null)
 				Initialize.Visit(visitor);
-			else
+
+			if (Condition!=null)
 				Condition.Visit(visitor);
 
-			Increment.Visit(visitor);
+			if (Increment!=null)
+				Increment.Visit(visitor);
+
 			CodeBlock.Visit(visitor);
 		}
 

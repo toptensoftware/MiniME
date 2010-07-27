@@ -1,0 +1,31 @@
+﻿for statement tests (part 2)
+-----
+// No variable declaration
+for (i=0; i<9; i++)
+	f(); 
+
+// No loop initialization
+for (; i<9; i++)
+	f();
+
+// No condition
+for (i=0; ; i++)
+	f()
+	
+// No counter
+for (i=0; i<9; )
+	f()
+	
+// Nothing
+for ( ; ; )
+	f();
+	
+// Multiple init, loop
+for (i=0,j=0; i<9 && j<9; i++, j++)
+	f()
+
+// eof
+-----
+for(i=0;i<9;i++)f();for(;i<9;i++)f();for(i=0;;i++)f();for(i=0;i<9;)f();for(;;)f();for(i=0,j=0;i<9&&j<9;i++,j++)f()
+
+-----

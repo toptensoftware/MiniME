@@ -34,9 +34,8 @@ namespace MiniME.ast
 
 			if (FinallyClause != null)
 			{
-				dest.Append("finally{");
-				Code.Render(dest);
-				dest.Append('}');
+				dest.Append("finally");
+				FinallyClause.RenderIndented(dest);
 			}
 			return false;
 

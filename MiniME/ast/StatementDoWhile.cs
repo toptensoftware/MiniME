@@ -20,9 +20,11 @@ namespace MiniME.ast
 		}
 		public override bool Render(RenderContext dest)
 		{
-			dest.Append("do ");
-			Code.RenderIndented(dest);
-			dest.Append(' ');
+			dest.Append("do");
+			if (Code.GetType() != typeof(StatementBlock))
+				dest.Append(' ');
+			if (Code.RenderIndented(dest))
+				dest.Append(';');
 			dest.StartLine();
 			dest.Append("while(");
 			Condition.Render(dest);

@@ -1,0 +1,21 @@
+﻿With statement tests
+-----
+// Single statement
+with (c) 
+	f();
+	
+// Compound statement
+with (c) 
+{ 
+	f();	
+	f(); 
+}	
+
+// No trailing semicolon
+with (c) 
+	f()
+	
+// eof
+-----
+with(c)f();with(c){f();f()}with(c)f()
+-----

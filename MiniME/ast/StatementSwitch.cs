@@ -104,6 +104,28 @@ namespace MiniME.ast
 				Value = value;
 			}
 
+			public void AddCode(ast.Statement statement)
+			{
+				if (Code == null)
+				{
+					Code = new ast.StatementBlock();
+					Code.HasBraces = false;
+				}
+
+				if (statement.GetType()==typeof(ast.StatementBlock))
+				{
+					foreach (var c in ((ast.StatementBlock)statement).Content)
+					{
+						Code.Content.Add(c);
+					}
+				}
+				else
+				{
+					Code.Content.Add(statement);
+				}
+			}
+
+
 			public ExpressionNode Value;
 			public StatementBlock Code;
 		}

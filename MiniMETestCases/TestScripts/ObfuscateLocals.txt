@@ -1,0 +1,12 @@
+﻿Obfuscation tests
+-----
+function fn()
+{
+	// locals should obfuscated to a and b
+	var local1;
+	var local2;
+	return local1+local2;
+}
+-----
+function fn(){var a;var b;return a+b}
+-----

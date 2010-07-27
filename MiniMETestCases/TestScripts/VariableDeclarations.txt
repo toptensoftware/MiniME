@@ -1,0 +1,28 @@
+﻿Variable declaration statement tests
+-----
+// Simple variable
+var v1;
+
+sep();
+
+// Consecutive variable declarations
+var v2;
+var v3;
+
+sep();
+
+// Multiple declarations in a single statement
+var v4,v5;
+
+sep();
+
+// Combine declarations
+var v6,v7;
+var v8;
+var v9,v10;
+
+
+// eof
+-----
+var v1;sep();var v2,v3;sep();var v4,v5;sep();var v6,v7,v8,v9,10
+-----

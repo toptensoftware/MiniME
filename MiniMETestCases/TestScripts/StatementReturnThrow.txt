@@ -1,0 +1,18 @@
+﻿return and throw statement tests
+-----
+// Return with value
+return 1
+fn();
+
+// Return without value
+return
+fn();
+
+throw 1;
+throw
+1;
+
+// eof
+-----
+return 1;fn();return;fn();throw 1;throw 1
+-----

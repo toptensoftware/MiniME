@@ -1,0 +1,22 @@
+﻿function parameter tests
+[NoObfuscate]
+-----
+// No params
+function x()
+{
+}
+
+// Single param
+function x(y)
+{
+}
+
+// Multiple params
+function x(a,b,c)
+{
+}
+
+// eof
+-----
+function x(){};function x(y){};function x(a,b,c){}
+-----

@@ -98,6 +98,12 @@ namespace MiniME
 		kw_function,
 	}
 
+	internal class DoubleLiteral
+	{
+		public double Value;
+		public string Original;
+	}
+
 	internal class Tokenizer
 	{
 		internal Tokenizer(string str, string strFileName)
@@ -184,10 +190,44 @@ namespace MiniME
 			}
 		}
 
+		internal bool IsAutoSemicolon()
+		{
+			if (p.eof)
+				return true;
+
+			// Scan backwards from the current token and look for a linebreak
+			var pos = m_tokenStart;
+			while (pos > 0)
+			{
+				// Ignore line space
+				if (StringScanner.IsLineSpace(p.input[pos - 1]))
+				{
+					pos--;
+					continue;
+				}
+
+				// Is it a line end?
+				if (StringScanner.IsLineEnd(p.input[pos - 1]))
+				{
+					return true;
+				}
+
+				return false;
+			}
+
+			return true;
+		}
+
 		internal bool SkipOptional(Token t)
 		{
 			if (token != t)
+			{
+				// Automatic semicolons?
+				if (t == Token.semicolon && IsAutoSemicolon())
+					return true;
+
 				return false;
+			}
 
 			Next();
 			return true;
@@ -198,28 +238,8 @@ namespace MiniME
 			// Automatic semicolons?
 			if (t == Token.semicolon && token != Token.semicolon)
 			{
-				if (p.eof)
+				if (IsAutoSemicolon())
 					return;
-
-				// Scan backwards from the current token and look for a linebreak
-				var pos = m_tokenStart;
-				while (pos > 0)
-				{
-					// Ignore line space
-					if (StringScanner.IsLineSpace(p.input[pos-1]))
-					{
-						pos--;
-						continue;
-					}
-
-					// Is it a line end?
-					if (StringScanner.IsLineEnd(p.input[pos - 1]))
-					{
-						return;
-					}
-
-					break;
-				}
 			}
 
 			Require(t);
@@ -914,7 +934,14 @@ namespace MiniME
 					throw new CompileError("Syntax error - incorrectly formatted decimal literal", this);
 				}
 
-				m_literal = temp;
+				// Need to store both the parsed value and the original value.
+				// Original value is used to re-write on render without losing/changing
+				// the value
+				DoubleLiteral l = new DoubleLiteral();
+				l.Value = temp;
+				l.Original = str;
+
+				m_literal = l;
 				return Token.literal;
 			}
 			else

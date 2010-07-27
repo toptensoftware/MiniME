@@ -31,7 +31,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="nunit.framework, Version=2.5.6.10205, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL" />
+    <Reference Include="nunit.framework, Version=2.5.5.10112, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -46,14 +46,97 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="SymbolAllocatorTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestFile.cs" />
+    <Compile Include="Test.cs" />
+    <EmbeddedResource Include="TestScripts\CommentsAndWhitespace.txt" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MiniME\MiniME.csproj">
       <Project>{947703CB-0944-4609-A4C3-B85B90DF50E1}</Project>
       <Name>MiniME</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\LiteralStrings.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\LiteralIntegers.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\LiteralFloats.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\LiteralRegEx.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\StatementDoWhile.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\StatementWhile.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\StatementFor.txt">
+      <SubType>Code</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TestScripts\StatementFor2.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\StatementForIn.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\StatementIf.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\StatementIfElse.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\StatementIfElseHanging.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\StatementLabelBreakContinue.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\StatementReturnThrow.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\StatementSwitch.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\StatementTryCatchFinally.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\StatementTryCatchFinally2.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\StatementWith.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\FunctionParameters.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\FunctionInExpression.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\FunctionNested.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\ExpressionsBasic.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\ExpressionsOperatorSpacing.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\ObfuscateGlobals.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\ObfuscateParameters.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\ObfuscateLocals.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\VariableDeclarations.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

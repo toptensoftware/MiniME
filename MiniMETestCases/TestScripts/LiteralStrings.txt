@@ -1,0 +1,8 @@
+﻿[Formatted]
+-----
+x="Hello \xf8 \"World\"";
+y='Hello \ufff8 \'World\'';
+-----
+x='Hello \xF8 "World"';
+y="Hello \uFFF8 'World'";
+-----

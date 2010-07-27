@@ -86,8 +86,29 @@ namespace MiniME
 			m_bEnableLineBreaksAfterNextWrite = true;
 		}
 
+		// Force insertion of a space if the next character is chNext
+		public void NeedSpaceIf(char chNext)
+		{
+			System.Diagnostics.Debug.Assert(m_chNeedSpaceIf == '\0');
+			m_chNeedSpaceIf = chNext;
+		}
+
 		public void Append(string val)
 		{
+			if (m_chNeedSpaceIf != '\0')
+			{
+				if (val.Length > 0 && val[0] == m_chNeedSpaceIf)
+				{
+					m_chNeedSpaceIf = '\0';
+					Append(" ");
+				}
+				else
+				{
+					m_chNeedSpaceIf = '\0';
+				}
+			}
+
+
 			TrackLinePosition(val.Length);
 			sb.Append(val);
 
@@ -98,18 +119,10 @@ namespace MiniME
 			}
 		}
 
-		public void Append(char val)
+		public void Append(char ch)
 		{
-			TrackLinePosition(1);
-			sb.Append(val);
-
-			if (m_bEnableLineBreaksAfterNextWrite)
-			{
-				m_bEnableLineBreaksAfterNextWrite = false;
-				EnableLineBreaks();
-			}
+			Append(new String(ch, 1));
 		}
-
 
 		public void AppendFormat(string str, params object[] args)
 		{
@@ -151,6 +164,7 @@ namespace MiniME
 		int m_iIndent = 0;
 		int m_iLineBreaksDisabled = 0;
 		bool m_bEnableLineBreaksAfterNextWrite = false;
+		char m_chNeedSpaceIf = '\0';
 		Compiler m_Compiler;
 		StringBuilder sb = new StringBuilder();
 		StringBuilder sbTemp = new StringBuilder();

@@ -1,0 +1,34 @@
+﻿hanging-else statement tests
+-----
+// Nested ifs (no hanging else)
+if (c)
+{
+	if (d)
+		f();
+	else
+		f();
+}
+else
+{
+	if (e)
+		f();
+	else
+		f();
+}		
+		
+// Hanging else
+if (c)
+{
+	if (d)
+		f()
+}
+else
+{
+	if (e)
+		f()
+}
+
+// eof
+-----
+if(c)if(d)f();else f();else if(e)f();else f();if(c){if(d)f()}else if(e)f()
+-----

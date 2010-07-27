@@ -1,0 +1,21 @@
+﻿While statement tests
+-----
+// Single statement
+while (c) 
+	f();
+	
+// Compound statement
+while (c) 
+{ 
+	f();	
+	f(); 
+}	
+
+// No trailing semicolon
+while (c) 
+	f()
+	
+// eof
+-----
+while(c)f();while(c){f();f()}while(c)f()
+-----

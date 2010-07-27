@@ -1,0 +1,32 @@
+﻿if-else statement tests
+-----
+// Single statement
+//	- must generate space after else
+if (c)
+	f();
+else
+	g();
+
+// Compound statement
+//    - don't generate space after else
+if (c)
+{
+	f();
+	f();
+}
+else
+{
+	g();
+	g();
+}
+
+// No trailing semicolon
+if (c)
+	f()
+else
+	g()
+
+// eof
+-----
+if(c)f();else g();if(c){f();f()}else{g();g()}if(c)f();else g()
+-----

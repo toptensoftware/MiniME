@@ -1,0 +1,38 @@
+﻿try-catch-finally statement tests
+[NoObfuscate]
+-----
+// try-catch-catch
+try
+{
+	f();
+}
+catch(x if x==1)		// This is a Firefox extension
+{
+	alert(x);
+}
+catch(x if x==2)
+{
+	alert(x);
+}
+
+// try-catch-catch
+try
+{
+	f();
+}
+catch(x if x==1)		// This is a Firefox extension
+{
+	alert(x);
+}
+catch(x if x==2)
+{
+	alert(x);
+}
+finally
+{
+	g();
+}
+
+-----
+try{f()}catch(x if x==1){alert(x)}catch(x if x==2){alert(x)}try{f()}catch(x if x==1){alert(x)}catch(x if x==2){alert(x)}finally{g()}
+-----

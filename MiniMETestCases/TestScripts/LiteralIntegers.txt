@@ -1,0 +1,12 @@
+﻿[Formatted]
+-----
+x=123456789;		// decimal
+y=0xFF;				// hex
+z=0xFFFFFFFFFFF;	// large hex, shorter when formatted as hex
+o=0177;				// octal
+-----
+x=123456789;
+y=255;
+z=0xFFFFFFFFFFF;
+o=127;
+-----

@@ -252,7 +252,12 @@ namespace MiniME
 
 			while (true)
 			{
-				if (t.token == Token.bitwiseNot || 
+				if (t.token == Token.add)
+				{
+					// Ignore as it's redundant!
+					t.Next();
+				}
+				else if (t.token == Token.bitwiseNot || 
 					t.token == Token.logicalNot || 
 					t.token == Token.add || 
 					t.token == Token.subtract ||
@@ -419,7 +424,7 @@ namespace MiniME
 		}
  
 		// Parse a single variable declaration
-		ast.Statement ParseVarDecl(ParseContext ctx)
+		ast.StatementVariableDeclaration ParseVarDecl(ParseContext ctx)
 		{
 			// Variable name
 			t.Require(Token.identifier);
@@ -456,19 +461,19 @@ namespace MiniME
 				}
 
 				// Create a statement block
-				var block = new ast.StatementBlock();
+				var multi = new ast.StatementVariableDeclarationMulti();
 
 				// Add the first declaration
-				block.Content.Add(stmt);
+				multi.Variables.Add(stmt);
 
 				// Parse other declarations
 				while (t.SkipOptional(Token.comma))
 				{
-					block.Content.Add(ParseVarDecl(ctx));
+					multi.Variables.Add(ParseVarDecl(ctx));
 				}
 
 				// End of statement
-				return block;
+				return multi;
 			}
 			else
 			{
@@ -492,8 +497,9 @@ namespace MiniME
 				t.Rewind(mark);
 			}
 
-			while (t.SkipOptional(Token.semicolon))
+			while (t.token==Token.semicolon)
 			{
+				t.Next();
 			};
 
 			switch (t.token)
@@ -505,9 +511,8 @@ namespace MiniME
 				{
 					t.Next();
 
-					if (t.token==Token.semicolon)
+					if (t.SkipOptional(Token.semicolon))
 					{
-						t.Next();
 						return new ast.StatementReturnThrow(Token.kw_return);
 					}
 					else
@@ -533,18 +538,21 @@ namespace MiniME
 					Token op = t.token;
 					t.Next();
 
-					// Optional identifier to break to?
-					string label = null;
-					if (t.token == Token.identifier)
+					if (!t.SkipOptional(Token.semicolon))
 					{
-						label = t.identifier;
-						t.Next();
-					}
+						t.Require(Token.identifier);
 
-					// Create the statement
-					var temp = new ast.StatementBreakContinue(op, label);
-					t.SkipRequired(Token.semicolon);
-					return temp;
+						var temp = new ast.StatementBreakContinue(op, t.identifier);
+						t.Next();
+
+						t.Require(Token.semicolon);
+
+						return temp;
+					}
+					else
+					{
+						return new ast.StatementBreakContinue(op, null);
+					}
 				}
 
 				case Token.kw_if:
@@ -605,14 +613,7 @@ namespace MiniME
 							throw new CompileError("Unexpected code in switch statement before 'case' or 'default'", t);
 						}
 
-						// Parse a statement
-						if (currentCase.Code == null)
-						{
-							currentCase.Code = new ast.StatementBlock();
-							currentCase.Code.HasBraces = false;
-						}
-
-						currentCase.Code.Content.Add(ParseStatement());
+						currentCase.AddCode(ParseStatement());
 					}
 
 					t.SkipRequired(Token.closeBrace);
@@ -637,7 +638,7 @@ namespace MiniME
 						// Foreach iterator
 						if (t.SkipOptional(Token.kw_in))
 						{
-							var stmtForEach = new ast.StatementForEach();
+							var stmtForEach = new ast.StatementForIn();
 
 							var decl = init as ast.StatementVariableDeclaration;
 
@@ -741,7 +742,7 @@ namespace MiniME
 
 					// The code
 					t.Require(Token.openBrace);
-					stmt.Code = ParseStatement();
+					stmt.Code = ParseStatementBlock(false);
 
 					while (t.SkipOptional(Token.kw_catch))
 					{
@@ -775,7 +776,7 @@ namespace MiniME
 					if (t.SkipOptional(Token.kw_finally))
 					{
 						t.Require(Token.openBrace);
-						stmt.FinallyClause=ParseStatement();
+						stmt.FinallyClause=ParseStatementBlock(false);
 					}
 
 					return stmt;
