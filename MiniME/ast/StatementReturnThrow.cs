@@ -29,14 +29,18 @@ namespace MiniME.ast
 
 		public override bool Render(RenderContext dest)
 		{
+			if (Value != null)
+			{
+				dest.Append(Op.ToString().Substring(3));
+				return true;
+			}
+
+	
 			dest.DisableLineBreaks();
 			dest.Append(Op.ToString().Substring(3));
-			if (Value!=null)
-			{
-				dest.Append(' ');
-				Value.Render(dest);
-			}
-			dest.EnableLineBreaks();
+			dest.Append(' ');
+			dest.EnableLineBreaksAfterNextWrite();
+			Value.Render(dest);
 			return true;
 		}
 		public override void OnVisitChildNodes(IVisitor visitor)

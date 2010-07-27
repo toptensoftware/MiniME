@@ -79,16 +79,33 @@ namespace MiniME
 			}
 		}
 
+		public void EnableLineBreaksAfterNextWrite()
+		{
+			m_bEnableLineBreaksAfterNextWrite = true;
+		}
+
 		public void Append(string val)
 		{
 			TrackLinePosition(val.Length);
 			sb.Append(val);
+
+			if (m_bEnableLineBreaksAfterNextWrite)
+			{
+				EnableLineBreaks();
+				m_bEnableLineBreaksAfterNextWrite = false;
+			}
 		}
 
 		public void Append(char val)
 		{
 			TrackLinePosition(1);
 			sb.Append(val);
+
+			if (m_bEnableLineBreaksAfterNextWrite)
+			{
+				EnableLineBreaks();
+				m_bEnableLineBreaksAfterNextWrite = false;
+			}
 		}
 
 
@@ -131,6 +148,7 @@ namespace MiniME
 		int m_iLinePos = 0;
 		int m_iIndent = 0;
 		int m_iLineBreaksDisabled = 0;
+		bool m_bEnableLineBreaksAfterNextWrite = false;
 		Compiler m_Compiler;
 		StringBuilder sb = new StringBuilder();
 		StringBuilder sbTemp = new StringBuilder();
