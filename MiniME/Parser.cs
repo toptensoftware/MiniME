@@ -10,6 +10,7 @@ namespace MiniME
 	enum ParseContext
 	{
 		DisableInOperator=0x0001,
+		NoFunctionCalls=0x0002,
 	}
 
 	class Parser
@@ -147,6 +148,42 @@ namespace MiniME
 					t.Next();
 					return ParseFunction();
 				}
+
+				case Token.kw_new:
+				{
+					t.Next();
+
+					// Parse the type
+					var newType = ParseExpressionMember(ctx | ParseContext.NoFunctionCalls);
+
+					// Create the new operator
+					var newOp = new ast.ExprNodeNew(newType);
+
+					// Parse parameters
+					t.SkipRequired(Token.openRound);
+
+					if (t.token != Token.closeRound)
+					{
+						while (true)
+						{
+							newOp.Arguments.Add(ParseSingleExpression(0));
+							if (t.SkipOptional(Token.comma))
+								continue;
+							else
+								break;
+						}
+					}
+
+					t.SkipRequired(Token.closeRound);
+
+					return newOp;
+				}
+
+				case Token.kw_delete:
+				{
+					t.Next();
+					return new ast.ExprNodeUnary(ParseExpressionMember(ctx), Token.kw_delete);
+				}
 			}
 
 			throw new CompileError("Invalid expression term", t);
@@ -158,6 +195,7 @@ namespace MiniME
 
 			while (true)
 			{
+				// Member dot '.'
 				if (t.SkipOptional(Token.memberDot))
 				{
 					t.Require(Token.identifier);
@@ -166,7 +204,17 @@ namespace MiniME
 					continue;
 				}
 
-				if (t.SkipOptional(Token.openRound))
+				// Array indexer '[]'
+				if (t.SkipOptional(Token.openSquare))
+				{
+					var temp = new ast.ExprNodeIndexer(lhs, ParseCompositeExpression(0));
+					t.SkipRequired(Token.closeSquare);
+					lhs = temp;
+					continue;
+				}
+
+				// Function call '()'
+				if ((ctx & ParseContext.NoFunctionCalls)==0 && t.SkipOptional(Token.openRound))
 				{
 					var temp = new ast.ExprNodeCall(lhs);
 
@@ -187,32 +235,10 @@ namespace MiniME
 					continue;
 				}
 
-				if (t.SkipOptional(Token.openSquare))
-				{
-					var temp = new ast.ExprNodeIndexer(lhs, ParseCompositeExpression(0));
-					t.SkipRequired(Token.closeSquare);
-					lhs = temp;
-					continue;
-				}
-
 				break;
 			}
 
 			return lhs;
-		}
-
-		ast.ExpressionNode ParseExpressionNewDelete(ParseContext ctx)
-		{
-			if (t.SkipOptional(Token.kw_new))
-			{
-				return new ast.ExprNodeUnary(ParseExpressionNewDelete(ctx), Token.kw_new);
-			}
-			else if (t.SkipOptional(Token.kw_delete))
-			{
-				return new ast.ExprNodeUnary(ParseExpressionNewDelete(ctx), Token.kw_delete);
-			}
-			else
-				return ParseExpressionMember(ctx);
 		}
 
 		ast.ExpressionNode ParseExpressionNegation(ParseContext ctx)
@@ -221,7 +247,7 @@ namespace MiniME
 			{
 				var temp = t.token;
 				t.Next();
-				return new ast.ExprNodeUnary(ParseExpressionNewDelete(ctx), temp);
+				return new ast.ExprNodeUnary(ParseExpressionMember(ctx), temp);
 			}
 
 			while (true)
@@ -244,7 +270,7 @@ namespace MiniME
 			}
 
 
-			var lhs=ParseExpressionNewDelete(ctx);
+			var lhs=ParseExpressionMember(ctx);
 
 			if (t.token == Token.increment || t.token == Token.decrement)
 			{

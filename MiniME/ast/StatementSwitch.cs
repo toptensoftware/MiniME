@@ -46,7 +46,7 @@ namespace MiniME.ast
 				dest.StartLine();
 				if (c.Value != null)
 				{
-					dest.Append("case");
+					dest.Append("case ");
 					c.Value.Render(dest);
 					dest.Append(":");
 				}

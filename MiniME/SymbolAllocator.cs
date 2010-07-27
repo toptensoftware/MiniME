@@ -14,6 +14,12 @@ namespace MiniME
 			CurrentScope.NextSymbol = "a";
 		}
 
+		public bool ShowOriginalSymbols
+		{
+			get;
+			set;
+		}
+
 		// Enter a new scope, all newly allocated obfuscated symbols stored in a 
 		// new scope that can be cleaned up by LeaveScope.
 		// Also returns all currently reserved obfuscated symbols to the list of 
@@ -53,7 +59,10 @@ namespace MiniME
 				string obfSymbol;
 				if (s.SymbolMap.TryGetValue(originalSymbol, out obfSymbol))
 				{
-					return String.Format("{0}", obfSymbol, originalSymbol);
+					if (ShowOriginalSymbols)
+						return String.Format("{0}/*{1}*/", obfSymbol, originalSymbol);
+					else
+						return obfSymbol;
 				}
 			}
 			return originalSymbol;

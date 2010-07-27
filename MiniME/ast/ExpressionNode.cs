@@ -7,23 +7,21 @@ namespace MiniME.ast
 {
 	enum OperatorPrecedence
 	{
-		terminal,
-		member,
-		call,
-		negation,
-		multiply,
-		add,
-		bitshift,
-		relational,
-		equality,
-		bitand,
-		bitxor,
-		bitor,
-		logand,
-		logor,
-		conditional,
-		assignment,
 		comma,
+		assignment,
+		conditional,
+		logor,
+		logand,
+		bitor,
+		bitxor,
+		bitand,
+		equality,
+		relational,
+		bitshift,
+		add,
+		multiply,
+		negation,
+		terminal,
 	}
 
 	abstract class ExpressionNode : Node
@@ -32,7 +30,7 @@ namespace MiniME.ast
 
 		public void WrapAndRender(RenderContext dest, ExpressionNode other)
 		{
-			if (other.GetPrecedence() > this.GetPrecedence())
+			if (other.GetPrecedence() < this.GetPrecedence())
 			{
 				dest.Append("(");
 				other.Render(dest);
@@ -42,6 +40,11 @@ namespace MiniME.ast
 			{
 				other.Render(dest);
 			}
+		}
+
+		public virtual object EvalConstLiteral()
+		{
+			return null;
 		}
 	}
 
@@ -75,7 +78,7 @@ namespace MiniME.ast
 
 		public override OperatorPrecedence GetPrecedence()
 		{
-			return OperatorPrecedence.member;
+			return OperatorPrecedence.terminal;
 		}
 
 		public override bool Render(RenderContext dest)
@@ -125,7 +128,7 @@ namespace MiniME.ast
 
 		public override OperatorPrecedence GetPrecedence()
 		{
-			return OperatorPrecedence.call;
+			return OperatorPrecedence.terminal;
 		}
 
 		public override bool Render(RenderContext dest)
@@ -146,6 +149,56 @@ namespace MiniME.ast
 		public override void OnVisitChildNodes(IVisitor visitor)
 		{
 			Lhs.Visit(visitor);
+			foreach (var c in Arguments)
+				c.Visit(visitor);
+		}
+	}
+
+	class ExprNodeNew : ExpressionNode
+	{
+		public ExprNodeNew(ExpressionNode objectType)
+		{
+			ObjectType= objectType;
+		}
+
+		public ExpressionNode ObjectType;
+		public List<ExpressionNode> Arguments = new List<ExpressionNode>();
+
+		public override void Dump(int indent)
+		{
+			writeLine(indent, "New ");
+			ObjectType.Dump(indent + 1);
+			writeLine(indent, "with args:");
+			foreach (var a in Arguments)
+			{
+				a.Dump(indent + 1);
+			}
+		}
+
+		public override OperatorPrecedence GetPrecedence()
+		{
+			return OperatorPrecedence.terminal;
+		}
+
+		public override bool Render(RenderContext dest)
+		{
+			dest.Append("new ");
+			WrapAndRender(dest, ObjectType);
+			dest.Append("(");
+			bool first = true;
+			foreach (var a in Arguments)
+			{
+				if (!first)
+					dest.Append(",");
+				a.Render(dest);
+				first = false;
+			}
+			dest.Append(")");
+			return true;
+		}
+		public override void OnVisitChildNodes(IVisitor visitor)
+		{
+			ObjectType.Visit(visitor);
 			foreach (var c in Arguments)
 				c.Visit(visitor);
 		}
@@ -172,7 +225,7 @@ namespace MiniME.ast
 
 		public override OperatorPrecedence GetPrecedence()
 		{
-			return OperatorPrecedence.member;
+			return OperatorPrecedence.terminal;
 		}
 
 		public override bool Render(RenderContext dest)
@@ -304,6 +357,7 @@ namespace MiniME.ast
 					}
 				}
 				dest.Append(chDelim);
+				return;
 			}
 
 			if (Value.GetType() == typeof(long))
@@ -317,12 +371,20 @@ namespace MiniME.ast
 					dest.Append(strHex);
 				else
 					dest.Append(strDec);
+				return;
 			}
 
 			if (Value.GetType() == typeof(double))
 			{
 				double dblVal = (double)Value;
 				dest.Append(dblVal);
+				return;
+			}
+
+			if (Value.GetType() == typeof(bool))
+			{
+				dest.Append(((bool)Value) ? "true" : "false");
+				return;
 			}
 
 		}
@@ -337,8 +399,12 @@ namespace MiniME.ast
 		{
 		}
 
+		public override object EvalConstLiteral()
+		{
+			return Value;
+		}
 
-		object Value;
+		public object Value;
 	}
 
 	class ExprNodeRegEx : ExpressionNode
@@ -520,6 +586,114 @@ namespace MiniME.ast
 			Rhs.Visit(visitor);
 		}
 
+		public static object Eval(double lhs, double rhs, Token Op)
+		{
+			switch (Op)
+			{
+				case Token.add: return lhs + rhs;
+				case Token.subtract: return lhs - rhs;
+				case Token.multiply: return lhs * rhs;
+				case Token.divide: return lhs / rhs;
+				case Token.modulus: return lhs % rhs;
+				case Token.compareEQ: return lhs == rhs;
+				case Token.compareEQStrict: return lhs == rhs;
+				case Token.compareNE: return lhs != rhs;
+				case Token.compareNEStrict: return lhs != rhs;
+				case Token.compareLT: return lhs < rhs;
+				case Token.compareLE: return lhs <= rhs;
+				case Token.compareGT: return lhs > rhs;
+				case Token.compareGE: return lhs >= rhs;
+			}
+
+			return null;
+		}
+
+		public static object Eval(long lhs, long rhs, Token Op)
+		{
+			switch (Op)
+			{
+				case Token.add: return lhs + rhs;
+				case Token.subtract: return lhs - rhs;
+				case Token.multiply: return lhs * rhs;
+				case Token.divide: return lhs / rhs;
+				case Token.modulus: return lhs % rhs;
+				case Token.bitwiseXor: return lhs ^ rhs;
+				case Token.bitwiseOr: return lhs | rhs;
+				case Token.bitwiseAnd: return lhs & rhs;
+				case Token.shl: return lhs << (int)rhs;
+				case Token.shr: return lhs >> (int)rhs;
+				case Token.shrz: return (long)(((ulong)lhs) >> (int)rhs);
+				case Token.compareEQ: return lhs == rhs;
+				case Token.compareEQStrict: return lhs == rhs;
+				case Token.compareNE: return lhs != rhs;
+				case Token.compareNEStrict: return lhs != rhs;
+				case Token.compareLT: return lhs < rhs;
+				case Token.compareLE: return lhs <= rhs;
+				case Token.compareGT: return lhs > rhs;
+				case Token.compareGE: return lhs >= rhs;
+			}
+			return null;
+		}
+
+		public static object Eval(bool lhs, bool rhs, Token Op)
+		{
+			switch (Op)
+			{
+				case Token.compareEQ: return lhs == rhs;
+				case Token.compareEQStrict: return lhs == rhs;
+				case Token.compareNE: return lhs != rhs;
+				case Token.compareNEStrict: return lhs != rhs;
+				case Token.logicalAnd: return lhs && rhs;
+				case Token.logicalOr: return lhs || rhs;
+			}
+
+			return null;
+		}
+
+
+		public override object EvalConstLiteral()
+		{
+			// Eval left, quit if cant
+			var lhs = Lhs.EvalConstLiteral();
+			if (lhs == null)
+				return null;
+
+			// Eval right, quit if cant
+			var rhs = Rhs.EvalConstLiteral();
+			if (rhs == null)
+				return null;
+
+			// We don't like strings
+			if (lhs.GetType() == typeof(string) ||
+				rhs.GetType() == typeof(string))
+			{
+				return null;
+			}
+
+			// Double?
+			if (lhs.GetType() == typeof(double) &&
+				rhs.GetType() == typeof(double))
+			{
+				return Eval((double)lhs, (double)rhs, Op);
+			}
+
+			// Long?
+			if (lhs.GetType()==typeof(long) && 
+				rhs.GetType()==typeof(long))
+			{
+				return Eval((long)lhs, (long)rhs, Op);
+			}
+
+			// Bool
+			if (lhs.GetType() == typeof(bool) &&
+				rhs.GetType() == typeof(bool))
+			{
+				return Eval((bool)lhs, (bool)rhs, Op);
+			}
+
+			return null;
+		}
+
 		ExpressionNode Lhs;
 		ExpressionNode Rhs;
 		Token Op;
@@ -546,9 +720,6 @@ namespace MiniME.ast
 		{
 			switch (Op)
 			{
-				case Token.kw_new:
-					return OperatorPrecedence.call;
-
 				case Token.bitwiseNot:
 				case Token.logicalNot:
 				case Token.add:
@@ -571,7 +742,6 @@ namespace MiniME.ast
 		{
 			switch (Op)
 			{
-				case Token.kw_new:
 				case Token.kw_typeof:
 				case Token.kw_void:
 				case Token.kw_delete:
@@ -614,6 +784,60 @@ namespace MiniME.ast
 		public override void OnVisitChildNodes(IVisitor visitor)
 		{
 			Rhs.Visit(visitor);
+		}
+
+		public static object Eval(double rhs, Token Op)
+		{
+			switch (Op)
+			{
+				case Token.add: return rhs;
+				case Token.subtract: return -rhs;
+			}
+
+			return null;
+		}
+
+		public static object Eval(long rhs, Token Op)
+		{
+			switch (Op)
+			{
+				case Token.bitwiseNot: return ~rhs;
+				case Token.logicalNot: return !(rhs != 0);
+				case Token.add: return rhs;
+				case Token.subtract: return -rhs;
+			}
+			return null;
+		}
+
+		public static object Eval(bool rhs, Token Op)
+		{
+			switch (Op)
+			{
+				case Token.logicalNot: return !rhs;
+			}
+			return null;
+		}
+
+		public override object EvalConstLiteral()
+		{
+			// Eval right, quit if cant
+			var rhs = Rhs.EvalConstLiteral();
+			if (rhs == null)
+				return null;
+
+			// Double?
+			if (rhs.GetType() == typeof(double))
+			{
+				return Eval((double)rhs, Op);
+			}
+
+			// Long?
+			if (rhs.GetType() == typeof(long))
+			{
+				return Eval((long)rhs, Op);
+			}
+
+			return null;
 		}
 
 		ExpressionNode Rhs;

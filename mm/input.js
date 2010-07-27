@@ -1,22 +1,15 @@
-﻿function test()
+﻿if (p.current() == ' ')
 {
-    function sub()
-    {
-        with(blah)
-        {
-            DoSomething();
-        }
-    }
-    
-    function sub2()
-    {
-        return eval("sub()");
-    }
-    
-    function sub3(param1, param2)
-    {
-        return param1 + param2;
-    }
-    
-    sub();
+	if (tabPos < 0)
+		leadingSpaces++;
+}
+else if (p.current() == '\t')
+{
+	if (tabPos < 0)
+		tabPos = p.position;
+}
+else
+{
+	// Something else, get out
+	break;
 }

@@ -73,7 +73,7 @@ namespace MiniME
 			// Quit if obfuscation prevented by evil
 			if (ContainsEvil)
 			{
-				if (ctx.DebugInfo)
+				if (ctx.SymbolInfo)
 				{
 					ctx.StartLine();
 					ctx.AppendFormat("// Obfuscation prevented by evil");
@@ -89,7 +89,7 @@ namespace MiniME
 					// Reserve space for inner, higher frequency symbols
 					if (i.Rank > rankPos+1)
 					{
-						if (ctx.DebugInfo)
+						if (ctx.SymbolInfo)
 						{
 							for (int j = rankPos+1; j < i.Rank; j++)
 							{
@@ -103,7 +103,7 @@ namespace MiniME
 					string newSymbol=ctx.Symbols.OnfuscateSymbol(i.Name);
 
 					// Create this symbol
-					if (ctx.DebugInfo)
+					if (ctx.SymbolInfo)
 					{
 						ctx.StartLine();
 						ctx.AppendFormat("// #{0} {1} -> {2}", i.Rank, i.Name, newSymbol);
@@ -155,6 +155,7 @@ namespace MiniME
 
 		public ast.Node Node;
 		public SymbolFrequency Symbols = new SymbolFrequency();
+		public SymbolScope OuterScope = null;
 		public List<SymbolScope> NestedScopes = new List<SymbolScope>();
 		public SymbolFrequency m_AllSymbols;
 		public bool ContainsEvil;		// Contains a 'with' or 'eval'

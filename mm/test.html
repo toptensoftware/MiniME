@@ -7,10 +7,14 @@
 	
 	<script type="text/javascript">
 
-do
+function blah()
 {
-	break;
-} while (true) alert("OK");
+	this.x=23;
+}
+
+t=new {a:1, b:2, c:blah}.c().x;
+
+alert(t);
 
 	</script>
 	

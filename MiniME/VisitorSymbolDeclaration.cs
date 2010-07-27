@@ -9,54 +9,40 @@ namespace MiniME
 	{
 		public VisitorSymbolDeclaration(SymbolScope rootScope)
 		{
-			m_Scopes.Push(rootScope);
+			currentScope = rootScope;
 		}
 
 		public void OnEnterNode(MiniME.ast.Node n)
 		{
-			// Is it a function?
+			// Define name of function in outer scope, before descending
 			if (n.GetType() == typeof(ast.ExprNodeFunction))
 			{
 				var fn = (ast.ExprNodeFunction)n;
-
-				fn.Scope = new SymbolScope(fn);
-
-				// Add this function to the parent function's list of nested functions
-				m_Scopes.Peek().NestedScopes.Add(fn.Scope);
 
 				// Define a symbol for the new function
 				if (!String.IsNullOrEmpty(fn.Name))
 				{
 					DefineSymbol(fn.Name);
 				}
-
-				// Enter scope
-				m_Scopes.Push(fn.Scope);
-
-				return;
 			}
 
-			// Is it a CatchClause?
+			// Descending into an inner scope
+			if (n.Scope != null)
+			{
+				System.Diagnostics.Debug.Assert(n.Scope.OuterScope == currentScope);
+				currentScope = n.Scope;
+			}
+
+
+			// Define catch clause exception variables in the inner scope
 			if (n.GetType() == typeof(ast.CatchClause))
 			{
 				var cc = (ast.CatchClause)n;
-
-				cc.Scope = new SymbolScope(cc);
-
-				// Add this function to the parent function's list of nested functions
-				if (m_Scopes.Count > 0)
-				{
-					m_Scopes.Peek().NestedScopes.Add(cc.Scope);
-				}
-
-				// Enter scope
-				m_Scopes.Push(cc.Scope);
-
 				DefineSymbol(cc.ExceptionVariable);
-
 				return;
 			}
 
+			// Define variables in the current scope
 			if (n.GetType() == typeof(ast.StatementVariableDeclaration))
 			{
 				var v = (ast.StatementVariableDeclaration)n;
@@ -64,51 +50,28 @@ namespace MiniME
 				return;
 			}
 
+			// Define parameters in the current scope
 			if (n.GetType() == typeof(ast.Parameter))
 			{
 				var p = (ast.Parameter)n;
 				DefineSymbol(p.Name);
 				return;
 			}
-
-			if (n.GetType() == typeof(ast.StatementWith))
-			{
-				m_Scopes.Peek().ContainsEvil = true;
-				return;
-			}
-
-			if (n.GetType() == typeof(ast.ExprNodeMember))
-			{
-				var m = (ast.ExprNodeMember)n;
-				if (m.Lhs == null && m.Name == "eval")
-				{
-					m_Scopes.Peek().ContainsEvil = true;
-				}
-				return;
-			}
 		}
 
 		public void OnLeaveNode(MiniME.ast.Node n)
 		{
-			if (n.GetType() == typeof(ast.ExprNodeFunction) || n.GetType() == typeof(ast.CatchClause))
+			if (n.Scope != null)
 			{
-				// Check if scope contained evil eval
-				bool bEvil = m_Scopes.Peek().ContainsEvil;
-
-				// Pop the stack
-				m_Scopes.Pop();
-
-				// Propagate evil
-				if (bEvil)
-					m_Scopes.Peek().ContainsEvil = true;
+				currentScope = n.Scope.OuterScope;
 			}
 		}
 
 		void DefineSymbol(string str)
 		{
-			m_Scopes.Peek().Symbols.DefineSymbol(str);
+			currentScope.Symbols.DefineSymbol(str);
 		}
 
-		public Stack<SymbolScope> m_Scopes=new Stack<SymbolScope>();
+		SymbolScope currentScope;
 	}
 }

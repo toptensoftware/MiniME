@@ -11,7 +11,10 @@ namespace mm
 
 		void Run(string[] args)
 		{
+			Console.WriteLine("MiniME!!");
+
 			MiniME.Compiler c = new MiniME.Compiler();
+			bool bStdOut = false;
 
 			// Process command line arguments
 			foreach (var a in args)
@@ -35,6 +38,32 @@ namespace mm
 						case "o":
 							m_strOutputFileName = Value;
 							break;
+
+						case "stdout":
+							bStdOut = true;
+							break;
+
+						case "no-obfuscate":
+							c.NoObfuscate = true;
+							break;
+
+						case "diag-formatted":
+							c.Formatted = true;
+							break;
+
+						case "diag-symbols":
+							c.SymbolInfo = true;
+							c.Formatted = true;
+							break;
+
+						case "diag-ast":
+							c.DumpAST = true;
+							break;
+
+						case "diag-scopes":
+							c.DumpScopes = true;
+							break;
+
 					}
 				}
 				else
@@ -52,7 +81,16 @@ namespace mm
 				}
 			}
 
-			c.Compile();
+			string strScript=c.Compile();
+
+			if (bStdOut)
+			{
+				Console.WriteLine(strScript);
+			}
+			else
+			{
+				System.IO.File.WriteAllText(m_strOutputFileName, strScript);
+			}
 		}
 
 		static void Main(string[] args)

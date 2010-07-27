@@ -26,12 +26,52 @@ namespace MiniME.ast
 
 		}
 
+		// Resolve the hanging-else problem
+
+		// If 
+		//	we have an else clause and...
+		//  the inner statement is a an if statement and...
+		//  it doesn't have an else clause
+		// Then
+		//  wrap the inner statement in braces
+		public bool CheckForHangingElse()
+		{
+
+			if (FalseStatement == null)
+				return false;
+
+			if (TrueStatement.GetType() != typeof(StatementIfElse))
+				return false;
+
+			StatementIfElse InnerIf = (StatementIfElse)TrueStatement;
+
+			if (InnerIf.FalseStatement == null)
+				return true;
+
+			return false;
+		}
+
 		public override bool Render(RenderContext dest)
 		{
 			dest.Append("if(");
 			Condition.Render(dest);
 			dest.Append(")");
-			bool retv=TrueStatement.RenderIndented(dest);
+
+			bool retv;
+			if (CheckForHangingElse())
+			{
+				dest.StartLine();
+				dest.Append("{");
+				TrueStatement.RenderIndented(dest);
+				dest.StartLine();
+				dest.Append("}");
+				retv = false;
+			}
+			else
+			{
+				retv = TrueStatement.RenderIndented(dest);
+			}
+
 			if (FalseStatement != null)
 			{
 				if (retv)

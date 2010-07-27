@@ -65,6 +65,8 @@
     <Compile Include="ast\Parameter.cs" />
     <Compile Include="ast\Statement.cs" />
     <Compile Include="ast\StatementBlock.cs" />
+    <Compile Include="VisitorScopeBuilder.cs" />
+    <Compile Include="VisitorConstDetector.cs" />
     <Compile Include="RenderContext.cs" />
     <Compile Include="Symbol.cs" />
     <Compile Include="SymbolFrequency.cs" />

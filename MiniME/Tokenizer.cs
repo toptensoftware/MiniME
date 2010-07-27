@@ -825,6 +825,17 @@ namespace MiniME
 
 		Token MapIdentifierToKeyword()
 		{
+			if (m_strIdentifier == "true")
+			{
+				m_literal = true;
+				return Token.literal;
+			}
+			if (m_strIdentifier == "false")
+			{
+				m_literal = false;
+				return Token.literal;
+			}
+
 			Token t;
 			if (m_mapKeywords.TryGetValue(m_strIdentifier, out t))
 				return t;

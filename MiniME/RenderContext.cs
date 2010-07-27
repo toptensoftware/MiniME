@@ -58,7 +58,7 @@ namespace MiniME
 			get;
 			set;
 		}
-		public bool DebugInfo
+		public bool SymbolInfo
 		{
 			get;
 			set;

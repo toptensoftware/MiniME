@@ -5,9 +5,9 @@ using System.Text;
 
 namespace MiniME
 {
-	class VisitorSymbolUsage : ast.IVisitor
+	class VisitorConstDetector : ast.IVisitor
 	{
-		public VisitorSymbolUsage(SymbolScope rootScope)
+		public VisitorConstDetector(SymbolScope rootScope)
 		{
 			currentScope = rootScope;
 		}
@@ -21,14 +21,21 @@ namespace MiniME
 				currentScope = n.Scope;
 			}
 
-			if (n.GetType() == typeof(ast.ExprNodeMember))
+			// Is is a "var <name>=<literal_int_or_double>"
+			if (n.GetType() == typeof(ast.StatementVariableDeclaration))
 			{
-				var m = (ast.ExprNodeMember)n;
-				if (m.Lhs == null)
+				var decl = (ast.StatementVariableDeclaration)n;
+				if (decl.InitialValue != null)
 				{
-					UseSymbol(m.Name);
+					object literal = decl.InitialValue.EvalConstLiteral();
+					if (literal != null)
+					{
+
+					}
 				}
 			}
+
+
 		}
 
 		public void OnLeaveNode(MiniME.ast.Node n)
@@ -39,11 +46,6 @@ namespace MiniME
 			}
 		}
 
-		void UseSymbol(string str)
-		{
-			currentScope.Symbols.UseSymbol(str);
-		}
-
-		public SymbolScope currentScope = null;
+		public SymbolScope currentScope;
 	}
 }

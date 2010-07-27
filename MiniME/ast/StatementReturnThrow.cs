@@ -39,7 +39,8 @@ namespace MiniME.ast
 		}
 		public override void OnVisitChildNodes(IVisitor visitor)
 		{
-			Value.Visit(visitor);
+			if (Value!=null)
+				Value.Visit(visitor);
 		}
 
 
