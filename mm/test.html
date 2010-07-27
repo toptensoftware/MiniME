@@ -7,14 +7,13 @@
 	
 	<script type="text/javascript">
 
-function blah()
-{
-	this.x=23;
-}
+var x={};
+x.fn=function() { return {y:23} }
 
-t=new {a:1, b:2, c:blah}.c().x;
+var z=x.
+fn();
 
-alert(t);
+alert(z.y);
 
 	</script>
 	

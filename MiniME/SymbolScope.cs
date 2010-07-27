@@ -73,7 +73,7 @@ namespace MiniME
 			// Quit if obfuscation prevented by evil
 			if (ContainsEvil)
 			{
-				if (ctx.SymbolInfo)
+				if (ctx.Compiler.Formatted && ctx.Compiler.SymbolInfo)
 				{
 					ctx.StartLine();
 					ctx.AppendFormat("// Obfuscation prevented by evil");
@@ -89,7 +89,7 @@ namespace MiniME
 					// Reserve space for inner, higher frequency symbols
 					if (i.Rank > rankPos+1)
 					{
-						if (ctx.SymbolInfo)
+						if (ctx.Compiler.Formatted && ctx.Compiler.SymbolInfo)
 						{
 							for (int j = rankPos+1; j < i.Rank; j++)
 							{
@@ -103,7 +103,7 @@ namespace MiniME
 					string newSymbol=ctx.Symbols.OnfuscateSymbol(i.Name);
 
 					// Create this symbol
-					if (ctx.SymbolInfo)
+					if (ctx.Compiler.Formatted && ctx.Compiler.SymbolInfo)
 					{
 						ctx.StartLine();
 						ctx.AppendFormat("// #{0} {1} -> {2}", i.Rank, i.Name, newSymbol);

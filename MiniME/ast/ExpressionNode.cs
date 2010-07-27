@@ -274,6 +274,8 @@ namespace MiniME.ast
 				// encode string
 				string str = (string)Value;
 
+				var temp = new StringBuilder();
+
 				// Count quotes and double quotes
 				int quotes = 0;
 				int dquotes = 0;
@@ -287,7 +289,7 @@ namespace MiniME.ast
 
 				char chDelim = dquotes > quotes ? '\'' : '\"';
 
-				dest.Append(chDelim);
+				temp.Append(chDelim);
 
 
 
@@ -298,65 +300,66 @@ namespace MiniME.ast
 						switch (ch)
 						{
 							case '\b':
-								dest.Append("\\b");
+								temp.Append("\\b");
 								break;
 
 							case '\f':
-								dest.Append("\\f");
+								temp.Append("\\f");
 								break;
 
 							case '\n':
-								dest.Append("\\n");
+								temp.Append("\\n");
 								break;
 
 							case '\r':
-								dest.Append("\\r");
+								temp.Append("\\r");
 								break;
 
 							case '\t':
-								dest.Append("\\t");
+								temp.Append("\\t");
 								break;
 
 							case '\'':
 								if (chDelim == '\'')
-									dest.Append("\\\'");
+									temp.Append("\\\'");
 								else
-									dest.Append('\'');
+									temp.Append('\'');
 								break;
 
 							case '\"':
 								if (chDelim == '\"')
-									dest.Append("\\\"");
+									temp.Append("\\\"");
 								else
-									dest.Append('\"');
+									temp.Append('\"');
 								break;
 
 							case '\\':
-								dest.Append("\\\\");
+								temp.Append("\\\\");
 								break;
 
 							default:
 								if (char.IsControl(ch))
 								{
-									dest.AppendFormat("\\x{0:X2}", (int)ch);
+									temp.AppendFormat("\\x{0:X2}", (int)ch);
 								}
 								else
 								{
-									dest.Append(ch);
+									temp.Append(ch);
 								}
 								break;
 						}
 					}
 					else if (ch <= 255)
 					{
-						dest.AppendFormat("\\x{0:X2}", (int)ch);
+						temp.AppendFormat("\\x{0:X2}", (int)ch);
 					}
 					else
 					{
-						dest.AppendFormat("\\u{0:X4}", (int)ch);
+						temp.AppendFormat("\\u{0:X4}", (int)ch);
 					}
 				}
-				dest.Append(chDelim);
+				temp.Append(chDelim);
+				dest.Append(temp.ToString());
 				return;
 			}
 
@@ -377,7 +380,7 @@ namespace MiniME.ast
 			if (Value.GetType() == typeof(double))
 			{
 				double dblVal = (double)Value;
-				dest.Append(dblVal);
+				dest.Append(dblVal.ToString());
 				return;
 			}
 
@@ -873,11 +876,11 @@ namespace MiniME.ast
 			switch (Op)
 			{
 				case Token.increment:
-					dest.Append("++");
+					dest.AppendNoBreak("++");
 					break;
 
 				case Token.decrement:
-					dest.Append("--");
+					dest.AppendNoBreak("--");
 					break;
 
 				default:
@@ -1148,7 +1151,7 @@ namespace MiniME.ast
 			// Render the function
 			Scope.ObfuscateSymbols(dest);
 
-			if (dest.Formatted)
+			if (dest.Compiler.Formatted)
 			{
 				dest.StartLine();
 			}

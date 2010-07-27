@@ -24,6 +24,12 @@ namespace MiniME
 			Reset();
 		}
 
+		public int MaxLineLength
+		{
+			get;
+			set;
+		}
+
 		public bool NoObfuscate
 		{
 			get;
@@ -105,7 +111,7 @@ namespace MiniME
 			if (DumpScopes)
 				rootScope.Dump(0);
 
-			RenderContext r = new RenderContext();
+			RenderContext r = new RenderContext(this);
 
 			r.Symbols.ShowOriginalSymbols = this.SymbolInfo;
 			rootScope.ClaimSymbols(r);
@@ -118,8 +124,6 @@ namespace MiniME
 				r.Symbols.ClaimSymbol(s);
 			}
 
-			r.Formatted = this.Formatted;
-			r.SymbolInfo = this.Formatted && this.SymbolInfo;
 			statements.Render(r);
 
 			return r.FinalScript();

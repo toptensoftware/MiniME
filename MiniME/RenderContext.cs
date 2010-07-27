@@ -7,19 +7,63 @@ namespace MiniME
 {
 	internal class RenderContext
 	{
-		public RenderContext()
+		public RenderContext(Compiler c)
 		{
+			m_Compiler = c;
+		}
+
+		public Compiler Compiler
+		{
+			get
+			{
+				return m_Compiler;
+			}
+		}
+
+
+		public void TrackLinePosition(int iCharacters)
+		{
+			// Don't line break if formatted output, or line breaks disabled
+			if (m_Compiler.Formatted || m_Compiler.MaxLineLength==0)
+				return;
+
+			if (m_iLinePos == 0)
+			{
+				m_iLinePos += iCharacters;
+				return;
+			}
+
+			m_iLinePos += iCharacters;
+			if (m_iLinePos > m_Compiler.MaxLineLength)
+			{
+				m_iLinePos = iCharacters;
+				sb.Append("\n");
+			}
 
 		}
 
-		public void Append<T>(T val)
+		public void AppendNoBreak(string val)
 		{
+			m_iLinePos += val.Length;
 			sb.Append(val);
 		}
 
+		public void Append(string val)
+		{
+			TrackLinePosition(val.Length);
+			sb.Append(val);
+		}
+
+		public void Append(char val)
+		{
+			TrackLinePosition(1);
+			sb.Append(val);
+		}
+
+
 		public void AppendFormat(string str, params object[] args)
 		{
-			sb.AppendFormat(str, args);
+			sb.AppendFormat(string.Format(str, args));
 		}
 
 		public string FinalScript()
@@ -46,25 +90,16 @@ namespace MiniME
 
 		public void StartLine()
 		{
-			if (Formatted)
+			if (Compiler.Formatted)
 			{
 				sb.Append("\n");
 				sb.Append(new String(' ', m_iIndent * 4));
 			}
 		}
 
-		public bool Formatted
-		{
-			get;
-			set;
-		}
-		public bool SymbolInfo
-		{
-			get;
-			set;
-		}
-
+		int m_iLinePos = 0;
 		int m_iIndent = 0;
+		Compiler m_Compiler;
 		StringBuilder sb = new StringBuilder();
 		SymbolAllocator m_Symbols=new SymbolAllocator();
 	}

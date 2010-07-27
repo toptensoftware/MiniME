@@ -43,6 +43,26 @@ namespace mm
 							bStdOut = true;
 							break;
 
+						case "linelen":
+							if (Value == null)
+							{
+								Console.WriteLine("Warning: ignoring command line argument `linelen` - value not specified");
+							}
+							else
+							{
+								int linelen;
+								if (int.TryParse(Value, out linelen) && linelen>=0)
+								{
+									c.MaxLineLength = linelen;
+								}
+								else
+								{
+									Console.WriteLine("Warning: ignoring command line argument `linelen` - invalid value");
+								}
+
+							}
+							break;
+
 						case "no-obfuscate":
 							c.NoObfuscate = true;
 							break;
@@ -99,7 +119,7 @@ namespace mm
 			{
 				new Program().Run(args);
 			}
-			catch (MiniME.CompileError  e)
+			catch (Exception  e)
 			{
 				Console.WriteLine(e.Message);
 			}

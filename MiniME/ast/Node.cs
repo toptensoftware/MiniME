@@ -18,7 +18,7 @@ namespace MiniME.ast
 		public abstract bool Render(RenderContext dest);
 		public bool RenderIndented(RenderContext dest)
 		{
-			if (dest.Formatted && GetType()!=typeof(StatementBlock))
+			if (dest.Compiler.Formatted && GetType()!=typeof(StatementBlock))
 			{
 				dest.Indent();
 				dest.StartLine();
