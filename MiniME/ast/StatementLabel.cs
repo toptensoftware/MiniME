@@ -18,8 +18,10 @@ namespace MiniME.ast
 		}
 		public override bool Render(RenderContext dest)
 		{
+			dest.DisableLineBreaks();
 			dest.Append(Label);
 			dest.Append(':');
+			dest.EnableLineBreaks();
 			return false;
 		}
 

@@ -274,7 +274,7 @@ namespace MiniME.ast
 				// encode string
 				string str = (string)Value;
 
-				var temp = new StringBuilder();
+				dest.DisableLineBreaks();
 
 				// Count quotes and double quotes
 				int quotes = 0;
@@ -289,7 +289,7 @@ namespace MiniME.ast
 
 				char chDelim = dquotes > quotes ? '\'' : '\"';
 
-				temp.Append(chDelim);
+				dest.Append(chDelim);
 
 
 
@@ -300,66 +300,66 @@ namespace MiniME.ast
 						switch (ch)
 						{
 							case '\b':
-								temp.Append("\\b");
+								dest.Append("\\b");
 								break;
 
 							case '\f':
-								temp.Append("\\f");
+								dest.Append("\\f");
 								break;
 
 							case '\n':
-								temp.Append("\\n");
+								dest.Append("\\n");
 								break;
 
 							case '\r':
-								temp.Append("\\r");
+								dest.Append("\\r");
 								break;
 
 							case '\t':
-								temp.Append("\\t");
+								dest.Append("\\t");
 								break;
 
 							case '\'':
 								if (chDelim == '\'')
-									temp.Append("\\\'");
+									dest.Append("\\\'");
 								else
-									temp.Append('\'');
+									dest.Append('\'');
 								break;
 
 							case '\"':
 								if (chDelim == '\"')
-									temp.Append("\\\"");
+									dest.Append("\\\"");
 								else
-									temp.Append('\"');
+									dest.Append('\"');
 								break;
 
 							case '\\':
-								temp.Append("\\\\");
+								dest.Append("\\\\");
 								break;
 
 							default:
 								if (char.IsControl(ch))
 								{
-									temp.AppendFormat("\\x{0:X2}", (int)ch);
+									dest.AppendFormat("\\x{0:X2}", (int)ch);
 								}
 								else
 								{
-									temp.Append(ch);
+									dest.Append(ch);
 								}
 								break;
 						}
 					}
 					else if (ch <= 255)
 					{
-						temp.AppendFormat("\\x{0:X2}", (int)ch);
+						dest.AppendFormat("\\x{0:X2}", (int)ch);
 					}
 					else
 					{
-						temp.AppendFormat("\\u{0:X4}", (int)ch);
+						dest.AppendFormat("\\u{0:X4}", (int)ch);
 					}
 				}
-				temp.Append(chDelim);
-				dest.Append(temp.ToString());
+				dest.Append(chDelim);
+				dest.EnableLineBreaks();
 				return;
 			}
 
@@ -872,21 +872,24 @@ namespace MiniME.ast
 
 		public override bool Render(RenderContext dest)
 		{
+			dest.DisableLineBreaks();
+
 			WrapAndRender(dest, Lhs);
 			switch (Op)
 			{
 				case Token.increment:
-					dest.AppendNoBreak("++");
+					dest.Append("++");
 					break;
 
 				case Token.decrement:
-					dest.AppendNoBreak("--");
+					dest.Append("--");
 					break;
 
 				default:
 					System.Diagnostics.Debug.Assert(false);
 					break;
 			}
+			dest.EnableLineBreaks();
 			return true;
 		}
 

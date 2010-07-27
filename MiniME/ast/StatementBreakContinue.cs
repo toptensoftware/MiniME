@@ -24,12 +24,14 @@ namespace MiniME.ast
 
 		public override bool Render(RenderContext dest)
 		{
+			dest.DisableLineBreaks();
 			dest.Append(Op.ToString().Substring(3));
 			if (Label != null)
 			{
 				dest.Append(' ');
 				dest.Append(Label);
 			}
+			dest.EnableLineBreaks();
 			return true;
 		}
 
