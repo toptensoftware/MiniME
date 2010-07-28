@@ -28,6 +28,7 @@ namespace MiniMETestCases
 
 			return from name in Assembly.GetExecutingAssembly().GetManifestResourceNames()
 				   where name.StartsWith("MiniMETestCases.TestScripts.") && name.EndsWith(".txt")
+				   orderby name
 				   select new TestCaseData(name);
 		}
 
@@ -45,7 +46,7 @@ namespace MiniMETestCases
 			c.AddScript(resourceName, t.Input);
 
 			// Render it
-			string strActual = c.Compile().Trim();
+			string strActual = c.CompileToString().Trim();
 		
 			string sep = new string('-', 15);
 			Console.WriteLine(sep + " input " + sep + "\n" + t.Input);

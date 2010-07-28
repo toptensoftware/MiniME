@@ -62,6 +62,18 @@ namespace MiniME
 			set;
 		}
 
+		public Encoding OutputEncoding
+		{
+			get;
+			set;
+		}
+
+		public string OutputFileName
+		{
+			get;
+			set;
+		}
+
 		public void Reset()
 		{
 			m_files.Clear();
@@ -69,14 +81,33 @@ namespace MiniME
 
 		public void AddFile(string strFileName)
 		{
-			var i = new FileInfo();
-			i.filename = strFileName;
-			i.content = File.ReadAllText(strFileName);
-			m_files.Add(i);
+			AddFile(strFileName, null);
 		}
 
 		public void AddFile(string strFileName, System.Text.Encoding Encoding)
 		{
+			// Work out file encoding
+			if (Encoding == null)
+			{
+				EncodingInfo e = TextFileUtils.DetectFileEncoding(strFileName);
+				if (e != null)
+					Encoding=e.GetEncoding();
+			}
+
+			// Use same encoding for output
+			if (OutputEncoding == null)
+				OutputEncoding = Encoding;
+
+			// Automatic output filename
+			if (String.IsNullOrEmpty(OutputFileName))
+			{
+				int dotpos = strFileName.LastIndexOf('.');
+				if (dotpos >= 0)
+					OutputFileName = strFileName.Substring(0, dotpos);
+				OutputFileName += ".min.js";
+			}
+
+			// Add file info
 			var i = new FileInfo();
 			i.filename = strFileName;
 			i.content = File.ReadAllText(strFileName, Encoding);
@@ -91,7 +122,7 @@ namespace MiniME
 			m_files.Add(i);
 		}
 
-		public string Compile()
+		public string CompileToString()
 		{
 			var statements = new ast.StatementBlock();
 			statements.HasBraces = false;
@@ -124,7 +155,7 @@ namespace MiniME
 				statements.Visit(new VisitorSymbolUsage(rootScope));
 			}
 			statements.Visit(new VisitorCombineVarDecl(rootScope));
-			statements.Visit(new VisitorConstDetector(rootScope));
+//			statements.Visit(new VisitorConstDetector(rootScope));
 			rootScope.PrepareSymbolRanks();
 
 			if (DumpScopes)
@@ -146,6 +177,20 @@ namespace MiniME
 			statements.Render(r);
 
 			return r.FinalScript();
+		}
+
+		public void Compile()
+		{
+			string str = CompileToString();
+
+			if (OutputEncoding!=null)
+			{
+				System.IO.File.WriteAllText(OutputFileName, str, OutputEncoding);
+			}
+			else
+			{
+				System.IO.File.WriteAllText(OutputFileName, str, OutputEncoding);
+			}
 		}
 
 		class FileInfo

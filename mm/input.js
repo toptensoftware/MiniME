@@ -1,1 +1,1 @@
-	var C_Copyright = "Copyright © Cognethos Pty Ltd, 2009. All rights reserved";
+	var C_Copyright = "Copyright Â© Cognethos Pty Ltd, 2009. All rights reserved";
