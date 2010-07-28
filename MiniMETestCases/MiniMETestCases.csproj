@@ -138,6 +138,21 @@
   <ItemGroup>
     <EmbeddedResource Include="TestScripts\VariableDeclarations.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\ObfuscateDontReuseGlobals.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\ObfuscateFrequency2.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\ObfuscateFrequency1.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\ObfuscateDoNoEvil1.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\ObfuscateDoNoEvil2.txt" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

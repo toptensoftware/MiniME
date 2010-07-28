@@ -1201,7 +1201,7 @@ namespace MiniME.ast
 
 			// Leave the symbol scope
 			dest.Symbols.LeaveScope();
-			return true;
+			return false;
 		}
 
 		public override void OnVisitChildNodes(IVisitor visitor)

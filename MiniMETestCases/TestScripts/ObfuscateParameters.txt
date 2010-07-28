@@ -2,7 +2,8 @@
 -----
 function fn(p1, p2)
 {
-	// Params p1 and p2 should be obfuscated to a and b
+	// Params `p1` and `p2` should be obfuscated to `a` and `b`
+	
 	return p1+p2;
 }
 -----

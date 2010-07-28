@@ -18,5 +18,5 @@ function x(a,b,c)
 
 // eof
 -----
-function x(){};function x(y){};function x(a,b,c){}
+function x(){}function x(y){}function x(a,b,c){}
 -----

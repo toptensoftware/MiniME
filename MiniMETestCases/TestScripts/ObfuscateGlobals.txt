@@ -1,6 +1,6 @@
 ﻿Obfuscation tests
 -----
-// Shouldn't be obfuscated as they're global scope.
+// These shouldn't be obfuscated as they're global scope.
 var global_var; 
 function global_fn() {}
 -----

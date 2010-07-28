@@ -81,23 +81,23 @@ namespace MiniME
 				return;
 			}
 
-			int rankPos = -1;
+			int expectedRank = 0;
 			foreach (var i in Symbols.Sort())
 			{
 				if (i.Scope == Symbol.ScopeType.local)
 				{
 					// Reserve space for inner, higher frequency symbols
-					if (i.Rank > rankPos+1)
+					if (i.Rank > expectedRank)
 					{
 						if (ctx.Compiler.Formatted && ctx.Compiler.SymbolInfo)
 						{
-							for (int j = rankPos+1; j < i.Rank; j++)
+							for (int r = expectedRank; r < i.Rank; r++)
 							{
 								ctx.StartLine();
-								ctx.AppendFormat("// #{0} Reserved", j);
+								ctx.AppendFormat("// #{0} reserved", r);
 							}
 						}
-						ctx.Symbols.ReserveObfuscatedSymbols(i.Rank - rankPos);
+						ctx.Symbols.ReserveObfuscatedSymbols(i.Rank - expectedRank);
 					}
 
 					string newSymbol=ctx.Symbols.OnfuscateSymbol(i.Name);
@@ -108,7 +108,7 @@ namespace MiniME
 						ctx.StartLine();
 						ctx.AppendFormat("// #{0} {1} -> {2}", i.Rank, i.Name, newSymbol);
 					}
-					rankPos = i.Rank;
+					expectedRank = i.Rank+1;
 				}
 			}
 		}

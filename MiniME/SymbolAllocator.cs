@@ -59,7 +59,7 @@ namespace MiniME
 				string obfSymbol;
 				if (s.SymbolMap.TryGetValue(originalSymbol, out obfSymbol))
 				{
-					if (ShowOriginalSymbols)
+					if (ShowOriginalSymbols && obfSymbol!=originalSymbol)
 						return String.Format("{0}/*{1}*/", obfSymbol, originalSymbol);
 					else
 						return obfSymbol;
