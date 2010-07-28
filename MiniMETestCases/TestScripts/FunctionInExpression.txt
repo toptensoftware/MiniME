@@ -1,6 +1,5 @@
-﻿function tests
-[NoObfuscate]
------
+﻿//[NoObfuscate]
+
 // Anonymous function in an expression
 var x=function(msg)
 {

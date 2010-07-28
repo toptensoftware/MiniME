@@ -7,8 +7,9 @@ using System.IO;
 /*
  * TODO:
  * 
- * - Collapse variables declarations into a single var statement
  * - Optimization of constants
+ * - Better error reporting
+ * - Allow semicolon after with (and possibly other) statements
  * - Diagnostic mode to reparse generated content
  * - Unit test cases
  * - Comments to prevent use of symbols //mm-reserve:top
@@ -100,7 +101,7 @@ namespace MiniME
 
 				if (t.more)
 				{
-					throw new CompileError("Unexpected EOF", t);
+					throw new CompileError("Unexpected end of file", t);
 				}
 			}
 

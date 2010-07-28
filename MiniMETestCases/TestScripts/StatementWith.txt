@@ -1,6 +1,4 @@
-﻿With statement tests
------
-// Single statement
+﻿// Single statement
 with (c) 
 	f();
 	

@@ -186,7 +186,7 @@ namespace MiniME
 				}
 			}
 
-			throw new CompileError("Invalid expression term", t);
+			throw new CompileError(string.Format("Invalid expression, didn't expect {0}", t.DescribeCurrentToken()), t);
 		}
 
 		ast.ExpressionNode ParseExpressionMember(ParseContext ctx)
@@ -487,15 +487,14 @@ namespace MiniME
 				t.Rewind(mark);
 			}
 
-			while (t.token==Token.semicolon)
-			{
-				t.Next();
-			};
-
 			switch (t.token)
 			{
 				case Token.openBrace:
 					return ParseStatementBlock(true);
+
+				case Token.semicolon:
+					// Empty statement
+					return new ast.StatementBlock();
 
 				case Token.kw_return:
 				{
@@ -792,14 +791,18 @@ namespace MiniME
 					return stmt;
 				}
 			}
-
-			throw new CompileError("Expected statement", t);
 		}
 
 		public void ParseStatements(ast.StatementBlock block)
 		{
 			while (t.token != Token.closeBrace && t.token!=Token.eof)
 			{
+				if (t.token == Token.semicolon)
+				{
+					t.Next();
+					continue;
+				}
+
 				block.Content.Add(ParseStatement());
 			}
 		}

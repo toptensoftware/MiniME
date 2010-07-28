@@ -1,6 +1,4 @@
-﻿return and throw statement tests
------
-// Return with value
+﻿// Return with value
 return 1
 fn();
 

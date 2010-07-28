@@ -1,5 +1,5 @@
-﻿[Formatted]
------
+﻿//[Formatted]
+
 // Tests for various operator forms that could result
 // in incorrect interpretation after re-rendering
 x=a++ + b;

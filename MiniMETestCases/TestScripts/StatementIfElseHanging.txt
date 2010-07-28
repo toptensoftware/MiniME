@@ -1,6 +1,4 @@
-﻿hanging-else statement tests
------
-// Nested ifs (no hanging else)
+﻿// Nested ifs (no hanging else)
 if (c)
 {
 	if (d)

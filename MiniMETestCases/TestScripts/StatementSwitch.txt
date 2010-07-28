@@ -1,6 +1,4 @@
-﻿switch statement tests
------
-// typical
+﻿// typical
 switch (c)
 {
 	case 1:

@@ -1,6 +1,4 @@
-﻿While statement tests
------
-// Single statement
+﻿// Single statement
 while (c) 
 	f();
 	

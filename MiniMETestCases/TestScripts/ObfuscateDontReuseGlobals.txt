@@ -1,0 +1,11 @@
+﻿var a,b;
+function fn(p1, p2)
+{
+	// Params `p1` and `p2` should be obfuscated to `c` and `d` 
+	// (`a` and `b` are defined globally)
+	
+	return p1+p2;
+}
+-----
+var a,b;function fn(c,d){return c+d}
+-----

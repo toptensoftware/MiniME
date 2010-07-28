@@ -1,6 +1,4 @@
-﻿if statement tests
------
-// Single statement
+﻿// Single statement
 if (c)
 	f();
 

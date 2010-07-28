@@ -1,6 +1,4 @@
-﻿Variable declaration statement tests
------
-// Simple variable
+﻿// Simple variable
 var v1;
 
 sep();

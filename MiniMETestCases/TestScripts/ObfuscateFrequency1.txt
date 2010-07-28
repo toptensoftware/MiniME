@@ -1,0 +1,10 @@
+﻿function fn(p1, p2)
+{
+	// Params `p1` and `p2` should be obfuscated to `b` and `a` 
+	// (`p2` more frequent, allocated first)
+	
+	return p1+p2+p2;
+}
+-----
+function fn(b,a){return b+a+a}
+-----

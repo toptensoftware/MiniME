@@ -1,0 +1,17 @@
+﻿function fn(p1, p2)
+{
+	// Params `p1` and `p2` should be obfuscated to `b` and `c`, with `a` reserved for inner 
+	// high-frequency symbol y
+	
+	return p1+p2;
+	
+	function zzz()
+	{
+		var y;
+		y=y+y+y+y+y+y;
+	}
+	
+}
+-----
+function fn(b,c){return b+c;function d(){var a;a=a+a+a+a+a+a}}
+-----

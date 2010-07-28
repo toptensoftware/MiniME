@@ -13,8 +13,8 @@ namespace MiniME
 
 		identifier,
 
+		// Operators
 		assign,
-
 		add,
 		subtract,
 		multiply,
@@ -23,7 +23,6 @@ namespace MiniME
 		shl,
 		shr,
 		shrz,
-
 		addAssign,
 		subtractAssign,
 		multiplyAssign,
@@ -32,10 +31,8 @@ namespace MiniME
 		shlAssign,
 		shrAssign,
 		shrzAssign,
-
 		increment,
 		decrement,
-
 		compareEQ,
 		compareNE,
 		compareLT,
@@ -44,34 +41,31 @@ namespace MiniME
 		compareGE,
 		compareEQStrict,
 		compareNEStrict,
+		bitwiseXor,
+		bitwiseOr,
+		bitwiseAnd,
+		bitwiseNot,
+		bitwiseXorAssign,
+		bitwiseOrAssign,
+		bitwiseAndAssign,
+		logicalNot,
+		logicalOr,
+		logicalAnd,
 
+		// Special symbols
+		ternary,			// ?
+		colon,				// :
+		semicolon,			// ;
+		comma,				// ,
 		openRound,
 		closeRound,
 		openBrace,
 		closeBrace,
 		openSquare,
 		closeSquare,
-
-		bitwiseXor,
-		bitwiseOr,
-		bitwiseAnd,
-		bitwiseNot,
-
-		bitwiseXorAssign,
-		bitwiseOrAssign,
-		bitwiseAndAssign,
-
-		logicalNot,
-		logicalOr,
-		logicalAnd,
-
-		ternary,			// ?
-		colon,				// :
-		semicolon,			// ;
-		comma,				// ,
-
 		memberDot,
 
+		// Keywords
 		kw_void,
 		kw_delete,
 		kw_new,
@@ -112,6 +106,7 @@ namespace MiniME
 			BuildKeywordMap();
 			p = new StringScanner();
 			p.Reset(str);
+			m_bPreceededByLineBreak = false;
 			Next();
 		}
 
@@ -121,6 +116,79 @@ namespace MiniME
 			{
 				return m_strFileName;
 			}
+		}
+
+		internal static string FormatToken(Token token)
+		{
+			switch (token)
+			{
+				case Token.eof: return "end-of-file";
+				case Token.assign: return "=";
+				case Token.add: return "+";
+				case Token.subtract: return "-";
+				case Token.multiply: return "*";
+				case Token.divide: return "/";
+				case Token.modulus: return "%";
+				case Token.shl: return "<<";
+				case Token.shr: return ">>";
+				case Token.shrz: return ">>>";
+				case Token.addAssign: return "+=";
+				case Token.subtractAssign: return "-=";
+				case Token.multiplyAssign: return "*=";
+				case Token.divideAssign: return "/=";
+				case Token.modulusAssign: return "*=";
+				case Token.shlAssign: return "<<=";
+				case Token.shrAssign: return ">>=";
+				case Token.shrzAssign: return ">>>=";
+				case Token.increment:return "++";
+				case Token.decrement: return "--";
+				case Token.compareEQ: return "==";
+				case Token.compareNE: return "!=";
+				case Token.compareLT: return "<";
+				case Token.compareLE: return "<=";
+				case Token.compareGT: return ">";
+				case Token.compareGE:return ">=";
+				case Token.compareEQStrict:return "===";
+				case Token.compareNEStrict:return "!==";
+				case Token.bitwiseXor:return "^";
+				case Token.bitwiseOr:return "|";
+				case Token.bitwiseAnd:return "&";
+				case Token.bitwiseNot:return "~";
+				case Token.bitwiseXorAssign: return "^=";
+				case Token.bitwiseOrAssign:return "|=";
+				case Token.bitwiseAndAssign:return "&=";
+				case Token.logicalNot:return "!";
+				case Token.logicalOr:return "||";
+				case Token.logicalAnd:return "&&";
+				case Token.ternary:return "?";
+				case Token.colon:return ":";
+				case Token.semicolon: return ";";
+				case Token.comma:return ",";
+				case Token.openRound:return "(";
+				case Token.closeRound:return ")";
+				case Token.openBrace:return "{";
+				case Token.closeBrace:return "}";
+				case Token.openSquare:return "[";
+				case Token.closeSquare:return "]";
+				case Token.memberDot:return ".";
+			}
+
+			var s=token.ToString();
+			if (s.StartsWith("kw_"))
+				return s.Substring(3);
+
+			return s;
+		}
+
+		internal string DescribeCurrentToken()
+		{
+			switch (token)
+			{
+				case Token.identifier:
+				case Token.literal:
+					return string.Format("{0} - `{1}`", FormatToken(token), RawToken);
+			}
+			return string.Format("`{0}`", FormatToken(token));
 		}
 
 		internal Token token
@@ -195,27 +263,13 @@ namespace MiniME
 			if (p.eof)
 				return true;
 
-			// Scan backwards from the current token and look for a linebreak
-			var pos = m_tokenStart;
-			while (pos > 0)
-			{
-				// Ignore line space
-				if (StringScanner.IsLineSpace(p.input[pos - 1]))
-				{
-					pos--;
-					continue;
-				}
+			if (token == Token.closeBrace)
+				return true;
 
-				// Is it a line end?
-				if (StringScanner.IsLineEnd(p.input[pos - 1]))
-				{
-					return true;
-				}
+			if (m_bPreceededByLineBreak)
+				return true;
 
-				return false;
-			}
-
-			return true;
+			return false;
 		}
 
 		internal bool SkipOptional(Token t)
@@ -250,7 +304,7 @@ namespace MiniME
 		{
 			if (token != t)
 			{
-				throw new CompileError(string.Format("Syntax error, expected {0}", t.ToString()), this);
+				throw new CompileError(string.Format("Syntax error - expected {0} but found {1}", FormatToken(t), DescribeCurrentToken()), this);
 			}
 		}
 
@@ -294,7 +348,7 @@ namespace MiniME
 			if (IsIdentifierChar(p.current))
 			{
 				p.position = m_tokenStart;
-				throw new CompileError("Syntax error - unexpected characters after regular expression", this);
+				throw new CompileError(string.Format("Syntax error - unexpected character `{0}` after regular expression", p.current), this);
 			}
 
 			// Get the regex verbatim
@@ -321,7 +375,15 @@ namespace MiniME
 
 		internal Token ParseToken()
 		{
-			p.SkipWhitespace();
+			// Skip whitespace, but remember if there were any line breaks
+			bool bOldPreceededByLineBreak = m_bPreceededByLineBreak;
+			m_bPreceededByLineBreak = false;
+			while (char.IsWhiteSpace(p.current))
+			{
+				if (p.eol)
+					m_bPreceededByLineBreak = true;
+				p.SkipForward(1);
+			}
 
 			// check for eof
 			if (p.eof)
@@ -384,6 +446,7 @@ namespace MiniME
 							}
 
 							p.SkipForward(2);
+							m_bPreceededByLineBreak = bOldPreceededByLineBreak;
 							return Token.comment;
 
 						case '/':
@@ -619,7 +682,7 @@ namespace MiniME
 					return ParseString();
 			}
 
-			throw new CompileError(string.Format("Syntax error, unrecognized character: '{0}'", p.current), this);
+			throw new CompileError(string.Format("Syntax error - unrecognized character: `{0}`", p.current), this);
 		}
 
 		Token ParseRawString()
@@ -731,7 +794,7 @@ namespace MiniME
 										int digit = HexDigit(p.current);
 										if (digit < 0)
 										{
-											throw new CompileError(string.Format("Syntax error - invalid character in string literal - {0}", p.current), this);
+											throw new CompileError(string.Format("Syntax error - invalid character `{0}` in string literal", p.current), this);
 										}
 										val = val * 16 + digit;
 										p.SkipForward(1);
@@ -751,7 +814,7 @@ namespace MiniME
 										int digit = HexDigit(p.current);
 										if (digit < 0)
 										{
-											throw new CompileError(string.Format("Syntax error - invalid character in string literal - {0}", p.current), this);
+											throw new CompileError(string.Format("Syntax error - invalid character `{0}` in string literal", p.current), this);
 										}
 										val = val * 16 + digit;
 										p.SkipForward(1);
@@ -761,7 +824,7 @@ namespace MiniME
 								}
 
 							default:
-								throw new CompileError(string.Format("Syntax error - unrecognised string escape character: '{0}'", p.current), this);
+								throw new CompileError(string.Format("Syntax error - unrecognised string escape character `{0}`", p.current), this);
 						}
 						p.SkipForward(1);
 					}
@@ -931,7 +994,7 @@ namespace MiniME
 				if (!double.TryParse(str, out temp))
 				{
 					p.position = m_tokenStart;
-					throw new CompileError("Syntax error - incorrectly formatted decimal literal", this);
+					throw new CompileError(string.Format("Syntax error - incorrectly formatted decimal literal `{0}`", str), this);
 				}
 
 				// Need to store both the parsed value and the original value.
@@ -954,7 +1017,7 @@ namespace MiniME
 				catch (Exception)
 				{
 					p.position = m_tokenStart;
-					throw new CompileError("Syntax error - incorrectly formatted integer literal", this);
+					throw new CompileError(string.Format("Syntax error - incorrectly formatted integer literal `{0}`", str), this);
 				}
 			}
 		}
@@ -1000,6 +1063,7 @@ namespace MiniME
 		StringScanner p;
 		StringBuilder sb = new StringBuilder();
 		Token m_currentToken;
+		bool m_bPreceededByLineBreak;
 		string m_strIdentifier;
 		int m_tokenStart;
 		int m_tokenEnd;

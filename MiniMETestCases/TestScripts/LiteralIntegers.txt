@@ -1,5 +1,4 @@
-﻿[Formatted]
------
+﻿//[Formatted]
 x=123456789;		// decimal
 y=0xFF;				// hex
 z=0xFFFFFFFFFFF;	// large hex, shorter when formatted as hex

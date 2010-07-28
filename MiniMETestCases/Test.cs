@@ -39,9 +39,9 @@ namespace MiniMETestCases
 
 			// Compile the input script
 			var c = new Compiler();
-			c.Formatted = t.Comment.IndexOf("[Formatted]") >= 0;
-			c.NoObfuscate = t.Comment.IndexOf("[NoObfuscate]") >= 0;
-			c.SymbolInfo = t.Comment.IndexOf("[SymbolInfo]") >= 0;
+			c.Formatted = t.Input.IndexOf("[Formatted]") >= 0;
+			c.NoObfuscate = t.Input.IndexOf("[NoObfuscate]") >= 0;
+			c.SymbolInfo = t.Input.IndexOf("[SymbolInfo]") >= 0;
 			c.AddScript(resourceName, t.Input);
 
 			// Render it

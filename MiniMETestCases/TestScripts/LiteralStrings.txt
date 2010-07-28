@@ -1,5 +1,4 @@
-﻿[Formatted]
------
+﻿//[Formatted]
 x="Hello \xf8 \"World\"";
 y='Hello \ufff8 \'World\'';
 -----

@@ -1,6 +1,5 @@
-﻿try-catch-finally statement tests
-[NoObfuscate]
------
+﻿//[NoObfuscate]
+
 // try-catch-catch
 try
 {

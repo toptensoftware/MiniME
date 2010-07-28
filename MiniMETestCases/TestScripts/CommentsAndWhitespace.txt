@@ -1,6 +1,5 @@
-﻿Test comments and whitespace parsing
-[Formatted]
------
+﻿//[Formatted]
+
 // Leading comment
 
 fn1();

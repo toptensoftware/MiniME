@@ -1,6 +1,4 @@
-﻿label, break and continue statement tests
------
-// Some labels
+﻿// Some labels
 label1:
 f();
 label2:

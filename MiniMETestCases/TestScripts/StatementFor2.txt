@@ -1,6 +1,4 @@
-﻿for statement tests (part 2)
------
-// No variable declaration
+﻿// No variable declaration
 for (i=0; i<9; i++)
 	f(); 
 

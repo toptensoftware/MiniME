@@ -1,6 +1,4 @@
-﻿for-in loop statement tests
------
-// Single statement
+﻿// Single statement
 for (var i in c)
 	f(); 
 

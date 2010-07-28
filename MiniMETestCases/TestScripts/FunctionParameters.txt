@@ -1,6 +1,5 @@
-﻿function parameter tests
-[NoObfuscate]
------
+﻿//[NoObfuscate]
+
 // No params
 function x()
 {

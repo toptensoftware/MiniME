@@ -1,6 +1,4 @@
-﻿Obfuscation tests
------
-function fn()
+﻿function fn()
 {
 	// These locals should obfuscated to `a` and `b`
 	

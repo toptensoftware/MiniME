@@ -1,0 +1,22 @@
+﻿// Semicolons are optional at end of line
+fn1()
+fn2()
+
+// Semicolons are optional before a closing brace
+while (c)
+{ fn3();fn4() }
+
+// Semicolons are optional after closing brace
+while (c)
+{ fn5();fn6(); }
+
+// With a semicolon
+while (c)
+{ fn7();fn8(); };
+
+// Empty statement
+if (true);
+
+-----
+fn1();fn2();while(c){fn3();fn4()}while(c){fn5();fn6()}while(c){fn7();fn8()}if(true){}
+-----

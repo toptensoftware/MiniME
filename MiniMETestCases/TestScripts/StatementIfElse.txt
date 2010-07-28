@@ -1,6 +1,4 @@
-﻿if-else statement tests
------
-// Single statement
+﻿// Single statement
 //	- must generate space after else
 if (c)
 	f();

@@ -1,6 +1,4 @@
-﻿do-while statement tests
------
-// Single statement
+﻿// Single statement
 do 
 	f(); 
 while (c);
