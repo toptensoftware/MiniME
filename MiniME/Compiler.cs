@@ -95,8 +95,14 @@ namespace MiniME
 			}
 
 			// Use same encoding for output
-			if (OutputEncoding == null)
+			if (OutputEncoding != null)
 				OutputEncoding = Encoding;
+
+			else
+			{
+				Encoding = Encoding.UTF8;
+			}
+
 
 			// Automatic output filename
 			if (String.IsNullOrEmpty(OutputFileName))
@@ -189,7 +195,7 @@ namespace MiniME
 			}
 			else
 			{
-				System.IO.File.WriteAllText(OutputFileName, str, OutputEncoding);
+				System.IO.File.WriteAllText(OutputFileName, str);
 			}
 		}
 

@@ -24,7 +24,8 @@ namespace MiniME
 			// Build a list of encodings sorted by preamble size (largest->smallest)
 			var EncodingsByPreambleSize = 
 						(from e in Encoding.GetEncodings()
-						  where e.GetEncoding().GetPreamble()!=null 
+						  let p=e.GetEncoding().GetPreamble()
+						  where p!=null && p.Length>0
 						  orderby e.GetEncoding().GetPreamble().Length descending
 						  select e).ToList();
 
