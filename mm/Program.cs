@@ -221,13 +221,17 @@ namespace mm
 				Console.WriteLine(e.Message);
 				System.Environment.ExitCode = 7;
 			}
-				/*
+			catch (System.IO.IOException e)
+			{
+				Console.WriteLine("File error - {0}", e.Message);
+				System.Environment.ExitCode = 9;
+			}
 			catch (Exception e)
 			{
 				Console.WriteLine("Internal error - {0}", e.Message);
-				System.Environment.ExitCode = 9;
+				System.Environment.ExitCode = 11;
 			}
-				 */
-		}
+		
+}
 	}
 }
