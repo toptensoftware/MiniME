@@ -1,7 +1,9 @@
 ﻿//[Formatted]
 x="Hello \xf8 \"World\"";
 y='Hello \ufff8 \'World\'';
+z="Copyright © 2010"
 -----
 x='Hello \xF8 "World"';
 y="Hello \uFFF8 'World'";
+z="Copyright \xA9 2010";
 -----

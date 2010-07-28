@@ -69,9 +69,17 @@ namespace MiniME
 
 		public void AddFile(string strFileName)
 		{
-			var i=new FileInfo();
-			i.filename=strFileName;
-			i.content=File.ReadAllText(strFileName);
+			var i = new FileInfo();
+			i.filename = strFileName;
+			i.content = File.ReadAllText(strFileName);
+			m_files.Add(i);
+		}
+
+		public void AddFile(string strFileName, System.Text.Encoding Encoding)
+		{
+			var i = new FileInfo();
+			i.filename = strFileName;
+			i.content = File.ReadAllText(strFileName, Encoding);
 			m_files.Add(i);
 		}
 

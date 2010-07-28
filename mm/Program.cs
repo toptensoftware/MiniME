@@ -63,6 +63,10 @@ namespace mm
 							}
 							break;
 
+						case "encoding":
+							break;
+
+		
 						case "no-obfuscate":
 							c.NoObfuscate = true;
 							break;
@@ -83,6 +87,7 @@ namespace mm
 						case "diag-scopes":
 							c.DumpScopes = true;
 							break;
+
 
 					}
 				}
