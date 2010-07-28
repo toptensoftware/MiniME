@@ -5,11 +5,21 @@ using System.Text;
 
 namespace MiniME.ast
 {
+	// Represents a for-in loop
 	class StatementForIn : Statement
 	{
+		// Constructor
 		public StatementForIn()
 		{
 		}
+
+		// Attributes
+		// Either VariableDeclaration or Iterator used, not both
+		public Statement VariableDeclaration;		// for (var x in ...)
+		public ExpressionNode Iterator;				// for (x in ...)
+		public ExpressionNode Collection;
+		public Statement Code;
+
 
 		public override void Dump(int indent)
 		{
@@ -26,7 +36,7 @@ namespace MiniME.ast
 			writeLine(indent, "collection:");
 			Collection.Dump(indent + 1);
 			writeLine(indent, "do:");
-			CodeBlock.Dump(indent + 1);
+			Code.Dump(indent + 1);
 		}
 
 		public override bool Render(RenderContext dest)
@@ -39,7 +49,7 @@ namespace MiniME.ast
 			dest.Append(" in ");
 			Collection.Render(dest);
 			dest.Append(")");
-			return CodeBlock.RenderIndented(dest);
+			return Code.RenderIndented(dest);
 		}
 
 		public override void OnVisitChildNodes(IVisitor visitor)
@@ -49,13 +59,9 @@ namespace MiniME.ast
 			else
 				Iterator.Visit(visitor);
 			Collection.Visit(visitor);
-			CodeBlock.Visit(visitor);
+			Code.Visit(visitor);
 		}
 
 
-		public Statement VariableDeclaration;		// for (var x in ...)
-		public ExpressionNode Iterator;				// for (x in ...)
-		public ExpressionNode Collection;
-		public Statement CodeBlock;
 	}
 }

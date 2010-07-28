@@ -5,11 +5,17 @@ using System.Text;
 
 namespace MiniME.ast
 {
+	// Represents a do-while statement
 	class StatementDoWhile : Statement
 	{
+		// Constructor
 		public StatementDoWhile()
 		{
 		}
+
+		// Attributes
+		public ExpressionNode Condition;
+		public Statement Code;
 
 		public override void Dump(int indent)
 		{
@@ -18,8 +24,11 @@ namespace MiniME.ast
 			writeLine(indent, "while:");
 			Condition.Dump(indent + 1);
 		}
+
 		public override bool Render(RenderContext dest)
 		{
+			// Render the statement, need special handling to insert
+			// a space if don't have a braced statement block
 			dest.Append("do");
 			if (Code.GetType() != typeof(StatementBlock))
 				dest.Append(' ');
@@ -40,7 +49,5 @@ namespace MiniME.ast
 
 
 
-		public ExpressionNode Condition;
-		public Statement Code;
 	}
 }

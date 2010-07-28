@@ -1,10 +1,20 @@
-﻿using System;
+﻿/*
+ * MiniME
+ * 
+ * Copyright (C) 2010 Topten Software. Some Rights Reserved.
+ * See http://toptensoftware.com/minime for licensing terms.
+ */
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
 namespace MiniME.ast
 {
+	// Operator precedence is used to determine how parentheses must
+	// be generated when regenerating the Javascript code from the 
+	// abstract syntax tree.
 	enum OperatorPrecedence
 	{
 		comma,
@@ -24,10 +34,13 @@ namespace MiniME.ast
 		terminal,
 	}
 
+	// Base class for all expression nodes
 	abstract class ExpressionNode : Node
 	{
+		// Must be overridden in all node types to return the precedence
 		public abstract OperatorPrecedence GetPrecedence();
 
+		// Render an child node, wrapping it in parentheses if necessary
 		public void WrapAndRender(RenderContext dest, ExpressionNode other)
 		{
 			if (other.GetPrecedence() < this.GetPrecedence())
@@ -42,6 +55,7 @@ namespace MiniME.ast
 			}
 		}
 
+		// Return the constant value of this expression, or null if can't
 		public virtual object EvalConstLiteral()
 		{
 			return null;
@@ -49,20 +63,23 @@ namespace MiniME.ast
 
 	}
 
-	// Represents a method/property/field name
-	class ExprNodeMember : ExpressionNode
+	// Represents a root level symbol, or a member on the rhs of a member dot.
+	class ExprNodeIdentifier : ExpressionNode
 	{
-		public ExprNodeMember(string name)
+		// Constructor
+		public ExprNodeIdentifier(string name)
 		{
 			Name = name;
 		}
 
-		public ExprNodeMember(string name, ExpressionNode lhs)
+		// Constructor
+		public ExprNodeIdentifier(string name, ExpressionNode lhs)
 		{
 			Name = name;
 			Lhs = lhs;
 		}
 
+		// Attributes
 		public string Name;
 		public ExpressionNode Lhs;
 
@@ -106,13 +123,16 @@ namespace MiniME.ast
 
 	}
 
+	// Represents a call to a method or global function.
 	class ExprNodeCall : ExpressionNode
 	{
+		// Constructor
 		public ExprNodeCall(ExpressionNode lhs)
 		{
 			Lhs = lhs;
 		}
 
+		// Attributes
 		public ExpressionNode Lhs;
 		public List<ExpressionNode> Arguments = new List<ExpressionNode>();
 
@@ -147,6 +167,7 @@ namespace MiniME.ast
 			dest.Append(")");
 			return true;
 		}
+
 		public override void OnVisitChildNodes(IVisitor visitor)
 		{
 			Lhs.Visit(visitor);
@@ -155,13 +176,16 @@ namespace MiniME.ast
 		}
 	}
 
+	// Represents object creation through `new` keyword
 	class ExprNodeNew : ExpressionNode
 	{
+		// Constructor
 		public ExprNodeNew(ExpressionNode objectType)
 		{
 			ObjectType= objectType;
 		}
 
+		// Attributes
 		public ExpressionNode ObjectType;
 		public List<ExpressionNode> Arguments = new List<ExpressionNode>();
 
@@ -205,14 +229,17 @@ namespace MiniME.ast
 		}
 	}
 
+	// Represents array indexer (ie: square brackets)
 	class ExprNodeIndexer : ExpressionNode
 	{
+		// Constructor
 		public ExprNodeIndexer(ExpressionNode lhs, ExpressionNode index)
 		{
 			Lhs = lhs;
 			Index = index; 
 		}
 
+		// Attributes
 		public ExpressionNode Lhs;
 		public ExpressionNode Index;
 
@@ -246,12 +273,17 @@ namespace MiniME.ast
 
 	}
 
+	// Represents a literal string, integer or double
 	class ExprNodeLiteral : ExpressionNode
 	{
+		// Constructor
 		public ExprNodeLiteral(object value)
 		{
 			Value = value;
 		}
+
+		// Attributes
+		public object Value;
 
 		public override string ToString()
 		{
@@ -268,16 +300,19 @@ namespace MiniME.ast
 			return OperatorPrecedence.terminal;
 		}
 
+		// Helper to render a literal value with appropriate escapting etc...
 		public static void RenderValue(RenderContext dest, object Value)
 		{
+			// Is it a string?
 			if (Value.GetType() == typeof(string))
 			{
-				// encode string
 				string str = (string)Value;
 
+				// Don't do line breaks
 				dest.DisableLineBreaks();
 
-				// Count quotes and double quotes
+				// Count quotes and double quotes and use the less frequent as the
+				// string delimiter
 				int quotes = 0;
 				int dquotes = 0;
 				foreach (char ch in str)
@@ -287,13 +322,12 @@ namespace MiniME.ast
 					if (ch == '\"')
 						dquotes++;
 				}
-
 				char chDelim = dquotes > quotes ? '\'' : '\"';
 
+				// Opening quote
 				dest.Append(chDelim);
 
-
-
+				// Encode the string
 				foreach (char ch in str)
 				{
 					if (ch < 127)
@@ -359,18 +393,22 @@ namespace MiniME.ast
 						dest.AppendFormat("\\u{0:X4}", (int)ch);
 					}
 				}
+
+				// Closing quote
 				dest.Append(chDelim);
+
+				// Done
 				dest.EnableLineBreaks();
 				return;
 			}
 
+			// Is it an integer
 			if (Value.GetType() == typeof(long))
 			{
+				// Try encoding as both hex and decimal and use the shorted
 				long lVal = (long)Value;
-
 				string strHex = "0x" + lVal.ToString("X");
 				string strDec = lVal.ToString();
-
 				if (strHex.Length < strDec.Length)
 					dest.Append(strHex);
 				else
@@ -378,22 +416,15 @@ namespace MiniME.ast
 				return;
 			}
 
+			// Is it a double
 			if (Value.GetType() == typeof(DoubleLiteral))
 			{
+				// Use the original string
 				dest.Append(((DoubleLiteral)Value).Original);
 				return;
-
-				/*
-				string strGeneral = dblVal.ToString();
-				string strScientific = dblVal.ToString("r");
-				if (strGeneral.Length < strScientific.Length)
-					dest.Append(strGeneral);
-				else
-					dest.Append(strScientific);
-				return;
-				 */
 			}
 
+			// Is it a bool
 			if (Value.GetType() == typeof(bool))
 			{
 				dest.Append(((bool)Value) ? "true" : "false");
@@ -417,15 +448,19 @@ namespace MiniME.ast
 			return Value;
 		}
 
-		public object Value;
 	}
 
+	// Represents a regular expression eg: /regex/gim
 	class ExprNodeRegEx : ExpressionNode
 	{
+		// Constructor
 		public ExprNodeRegEx(string re)
 		{
 			RegEx = re;
 		}
+
+		// Attributes
+		string RegEx;
 
 		public override string ToString()
 		{
@@ -452,17 +487,23 @@ namespace MiniME.ast
 		{
 		}
 
-		string RegEx;
 	}
 
+	// Represents a binary operation (eg: x+y)
 	class ExprNodeBinary : ExpressionNode
 	{
+		// Constructor
 		public ExprNodeBinary(ExpressionNode lhs, ExpressionNode rhs, Token op)
 		{
 			Lhs = lhs;
 			Rhs = rhs;
 			Op = op;
 		}
+
+		// Attributes
+		ExpressionNode Lhs;
+		ExpressionNode Rhs;
+		Token Op;
 
 		public override string ToString()
 		{
@@ -546,8 +587,10 @@ namespace MiniME.ast
 
 		public override bool Render(RenderContext dest)
 		{
+			// LHS
 			WrapAndRender(dest, Lhs);
 
+			// Operator
 			switch (Op)
 			{
 				case Token.add:				
@@ -565,43 +608,47 @@ namespace MiniME.ast
 					dest.NeedSpaceIf('-');
 					break;
 
-				case Token.multiply:		dest.Append("*"); break;
-				case Token.divide:			dest.Append("/"); break;
-				case Token.modulus: dest.Append("%"); break;
-				case Token.shl: dest.Append("<<"); break;
-				case Token.shr: dest.Append(">>"); break;
-				case Token.assign: dest.Append("="); break;
-				case Token.shrz: dest.Append(">>>"); break;
-				case Token.addAssign: dest.Append("+="); break;
-				case Token.subtractAssign: dest.Append("-="); break;
-				case Token.multiplyAssign: dest.Append("*="); break;
-				case Token.divideAssign: dest.Append("/="); break;
-				case Token.modulusAssign: dest.Append("%="); break;
-				case Token.shlAssign: dest.Append("<<="); break;
-				case Token.shrAssign: dest.Append(">>="); break;
-				case Token.shrzAssign: dest.Append(">>>="); break;
-				case Token.bitwiseXorAssign: dest.Append("^="); break;
-				case Token.bitwiseOrAssign: dest.Append("|="); break;
-				case Token.bitwiseAndAssign: dest.Append("&="); break;
-				case Token.compareEQ: dest.Append("=="); break;
-				case Token.compareNE: dest.Append("!="); break;
-				case Token.compareLT: dest.Append("<"); break;
-				case Token.compareLE: dest.Append("<="); break;
-				case Token.compareGT: dest.Append(">"); break;
-				case Token.compareGE: dest.Append(">="); break;
-				case Token.compareEQStrict: dest.Append("==="); break;
-				case Token.compareNEStrict: dest.Append("!=="); break;
-				case Token.bitwiseXor: dest.Append("^"); break;
-				case Token.bitwiseOr: dest.Append("|"); break;
-				case Token.bitwiseAnd: dest.Append("&"); break;
-				case Token.logicalNot: dest.Append("!"); break;
-				case Token.logicalOr: dest.Append("||"); break;
-				case Token.logicalAnd: dest.Append("&&"); break;
+				case Token.multiply:
+				case Token.divide:
+				case Token.modulus:
+				case Token.shl:
+				case Token.shr:
+				case Token.assign:
+				case Token.shrz:
+				case Token.addAssign:
+				case Token.subtractAssign:
+				case Token.multiplyAssign:
+				case Token.divideAssign:
+				case Token.modulusAssign:
+				case Token.shlAssign:
+				case Token.shrAssign:
+				case Token.shrzAssign:
+				case Token.bitwiseXorAssign:
+				case Token.bitwiseOrAssign:
+				case Token.bitwiseAndAssign:
+				case Token.compareEQ:
+				case Token.compareNE:
+				case Token.compareLT:
+				case Token.compareLE:
+				case Token.compareGT:
+				case Token.compareGE:
+				case Token.compareEQStrict:
+				case Token.compareNEStrict:
+				case Token.bitwiseXor:
+				case Token.bitwiseOr:
+				case Token.bitwiseAnd:
+				case Token.logicalNot:
+				case Token.logicalOr:
+				case Token.logicalAnd:
+					dest.Append(Tokenizer.FormatToken(Op));
+					break;
+
 				default:
 					System.Diagnostics.Debug.Assert(false);
 					break;
 			}
 
+			// RHS
 			WrapAndRender(dest, Rhs);
 			return true;
 		}
@@ -720,18 +767,22 @@ namespace MiniME.ast
 			return null;
 		}
 
-		ExpressionNode Lhs;
-		ExpressionNode Rhs;
-		Token Op;
 	}
 
+	// Represents a unary operator (eg: ++, !, ~ etc...)
 	class ExprNodeUnary : ExpressionNode
 	{
+		// Constrctor
 		public ExprNodeUnary(ExpressionNode rhs, Token op)
 		{
 			Rhs = rhs;
 			Op = op;
 		}
+
+		// Attributes
+		public ExpressionNode Rhs;
+		public Token Op;
+
 		public override string ToString()
 		{
 			return String.Format("{0}({1})", Op.ToString(), Rhs.ToString());
@@ -742,6 +793,7 @@ namespace MiniME.ast
 			writeLine(indent, "{0}", Op.ToString());
 			Rhs.Dump(indent+1);
 		}
+
 		public override OperatorPrecedence GetPrecedence()
 		{
 			switch (Op)
@@ -775,14 +827,6 @@ namespace MiniME.ast
 					dest.Append(' ');
 					break;
 
-				case Token.bitwiseNot:
-					dest.Append('~');
-					break;
-
-				case Token.logicalNot:
-					dest.Append('!');
-					break;
-
 				case Token.add:
 					break;
 
@@ -791,18 +835,19 @@ namespace MiniME.ast
 					dest.NeedSpaceIf('-');
 					break;
 
+				case Token.bitwiseNot:
+				case Token.logicalNot:
 				case Token.increment:
-					dest.Append("++");
-					break;
-
 				case Token.decrement:
-					dest.Append("--");
+					dest.Append(Tokenizer.FormatToken(Op));
 					break;
 
 				default:
 					System.Diagnostics.Debug.Assert(false);
 					break;
 			}
+
+			// RHS
 			WrapAndRender(dest, Rhs);
 			return true;
 		}
@@ -866,17 +911,22 @@ namespace MiniME.ast
 			return null;
 		}
 
-		public ExpressionNode Rhs;
-		public Token Op;
 	}
 
+	// Represents a postfix increment or decrement
 	class ExprNodePostfix : ExpressionNode
 	{
+		// Constructor
 		public ExprNodePostfix(ExpressionNode lhs, Token op)
 		{
 			Lhs = lhs;
 			Op = op;
 		}
+
+		// Attributes
+		ExpressionNode Lhs;
+		Token Op;
+		
 		public override string ToString()
 		{
 			return String.Format("({1})-postfix-{0}", Op.ToString(), Lhs.ToString());
@@ -901,11 +951,8 @@ namespace MiniME.ast
 			switch (Op)
 			{
 				case Token.increment:
-					dest.Append("++");
-					break;
-
 				case Token.decrement:
-					dest.Append("--");
+					dest.Append(Tokenizer.FormatToken(Op));
 					break;
 
 				default:
@@ -921,16 +968,19 @@ namespace MiniME.ast
 			Lhs.Visit(visitor);
 		}
 
-		ExpressionNode Lhs;
-		Token Op;
 	}
 
+	// Represents an array literal (eg: [1,2,3])
 	class ExprNodeArrayLiteral : ExpressionNode
 	{
+		// Constructor
 		public ExprNodeArrayLiteral()
 		{
 
 		}
+
+		// Attributes
+		public List<ExpressionNode> Values = new List<ExpressionNode>();
 
 		public override string ToString()
 		{
@@ -940,7 +990,7 @@ namespace MiniME.ast
 		public override void Dump(int indent)
 		{
 			writeLine(indent, "array literal:");
-			foreach (var e in Expressions)
+			foreach (var e in Values)
 			{
 				if (e == null)
 					writeLine(indent + 1, "<undefined>");
@@ -954,13 +1004,11 @@ namespace MiniME.ast
 			return OperatorPrecedence.terminal;
 		}
 
-		public List<ExpressionNode> Expressions = new List<ExpressionNode>();
-
 
 		public override bool Render(RenderContext dest)
 		{
 			dest.Append('[');
-			foreach (var e in Expressions)
+			foreach (var e in Values)
 			{
 				WrapAndRender(dest, e);
 			}
@@ -970,13 +1018,14 @@ namespace MiniME.ast
 
 		public override void OnVisitChildNodes(IVisitor visitor)
 		{
-			foreach (var e in Expressions)
+			foreach (var e in Values)
 				e.Visit(visitor);
 		}
 
 
 	}
 
+	// Key/value pair for object literal 
 	class KeyExpressionPair
 	{
 		public KeyExpressionPair(object key, ExpressionNode value)
@@ -988,12 +1037,17 @@ namespace MiniME.ast
 		public ExpressionNode Value;
 	}
 
+	// Represents an object literal (eg: {a:1,b:2,c:3})
 	class ExprNodeObjectLiteral : ExpressionNode
 	{
+		// Constructor
 		public ExprNodeObjectLiteral()
 		{
 
 		}
+
+		// List of values (NB: don't use a dictionary as we need to maintain order)
+		public List<KeyExpressionPair> Values = new List<KeyExpressionPair>();
 
 		public override string ToString()
 		{
@@ -1023,8 +1077,8 @@ namespace MiniME.ast
 				if (i > 0)
 					dest.Append(',');
 
+				// Key - if key is a valid identifier, don't quote it
 				var kp = Values[i];
-
 				if (kp.Key.GetType() == typeof(String) && Tokenizer.IsIdentifier((string)kp.Key))
 				{
 					dest.Append((string)kp.Key);
@@ -1033,6 +1087,8 @@ namespace MiniME.ast
 				{
 					ExprNodeLiteral.RenderValue(dest, kp.Key);
 				}
+
+				// Value
 				dest.Append(':');
 				kp.Value.Render(dest);
 			}
@@ -1048,15 +1104,18 @@ namespace MiniME.ast
 			}
 		}
 
-		public List<KeyExpressionPair> Values = new List<KeyExpressionPair>();
 	}
 
+	// Represents a condiditional expression eg: conditions ? true : false
 	class ExprNodeConditional : ExpressionNode
 	{
+		// Constructor
 		public ExprNodeConditional(ExpressionNode condition)
 		{
 			Condition = condition;
 		}
+
+		// Attributes
 		public ExpressionNode Condition;
 		public ExpressionNode TrueResult;
 		public ExpressionNode FalseResult;
@@ -1095,11 +1154,15 @@ namespace MiniME.ast
 
 	}
 
+	// Represents a comma separated composite expression
 	class ExprNodeComposite : ExpressionNode
 	{
+		// Constrictor
 		public ExprNodeComposite()
 		{
 		}
+
+		// Attributes
 		public List<ExpressionNode> Expressions = new List<ExpressionNode>();
 
 		public override void Dump(int indent)
@@ -1139,11 +1202,19 @@ namespace MiniME.ast
 
 	}
 
+	// Represents a function declaration
 	class ExprNodeFunction : ExpressionNode
 	{
+		// Constructor
 		public ExprNodeFunction()
 		{
 		}
+
+		// Attributes
+		public string Name;
+		public List<Parameter> Parameters = new List<Parameter>();
+		public Statement Code;
+
 
 		public override string ToString()
 		{
@@ -1158,8 +1229,8 @@ namespace MiniME.ast
 				writeLine(indent + 1, p.ToString());
 			}
 			writeLine(indent, "body:");
-			if (Body != null)
-				Body.Dump(indent + 1);
+			if (Code != null)
+				Code.Dump(indent + 1);
 			else
 				writeLine(indent + 1, "<no implementation>");
 		}
@@ -1171,23 +1242,26 @@ namespace MiniME.ast
 
 		public override bool Render(RenderContext dest)
 		{
-			// Enter a new symbol scope
+			// Enter a new symbol scope and tell symbol allocator
+			// about our local symbols
 			dest.Symbols.EnterScope();
-
-			// Render the function
 			Scope.ObfuscateSymbols(dest);
 
+			// `function`
 			if (dest.Compiler.Formatted)
 			{
 				dest.StartLine();
 			}
-
 			dest.Append("function");
+
+			// Function name not present for anonymous functions
 			if (Name != null)
 			{
 				dest.Append(' ');
 				dest.Append(dest.Symbols.GetObfuscatedSymbol(Name));
 			}
+
+			// Parameters
 			dest.Append('(');
 			for (int i = 0; i < Parameters.Count; i++)
 			{
@@ -1196,10 +1270,11 @@ namespace MiniME.ast
 				Parameters[i].Render(dest);
 			}
 			dest.Append(")");
-			Body.Render(dest);
 
+			// Body of the function
+			Code.Render(dest);
 
-			// Leave the symbol scope
+			// Clean up scope and we're finished
 			dest.Symbols.LeaveScope();
 			return false;
 		}
@@ -1210,12 +1285,9 @@ namespace MiniME.ast
 			{
 				p.Visit(visitor);
 			}
-			Body.Visit(visitor);
+			Code.Visit(visitor);
 		}
 
 
-		public string Name;
-		public List<Parameter> Parameters = new List<Parameter>();
-		public Statement Body;
 	}
 }

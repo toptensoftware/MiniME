@@ -5,8 +5,10 @@ using System.Text;
 
 namespace MiniME
 {
+	// All tokenize/parse/render errors thrown through this
 	public class CompileError : Exception
 	{
+		// Constructor
 		internal CompileError(string message, Tokenizer t)
 		{
 			m_strMessage = message;
@@ -14,6 +16,12 @@ namespace MiniME
 			m_lineNumber = t.currentLine;
 			m_linePosition = t.currentLinePosition;
 		}
+
+		// Attributes
+		string m_strMessage;
+		string m_strFileName;
+		int m_lineNumber;
+		int m_linePosition;
 
 		public override string Message
 		{
@@ -23,9 +31,5 @@ namespace MiniME
 			}
 		}
 
-		string m_strMessage;
-		string m_strFileName;
-		int m_lineNumber;
-		int m_linePosition;
 	}
 }

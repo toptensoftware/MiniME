@@ -5,8 +5,12 @@ using System.Text;
 
 namespace MiniME
 {
+	// AST Visitor to create the SymbolScope object heirarchy
+	//  - scopes are created for functions and catch clauses
+	//  - also detects evil and marks scopes as such
 	class VisitorScopeBuilder : ast.IVisitor
 	{
+		// Constructor
 		public VisitorScopeBuilder(SymbolScope rootScope)
 		{
 			m_Scopes.Push(rootScope);
@@ -20,7 +24,7 @@ namespace MiniME
 				n.Scope = new SymbolScope(n);
 
 				// Add this function to the parent function's list of nested functions
-				m_Scopes.Peek().NestedScopes.Add(n.Scope);
+				m_Scopes.Peek().InnerScopes.Add(n.Scope);
 				n.Scope.OuterScope = m_Scopes.Peek();
 
 				// Enter scope
@@ -29,15 +33,17 @@ namespace MiniME
 				return;
 			}
 
+			// Is it an evil?
 			if (n.GetType() == typeof(ast.StatementWith))
 			{
 				m_Scopes.Peek().ContainsEvil = true;
 				return;
 			}
 
-			if (n.GetType() == typeof(ast.ExprNodeMember))
+			// More evil
+			if (n.GetType() == typeof(ast.ExprNodeIdentifier))
 			{
-				var m = (ast.ExprNodeMember)n;
+				var m = (ast.ExprNodeIdentifier)n;
 				if (m.Lhs == null && m.Name == "eval")
 				{
 					m_Scopes.Peek().ContainsEvil = true;
@@ -52,7 +58,7 @@ namespace MiniME
 			{
 				System.Diagnostics.Debug.Assert(m_Scopes.Peek() == n.Scope);
 
-				// Check if scope contained evil eval
+				// Check if scope contained evil
 				bool bEvil = m_Scopes.Peek().ContainsEvil;
 
 				// Pop the stack

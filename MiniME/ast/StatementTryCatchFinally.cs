@@ -5,11 +5,18 @@ using System.Text;
 
 namespace MiniME.ast
 {
+	// Represents a try-catch-finally statement
 	class StatementTryCatchFinally : Statement
 	{
+		// Constructor
 		public StatementTryCatchFinally()
 		{
 		}
+
+		// Attributes
+		public Statement Code;
+		public List<CatchClause> CatchClauses = new List<CatchClause>();
+		public Statement FinallyClause;
 
 		public override void Dump(int indent)
 		{
@@ -25,13 +32,17 @@ namespace MiniME.ast
 
 		public override bool Render(RenderContext dest)
 		{
+			// Statement
 			dest.Append("try");
 			Code.Render(dest);
+
+			// Catch clauses
 			foreach (var cc in CatchClauses)
 			{
 				cc.Render(dest);
 			}
 
+			// Finally clause
 			if (FinallyClause != null)
 			{
 				dest.Append("finally");
@@ -51,16 +62,21 @@ namespace MiniME.ast
 			if (FinallyClause != null)
 				FinallyClause.Visit(visitor);
 		}
-
-
-
-		public Statement Code;
-		public List<CatchClause> CatchClauses =new List<CatchClause>();
-		public Statement FinallyClause;
 	}
 
+	// Represents a single catch clause in a try-catch statement
 	class CatchClause : Statement
 	{
+		// Constructor
+		public CatchClause()
+		{
+		}
+
+		// Attributes
+		public string ExceptionVariable;
+		public ExpressionNode Condition;
+		public Statement Code;
+
 		public override void Dump(int indent)
 		{
 			if (Condition != null)
@@ -79,12 +95,14 @@ namespace MiniME.ast
 
 		public override bool Render(RenderContext dest)
 		{
-			// Enter a new symbol scope
+			// Enter a new symbol scope since the exception variable
+			// can be obfuscated
 			dest.Symbols.EnterScope();
 
-			// Render the function
+			// Obfuscate our local symbols
 			Scope.ObfuscateSymbols(dest);
 
+			// Catch clause
 			dest.StartLine();
 			dest.Append("catch(");
 			dest.Append(dest.Symbols.GetObfuscatedSymbol(ExceptionVariable));
@@ -94,8 +112,11 @@ namespace MiniME.ast
 				Condition.Render(dest);
 			}
 			dest.Append(')');
+
+			// Associated code
 			Code.Render(dest);
 
+			// Done
 			dest.Symbols.LeaveScope();
 			return false;
 		}
@@ -107,9 +128,6 @@ namespace MiniME.ast
 			if (Code != null)
 				Code.Visit(visitor);
 		}
-		public string ExceptionVariable;
-		public ExpressionNode Condition;
-		public Statement Code;
 	}
 
 

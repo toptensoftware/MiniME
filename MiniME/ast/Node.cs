@@ -5,6 +5,8 @@ using System.Text;
 
 namespace MiniME.ast
 {
+	// Implemented by anything that needs to walk the entire abstract
+	// syntax tree as a visitor
 	interface IVisitor
 	{
 		void OnEnterNode(Node n);
@@ -12,10 +14,16 @@ namespace MiniME.ast
 
 	}
 
+	// Base class for all nodes in the AST
 	abstract class Node
 	{
+		// Override to dump this node
 		public abstract void Dump(int indent);
+
+		// Override to render this node
 		public abstract bool Render(RenderContext dest);
+
+		// Render this node in an indented block (if in formatted mode)
 		public bool RenderIndented(RenderContext dest)
 		{
 			if (dest.Compiler.Formatted && GetType()!=typeof(StatementBlock))
@@ -32,6 +40,7 @@ namespace MiniME.ast
 			}
 		}
 
+		// Call visitor for this node and all child nodes
 		public void Visit(IVisitor visitor)
 		{
 			visitor.OnEnterNode(this);
@@ -39,8 +48,10 @@ namespace MiniME.ast
 			visitor.OnLeaveNode(this);
 		}
 
+		// Must be override to visit any child nodes
 		public abstract void OnVisitChildNodes(IVisitor visitor);
 
+		// Helpers for Dump implementation
 		public static void write(int indent, string str, params string[] args)
 		{
 			Console.Write(new String(' ', indent * 4));
@@ -56,7 +67,9 @@ namespace MiniME.ast
 			Console.WriteLine(str, args);
 		}
 
-		public SymbolScope Scope;		// Only used by function and CatchClause nodes
+		// Scope that this node introduces.
+		// Only used by function and CatchClause nodes
+		public SymbolScope Scope;		
 	}
 
 }

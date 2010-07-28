@@ -5,19 +5,15 @@ using System.Text;
 
 namespace MiniME
 {
+	// SymbolFrequency maintains frequency counts for a set of symbols
 	class SymbolFrequency : Dictionary<string, Symbol>
 	{
-		public bool FindSymbol(string name, Symbol.ScopeType scope, out Symbol retv)
+		// Constructor
+		public SymbolFrequency()
 		{
-			return this.TryGetValue(name + "." + scope.ToString(), out retv);
 		}
 
-		public Symbol AddSymbol(Symbol s)
-		{
-			Add(s.Name + "." + s.Scope.ToString(), s);
-			return s;
-		}
-
+		// Define a new local symbol
 		public void DefineSymbol(string str)
 		{
 			Symbol s;
@@ -28,8 +24,11 @@ namespace MiniME
 			s.Frequency++;
 		}
 
+		// Increase the frequency count of a symbol
 		public void UseSymbol(string str)
 		{
+			// Look for local then outer.  If neither, allocate a new 
+			// outer scope symbol
 			Symbol s;
 			if (!FindSymbol(str, Symbol.ScopeType.local, out s))
 			{
@@ -38,9 +37,12 @@ namespace MiniME
 					s = AddSymbol(new Symbol(str, Symbol.ScopeType.outer));
 				}
 			}
+			
+			// And bump...
 			s.Frequency++;
 		}
 
+		// Deep copy all symbols from another symbol frequency map
 		public void CopyFrom(SymbolFrequency other)
 		{
 			this.Clear();
@@ -50,9 +52,18 @@ namespace MiniME
 				AddSymbol(new Symbol(i.Value));
 			}
 		}
-		public void MergeSymbols(SymbolFrequency other)
+		
+		// Merge symbols from an inner frequency map.
+		// Symbols are merged by:
+		//   - inner symbols from the inner map are mapped to inner symbols on the outer map
+		//   - local symbols from the inner map are mapped to inner symbols on the outer map
+		//   - outer symbols from the inner map which are defined in the outer map
+		//			are mapped to local symbols on the outer map
+		//	 - outer symbols from the inner map which are not defined in the outer map
+		//			are mapped to outer symbols on the outer map
+		public void MergeSymbols(SymbolFrequency inner)
 		{
-			foreach (var i in other)
+			foreach (var i in inner)
 			{
 				Symbol s;
 				switch (i.Value.Scope)
@@ -78,14 +89,18 @@ namespace MiniME
 				s.Frequency += i.Value.Frequency;
 			}
 		}
+
+		// Sort all symbols by frequency and return in a list
 		public List<Symbol> Sort()
 		{
+			// Build a list
 			var l = new List<Symbol>();
 			foreach (var i in this)
 			{
 				l.Add(i.Value);
 			}
 
+			// Sort by frequency, rank, name and scope
 			l.Sort(delegate(Symbol s1, Symbol s2) 
 				{
 					int Compare=s2.Frequency-s1.Frequency;
@@ -101,6 +116,33 @@ namespace MiniME
 			return l;
 		}
 
+		// Update the rank level for all local symbols in a frequency map
+		//  - Rank is just the order of the symbol in the sorted frequency map
+		//  - This function looks at each local symbol and compares its currently
+		//    stored rank with it's position in the list.  
+		//  - If the current position is further down the list than the currently 
+		//    stored rank, increase the stored rank to match.
+		public void UpdateRanks(List<Symbol> SymbolsByFreq)
+		{
+			int Rank = 0;
+			foreach (var s in SymbolsByFreq)
+			{
+				if (s.Scope == Symbol.ScopeType.local)
+				{
+					Symbol originalSymbol;
+					FindSymbol(s.Name, Symbol.ScopeType.local, out originalSymbol);
+					if (Rank > originalSymbol.Rank)
+						originalSymbol.Rank = Rank;
+				}
+
+				if (s.Scope != Symbol.ScopeType.outer)
+				{
+					Rank++;
+				}
+			}
+		}
+
+		// Dump to console
 		public void Dump(int indent)
 		{
 			foreach (var i in this.Sort())
@@ -108,5 +150,19 @@ namespace MiniME
 				Utils.WriteIndentedLine(indent, "{0}: {1}x '{2}' {3}", i.Scope.ToString(), i.Frequency, i.Name, i.Scope==Symbol.ScopeType.local ? "#"+i.Rank.ToString() : "");
 			}
 		}
+
+		// Find an existing symbol
+		bool FindSymbol(string name, Symbol.ScopeType scope, out Symbol retv)
+		{
+			return this.TryGetValue(name + "." + scope.ToString(), out retv);
+		}
+
+		// Add a new symbol
+		Symbol AddSymbol(Symbol s)
+		{
+			Add(s.Name + "." + s.Scope.ToString(), s);
+			return s;
+		}
+
 	}
 }

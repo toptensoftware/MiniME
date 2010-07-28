@@ -5,12 +5,17 @@ using System.Text;
 
 namespace MiniME.ast
 {
+	// Wraps an expression as a statement
 	class StatementExpression : Statement
 	{
+		// Constructor
 		public StatementExpression(ExpressionNode expression)
 		{
 			Expression = expression;
 		}
+
+		// Attributes
+		public ExpressionNode Expression;
 
 		public override void Dump(int indent)
 		{
@@ -27,7 +32,6 @@ namespace MiniME.ast
 		}
 
 
-		public ExpressionNode Expression;
 
 	}
 }

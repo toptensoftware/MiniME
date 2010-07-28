@@ -5,13 +5,19 @@ using System.Text;
 
 namespace MiniME.ast
 {
+	// Represents a break or continue statement, with it's optional label
 	class StatementBreakContinue : Statement
 	{
+		// Constructor
 		public StatementBreakContinue(Token op, string label)
 		{
 			Op = op;
 			Label = label;
 		}
+
+		// Attributes
+		public Token Op;
+		public string Label;
 
 		public override void Dump(int indent)
 		{
@@ -39,7 +45,5 @@ namespace MiniME.ast
 		{
 		}
 
-		public Token Op;
-		public string Label;
 	}
 }

@@ -5,11 +5,19 @@ using System.Text;
 
 namespace MiniME.ast
 {
+	// Represents a for(;;) loop
 	class StatementFor : Statement
 	{
+		// Constructor
 		public StatementFor()
 		{
 		}
+
+		// Attributes
+		public Statement Initialize;
+		public ExpressionNode Condition;
+		public ExpressionNode Increment;
+		public Statement Code;
 
 		public override void Dump(int indent)
 		{
@@ -32,7 +40,7 @@ namespace MiniME.ast
 				writeLine(indent+1, "n/a");
 
 			writeLine(indent, "do:");
-			CodeBlock.Dump(indent + 1);
+			Code.Dump(indent + 1);
 		}
 
 		public override bool Render(RenderContext dest)
@@ -47,7 +55,7 @@ namespace MiniME.ast
 			if (Increment != null)
 				Increment.Render(dest);
 			dest.Append(")");
-			return CodeBlock.RenderIndented(dest);
+			return Code.RenderIndented(dest);
 		}
 
 		public override void OnVisitChildNodes(IVisitor visitor)
@@ -61,13 +69,9 @@ namespace MiniME.ast
 			if (Increment!=null)
 				Increment.Visit(visitor);
 
-			CodeBlock.Visit(visitor);
+			Code.Visit(visitor);
 		}
 
 
-		public Statement Initialize;
-		public ExpressionNode Condition;
-		public ExpressionNode Increment;
-		public Statement CodeBlock;
 	}
 }

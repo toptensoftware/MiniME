@@ -5,12 +5,19 @@ using System.Text;
 
 namespace MiniME.ast
 {
+	// Represents an if-else statement
 	class StatementIfElse : Statement
 	{
+		// Constructor
 		public StatementIfElse(ExpressionNode condition)
 		{
 			Condition = condition;
 		}
+
+		// Attributes
+		public ExpressionNode Condition;
+		public Statement TrueStatement;
+		public Statement FalseStatement;
 
 		public override void Dump(int indent)
 		{
@@ -53,10 +60,12 @@ namespace MiniME.ast
 
 		public override bool Render(RenderContext dest)
 		{
+			// Statement
 			dest.Append("if(");
 			Condition.Render(dest);
 			dest.Append(")");
 
+			// True block
 			bool retv;
 			if (CheckForHangingElse())
 			{
@@ -72,6 +81,7 @@ namespace MiniME.ast
 				retv = TrueStatement.RenderIndented(dest);
 			}
 
+			// False block
 			if (FalseStatement != null)
 			{
 				if (retv)
@@ -85,6 +95,7 @@ namespace MiniME.ast
 
 				retv = FalseStatement.RenderIndented(dest);
 			}
+
 			return retv;
 		}
 
@@ -96,8 +107,5 @@ namespace MiniME.ast
 				FalseStatement.Visit(visitor);
 		}
 
-		public ExpressionNode Condition;
-		public Statement TrueStatement;
-		public Statement FalseStatement;
 	}
 }

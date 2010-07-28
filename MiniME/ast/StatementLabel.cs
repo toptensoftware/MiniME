@@ -5,12 +5,17 @@ using System.Text;
 
 namespace MiniME.ast
 {
+	// Represents a label statement
 	class StatementLabel : Statement
 	{
+		// Constructor
 		public StatementLabel(string label)
 		{
 			Label = label;
 		}
+
+		// Attributes
+		public string Label;
 
 		public override void Dump(int indent)
 		{
@@ -28,9 +33,5 @@ namespace MiniME.ast
 		public override void OnVisitChildNodes(IVisitor visitor)
 		{
 		}
-
-
-
-		public string Label;
 	}
 }

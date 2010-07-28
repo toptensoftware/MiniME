@@ -13,26 +13,42 @@ namespace MiniME
 		NoFunctionCalls=0x0002,
 	}
 
+	// Implementation of the Javascript parser.
+	// Reads input from a Tokenizer and builds a complete abtract
+	// syntax tree for all contained statements, functions, variables, 
+	// expressions etc...
 	class Parser
 	{
+		// Constructor
 		public Parser(Tokenizer t)
 		{
 			this.t = t;
 		}
 
-		internal delegate ast.ExpressionNode fnExprNode(ParseContext ctx);
+		// Attributes
+		Tokenizer t;
 
+	
+		// Parse binary is a helper function to parse binary operations.  Uses a function 
+		// callbacks (TokenCheck) to check if a token is applicable to the current operator 
+		// precedence and a delegate (fnExprNode) to call the next higher precedence parser.
+		internal delegate ast.ExpressionNode fnExprNode(ParseContext ctx);
 		ast.ExpressionNode ParseBinary(fnExprNode Next, ParseContext ctx, Func<Token, bool> TokenCheck)
 		{
+			// Parse the LHS
 			var lhs = Next(ctx);
 
+			// Parse all consecutive RHS
 			while (true)
 			{
+				// Check operator at same precedence level
 				if (TokenCheck(t.token))
 				{
+					// Save the operator token
 					var Op = t.token;
 					t.Next();
 
+					// Parse the RHS and join to the LHS with appropriate operator.
 					lhs = new ast.ExprNodeBinary(lhs, Next(ctx), Op);
 				}
 				else
@@ -40,6 +56,7 @@ namespace MiniME
 			}
 		}
 
+		// Parse an expression terminal
 		ast.ExpressionNode ParseExpressionTerminal(ParseContext ctx)
 		{
 			switch (t.token)
@@ -61,13 +78,14 @@ namespace MiniME
 
 				case Token.identifier:
 				{
-					var temp = new ast.ExprNodeMember(t.identifier);
+					var temp = new ast.ExprNodeIdentifier(t.identifier);
 					t.Next();
 					return temp;
 				}
 
 				case Token.openSquare:
 				{
+					// Array literal
 					t.Next();
 					var temp = new ast.ExprNodeArrayLiteral();
 					while (true)
@@ -79,12 +97,12 @@ namespace MiniME
 						if (t.token == Token.comma)
 						{
 							t.Next();
-							temp.Expressions.Add(null);
+							temp.Values.Add(null);
 						}
 						else
 						{
 							// Non-empty expression
-							temp.Expressions.Add(ParseSingleExpression(0));
+							temp.Values.Add(ParseSingleExpression(0));
 
 							// End of list?
 							if (!t.SkipOptional(Token.comma))
@@ -94,7 +112,7 @@ namespace MiniME
 						// Trailing blank element?
 						if (t.token == Token.closeSquare)
 						{
-							temp.Expressions.Add(null);
+							temp.Values.Add(null);
 						}
 
 					}
@@ -104,14 +122,18 @@ namespace MiniME
 
 				case Token.openBrace:
 				{
+					// Object literal
 					t.Next();
 
+					// Create the literal
 					var temp = new ast.ExprNodeObjectLiteral();
 					while (true)
 					{
 						if (t.token == Token.closeBrace)
 							break;
 
+						// Key 
+						//  - can be an identifier, or string/number literal
 						object key;
 						if (t.token == Token.identifier)
 						{
@@ -124,10 +146,13 @@ namespace MiniME
 						}
 						t.Next();
 
+						// Key/value delimiter
 						t.SkipRequired(Token.colon);
 
+						// Value
 						temp.Values.Add(new ast.KeyExpressionPair(key, ParseSingleExpression(0)));
 
+						// Another key/value pair
 						if (!t.SkipOptional(Token.comma))
 							break;
 					}
@@ -189,6 +214,7 @@ namespace MiniME
 			throw new CompileError(string.Format("Invalid expression, didn't expect {0}", t.DescribeCurrentToken()), t);
 		}
 
+		// Parse member dots, array indexers, function calls
 		ast.ExpressionNode ParseExpressionMember(ParseContext ctx)
 		{
 			var lhs = ParseExpressionTerminal(ctx);
@@ -196,10 +222,10 @@ namespace MiniME
 			while (true)
 			{
 				// Member dot '.'
-				if (t.SkipOptional(Token.memberDot))
+				if (t.SkipOptional(Token.period))
 				{
 					t.Require(Token.identifier);
-					lhs = new ast.ExprNodeMember(t.identifier, lhs);
+					lhs = new ast.ExprNodeIdentifier(t.identifier, lhs);
 					t.Next();
 					continue;
 				}
@@ -241,8 +267,10 @@ namespace MiniME
 			return lhs;
 		}
 
+		// Unary operators such as negation, not, increment/decrement
 		ast.ExpressionNode ParseExpressionNegation(ParseContext ctx)
 		{
+			// Prefix increment
 			if (t.token == Token.increment || t.token == Token.decrement)
 			{
 				var temp = t.token;
@@ -250,11 +278,12 @@ namespace MiniME
 				return new ast.ExprNodeUnary(ParseExpressionMember(ctx), temp);
 			}
 
+			// Unary ops
 			while (true)
 			{
 				if (t.token == Token.add)
 				{
-					// Ignore as it's redundant!
+					// Ignore as it's redundant
 					t.Next();
 				}
 				else if (t.token == Token.bitwiseNot || 
@@ -275,8 +304,10 @@ namespace MiniME
 			}
 
 
+			// The operand
 			var lhs=ParseExpressionMember(ctx);
 
+			// Postfix increment
 			if (t.token == Token.increment || t.token == Token.decrement)
 			{
 				var temp = t.token;
@@ -364,7 +395,8 @@ namespace MiniME
 		{
 			var lhs=ParseExpressionLogicalOr(ctx);
 
-			if (t.SkipOptional(Token.ternary))
+			// Is it a ternary operator eg: condition ? true : false
+			if (t.SkipOptional(Token.question))
 			{
 				var result=new ast.ExprNodeConditional(lhs);
 
@@ -400,7 +432,8 @@ namespace MiniME
 							);
 		}
 
-
+		// Parse an expression that might include comma separated multiple
+		// expressions.
 		ast.ExpressionNode ParseCompositeExpression(ParseContext ctx)
 		{
 			var lhs = ParseExpressionAssignment(ctx);
@@ -418,6 +451,7 @@ namespace MiniME
 			return expr;
 		}
 
+		// Parse a single expression (ie: doesn't support comma operator)
 		ast.ExpressionNode ParseSingleExpression(ParseContext ctx)
 		{
 			return ParseExpressionAssignment(ctx);
@@ -431,22 +465,23 @@ namespace MiniME
 			var name = t.identifier;
 			t.Next();
 
-			// Initial value?
+			// Optional initial value
 			ast.ExpressionNode InitialValue = null;
 			if (t.SkipOptional(Token.assign))
 			{
 				InitialValue = ParseSingleExpression(ctx);
 			}
 
+			// Store it
 			decl.AddDeclaration(name, InitialValue);
 		}
 
-		// Parse a variable declaration statement (which might include
-		// several variable definitions separated by commas.
-		// eg: var x=23, y, z=44;
+		// Parse a variable declaration statement 
+		//  - might include several variable definitions separated by commas.
+		//     eg: var x=23, y, z=44;
 		ast.Statement ParseVarDeclStatement(ParseContext ctx)
 		{
-			// Variable declaration?
+			// Is it a variable declaration?
 			if (t.token == Token.kw_var)
 			{
 				t.Next();
@@ -467,10 +502,12 @@ namespace MiniME
 			}
 			else
 			{
+				// Must be just a normal expression statement
 				return new ast.StatementExpression(ParseCompositeExpression(ctx));
 			}
 		}
 
+		// Parse a single statement
 		ast.Statement ParseStatement()
 		{
 			// Special handling for labels
@@ -523,10 +560,11 @@ namespace MiniME
 				case Token.kw_break:
 				case Token.kw_continue:
 				{
-					// Save and skip op
+					// Statement
 					Token op = t.token;
 					t.Next();
 
+					// Optional label
 					if (!t.SkipOptional(Token.semicolon))
 					{
 						t.Require(Token.identifier);
@@ -538,10 +576,9 @@ namespace MiniME
 
 						return temp;
 					}
-					else
-					{
-						return new ast.StatementBreakContinue(op, null);
-					}
+
+					// No label
+					return new ast.StatementBreakContinue(op, null);
 				}
 
 				case Token.kw_if:
@@ -556,7 +593,7 @@ namespace MiniME
 					// True code block
 					stmt.TrueStatement=ParseStatement();
 
-					// Else?
+					// Optional else block
 					if (t.SkipOptional(Token.kw_else))
 					{
 						stmt.FalseStatement=ParseStatement();
@@ -574,9 +611,10 @@ namespace MiniME
 					var stmt = new ast.StatementSwitch(ParseCompositeExpression(0));
 					t.SkipRequired(Token.closeRound);
 
-					// Cases
+					// Opening brace
 					t.SkipRequired(Token.openBrace);
 
+					// Parse all cases
 					ast.StatementSwitch.Case currentCase = null;
 					while (t.token!=Token.closeBrace)
 					{
@@ -605,16 +643,15 @@ namespace MiniME
 						currentCase.AddCode(ParseStatement());
 					}
 
+					// Done
 					t.SkipRequired(Token.closeBrace);
-
-
 					return stmt;
 				}
 
 				case Token.kw_for:
 				{
+					// Statement
 					t.Next();
-
 					t.SkipRequired(Token.openRound);
 
 					ast.Statement init = null;
@@ -650,7 +687,7 @@ namespace MiniME
 								{
 									throw new CompileError("Syntax error - invalid iterator variable declarations in for loop", t);
 								}
-								if ((exprstmtForEach.Expression as ast.ExprNodeMember) == null &&
+								if ((exprstmtForEach.Expression as ast.ExprNodeIdentifier) == null &&
 									(exprstmtForEach.Expression as ast.ExprNodeIndexer) == null)
 								{
 									throw new CompileError("Syntax error - invalid iterator variable declarations in for loop", t);
@@ -664,14 +701,14 @@ namespace MiniME
 							t.SkipRequired(Token.closeRound);
 
 							// Parse content
-							stmtForEach.CodeBlock = ParseStatement();
+							stmtForEach.Code = ParseStatement();
 							return stmtForEach;
 						}
 					}
 
+					// Create the statement, store the initialization expression(s)
 					var stmt = new ast.StatementFor();
 					stmt.Initialize = init;
-
 					t.SkipRequired(Token.semicolon);
 
 					// Condition
@@ -679,14 +716,13 @@ namespace MiniME
 						stmt.Condition = ParseCompositeExpression(0);
 					t.SkipRequired(Token.semicolon);
 
-					// Iterators
+					// Iterator
 					if (t.token!=Token.closeRound)
 						stmt.Increment = ParseCompositeExpression(0);
 					t.SkipRequired(Token.closeRound);
 
-					// Parse content
-					stmt.CodeBlock = ParseStatement();
-
+					// Parse code block
+					stmt.Code = ParseStatement();
 					return stmt;
 				}
 
@@ -736,6 +772,7 @@ namespace MiniME
 					t.Require(Token.openBrace);
 					stmt.Code = ParseStatementBlock(false);
 
+					// Catch clauses
 					while (t.SkipOptional(Token.kw_catch))
 					{
 						var cc=new ast.CatchClause();
@@ -748,7 +785,7 @@ namespace MiniME
 						cc.ExceptionVariable=t.identifier;
 						t.Next();
 
-						// Optional 'if <condition>'
+						// Optional 'if <condition>'   (firefox extension)
 						if (t.token==Token.kw_if)
 						{
 							t.Next();
@@ -765,6 +802,7 @@ namespace MiniME
 						stmt.CatchClauses.Add(cc);
 					}
 
+					// Finally
 					if (t.SkipOptional(Token.kw_finally))
 					{
 						t.Require(Token.openBrace);
@@ -777,6 +815,7 @@ namespace MiniME
 
 				case Token.kw_function:
 				{
+					// Function declaration
 					t.Next();
 					t.Require(Token.identifier);
 					var stmt = new ast.StatementExpression(ParseFunction());
@@ -786,6 +825,7 @@ namespace MiniME
 
 				default:
 				{
+					// Must be a variable declaration or an expression
 					var stmt = ParseVarDeclStatement(0);
 					t.SkipRequired(Token.semicolon);
 					return stmt;
@@ -793,34 +833,45 @@ namespace MiniME
 			}
 		}
 
+		// Parse series of statements into a statement block
 		public void ParseStatements(ast.StatementBlock block)
 		{
 			while (t.token != Token.closeBrace && t.token!=Token.eof)
 			{
+				// Skip redundant semicolons
 				if (t.token == Token.semicolon)
 				{
 					t.Next();
 					continue;
 				}
 
+				// Add the next statement
 				block.Content.Add(ParseStatement());
 			}
 		}
 
+		// Parse a brace enclosed statement block
 		ast.Statement ParseStatementBlock(bool bCanReduce)
 		{
+			// Opening brace
 			t.SkipRequired(Token.openBrace);
 
+			// Statements
 			var block = new ast.StatementBlock();
 			ParseStatements(block);
 
+			// Closing brace
 			t.SkipRequired(Token.closeBrace);
 
+			// Quit if reduction disabled
 			if (!bCanReduce)
 				return block;
 
+			// Roll inner statment blocks into parent
 			block.RemoveRedundant();
 
+			// If it's a single statement, do away with the block
+			// and just return the one statement
 			if (block.Content.Count == 1)
 			{
 				return block.Content[0];
@@ -831,6 +882,7 @@ namespace MiniME
 			}
 		}
 
+		// Parse the parameter declarations on a function
 		void ParseParameters(ast.ExprNodeFunction fn)
 		{
 			// Must have open paren
@@ -840,6 +892,7 @@ namespace MiniME
 			if (t.SkipOptional(Token.closeRound))
 				return;
 
+			// Parameters
 			while (true)
 			{
 				// Name
@@ -857,11 +910,13 @@ namespace MiniME
 		}
 
 
+		// Parse a function declaration
 		ast.ExprNodeFunction ParseFunction()
 		{
 			// Create the function
 			var fn = new ast.ExprNodeFunction();
 
+			// Functions can be anonymous
 			if (t.token == Token.identifier)
 			{
 				fn.Name = t.identifier;
@@ -871,13 +926,11 @@ namespace MiniME
 			// Parameters
 			ParseParameters(fn);
 
-			// Function body
-			fn.Body = ParseStatementBlock(false);
+			// Body
+			fn.Code = ParseStatementBlock(false);
 
 			return fn;
 		}
-
-		Tokenizer t;
 
 	}
 }

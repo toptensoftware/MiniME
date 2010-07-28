@@ -5,8 +5,11 @@ using System.Text;
 
 namespace MiniME
 {
+	// Walk the AST counting usage frequency of symbols
+	//  - this is part 2 of what was started by VisitorSymbolDeclaration
 	class VisitorSymbolUsage : ast.IVisitor
 	{
+		// Constructor
 		public VisitorSymbolUsage(SymbolScope rootScope)
 		{
 			currentScope = rootScope;
@@ -21,12 +24,12 @@ namespace MiniME
 				currentScope = n.Scope;
 			}
 
-			if (n.GetType() == typeof(ast.ExprNodeMember))
+			if (n.GetType() == typeof(ast.ExprNodeIdentifier))
 			{
-				var m = (ast.ExprNodeMember)n;
+				var m = (ast.ExprNodeIdentifier)n;
 				if (m.Lhs == null)
 				{
-					UseSymbol(m.Name);
+					currentScope.Symbols.UseSymbol(m.Name);
 				}
 			}
 		}
@@ -37,11 +40,6 @@ namespace MiniME
 			{
 				currentScope = n.Scope.OuterScope;
 			}
-		}
-
-		void UseSymbol(string str)
-		{
-			currentScope.Symbols.UseSymbol(str);
 		}
 
 		public SymbolScope currentScope = null;

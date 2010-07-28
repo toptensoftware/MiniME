@@ -5,13 +5,16 @@ using System.Text;
 
 namespace MiniME.ast
 {
+	// Represents a parameter to a function
 	class Parameter : Node
 	{
+		// Constructor
 		public Parameter(string name)
 		{
 			Name = name;
 		}
 
+		// Attributes
 		public string Name;
 
 		public override string ToString()
@@ -23,6 +26,7 @@ namespace MiniME.ast
 		{
 			write(indent, ToString());
 		}
+
 		public override bool Render(RenderContext dest)
 		{
 			dest.Append(dest.Symbols.GetObfuscatedSymbol(Name));

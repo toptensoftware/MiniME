@@ -5,19 +5,17 @@ using System.Text;
 
 namespace MiniME
 {
+	// SymbolAllocator - allocates and maps symbols
 	class SymbolAllocator
 	{
-		public SymbolAllocator()
+		// Constructor
+		public SymbolAllocator(Compiler c)
 		{
+			m_Compiler = c;
+
 			// Create the global scope
 			m_ScopeStack.Add(new Scope());
 			CurrentScope.NextSymbol = "a";
-		}
-
-		public bool ShowOriginalSymbols
-		{
-			get;
-			set;
 		}
 
 		// Enter a new scope, all newly allocated obfuscated symbols stored in a 
@@ -39,15 +37,15 @@ namespace MiniME
 			m_ScopeStack.Add(s);
 		}
 
-		// Leave the current scope, returning all currently obfuscated symbols 
-		// to the list of available symbols
+		// Leave the current scope, effectively returning all currently 
+		// allocated symbols to the set of available symbols
 		public void LeaveScope()
 		{
 			// Pop the last scope
 			m_ScopeStack.RemoveAt(m_ScopeStack.Count - 1);
 		}
 
-		// Get the obfuscated symbol for a previously allocated for a symbol
+		// Get the obfuscated symbol for a previously allocated symbol
 		// Returns the original symbol if not obfuscated
 		public string GetObfuscatedSymbol(string originalSymbol)
 		{
@@ -59,12 +57,14 @@ namespace MiniME
 				string obfSymbol;
 				if (s.SymbolMap.TryGetValue(originalSymbol, out obfSymbol))
 				{
-					if (ShowOriginalSymbols && obfSymbol!=originalSymbol)
+					if (m_Compiler.SymbolInfo && obfSymbol!=originalSymbol)
 						return String.Format("{0}/*{1}*/", obfSymbol, originalSymbol);
 					else
 						return obfSymbol;
 				}
 			}
+
+			// No match, return the original
 			return originalSymbol;
 		}
 
@@ -72,13 +72,17 @@ namespace MiniME
 		// Claimed symbols are also never obfuscated.
 		public void ClaimSymbol(string symbol)
 		{
+			// Map symbol to itself
 			CurrentScope.SymbolMap.Add(symbol, symbol);
+
+			// Add to the claimed map
 			CurrentScope.ClaimedSymbols.Add(symbol, true);
 		}
 
 		// Allocate the next shortest symbol
 		public string OnfuscateSymbol(string originalSymbol)
 		{
+			// Allocate, store, return
 			string newSymbol = GetNextObfuscatedSymbol();
 			CurrentScope.SymbolMap.Add(originalSymbol, newSymbol);
 			return newSymbol;
@@ -87,6 +91,7 @@ namespace MiniME
 		// Reserve the next 'count' obfuscated symbols
 		public void ReserveObfuscatedSymbols(int count)
 		{
+			// All we do is allocate symbols and add to the reserve list
 			for (int i = 0; i < count; i++)
 			{
 				CurrentScope.ReservedSymbols.Add(GetNextObfuscatedSymbol());
@@ -105,7 +110,8 @@ namespace MiniME
 			return false;
 		}
 
-		// Work out the next obfuscated symbol
+		// Work out the next obfuscated symbol, taking care
+		// to not allocate something that's already it use
 		string GetNextObfuscatedSymbol()
 		{
 			while (true)
@@ -116,7 +122,8 @@ namespace MiniME
 			}
 		}
 
-		// Work out the next obfuscated symbol
+		// Work out the next obfuscated symbol by first checking the
+		// list of available symbols, then by allocating new ones
 		string GetNextObfuscatedSymbolHelper()
 		{
 			// Use available symbol list first
@@ -133,13 +140,20 @@ namespace MiniME
 			return str;
 		}
 
+		// Helper to increment a symbol string to get the next
+		// Need to ensure that symbol never starts with a digit.
+		// Use characters a-z, A-Z and 0-9
 		static string NextSymbol(string str)
 		{
+			// First ever
 			if (String.IsNullOrEmpty(str))
 				return "a";
 
-			char[] array = str.ToCharArray();
+			// The approach is to convert the string to a character array
+			// and then simply increment the last character and move
+			// left as each column overflows.  `letter math`
 
+			char[] array = str.ToCharArray();
 			for (int i = array.Length - 1; i >= 0; i--)
 			{
 				// Easy cases
@@ -168,10 +182,11 @@ namespace MiniME
 				if (i > 0)
 					continue;
 
-				// Need a new leading character
+				// Prepend a new leading character
 				return "a" + new String(array);
 			}
 
+			// Done!
 			return new String(array);
 		}
 
@@ -185,6 +200,7 @@ namespace MiniME
 			}
 		}
 
+		// Symbol allocate scope - stores state of the currently entered scope
 		class Scope
 		{
 			public Dictionary<string, bool> ClaimedSymbols = new Dictionary<string, bool>();
@@ -194,6 +210,7 @@ namespace MiniME
 			public string NextSymbol;
 		};
 
+		Compiler m_Compiler;
 		List<Scope> m_ScopeStack = new List<Scope>();
 		StringBuilder m_sb = new StringBuilder();
 	}

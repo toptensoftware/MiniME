@@ -5,6 +5,8 @@ using System.Text;
 
 namespace MiniME
 {
+	// Visitor to look at all statement blocks, find consecutive variable
+	// declarations and combine into a single statement
 	class VisitorCombineVarDecl: ast.IVisitor
 	{
 		public VisitorCombineVarDecl(SymbolScope rootScope)

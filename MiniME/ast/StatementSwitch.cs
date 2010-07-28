@@ -5,12 +5,18 @@ using System.Text;
 
 namespace MiniME.ast
 {
+	// Represents a switch-case statement
 	class StatementSwitch : Statement
 	{
+		// Constructor
 		public StatementSwitch(ExpressionNode testExpression)
 		{
 			TestExpression = testExpression;
 		}
+
+		// Attributes
+		public ExpressionNode TestExpression;
+		public List<Case> Cases = new List<Case>();
 
 		public override void Dump(int indent)
 		{
@@ -38,18 +44,25 @@ namespace MiniME.ast
 
 		public override bool Render(RenderContext dest)
 		{
+			// Statement
 			dest.Append("switch(");
 			TestExpression.Render(dest);
 			dest.Append(')');
 			dest.StartLine();
+
+			// Opening brace
 			dest.Append('{');
+
+			// Cases
 			dest.Indent();
 			bool bNeedSemicolon=false;
 			foreach (var c in Cases)
 			{
+				// Separator
 				if (bNeedSemicolon)
 					dest.Append(';');
 
+				// `case` or `default`
 				dest.StartLine();
 				if (c.Value != null)
 				{
@@ -61,6 +74,8 @@ namespace MiniME.ast
 				{
 					dest.Append("default:");
 				}
+
+				// Is there any code associated with this case?
 				if (c.Code != null)
 				{
 					bNeedSemicolon = c.Code.RenderIndented(dest);
@@ -70,6 +85,8 @@ namespace MiniME.ast
 					bNeedSemicolon = false;
 				}
 			}
+
+			// Close brace
 			dest.Unindent();
 			dest.StartLine();
 			dest.Append("}");
@@ -90,6 +107,7 @@ namespace MiniME.ast
 
 
 
+		// Create a new case clause
 		public Case AddCase(ExpressionNode Value)
 		{
 			var c=new Case(Value);
@@ -97,21 +115,30 @@ namespace MiniME.ast
 			return c;
 		}
 
+		// Represents a single case in a switch statement
 		public class Case
 		{
+			// Constructor
 			public Case(ExpressionNode value)
 			{
 				Value = value;
 			}
 
+			// Attributes
+			public ExpressionNode Value;
+			public StatementBlock Code;
+
+			// Add code to this case clause.
 			public void AddCode(ast.Statement statement)
 			{
+				// First time?
 				if (Code == null)
 				{
 					Code = new ast.StatementBlock();
 					Code.HasBraces = false;
 				}
 
+				// Merge child statement blocks
 				if (statement.GetType()==typeof(ast.StatementBlock))
 				{
 					foreach (var c in ((ast.StatementBlock)statement).Content)
@@ -124,16 +151,7 @@ namespace MiniME.ast
 					Code.Content.Add(statement);
 				}
 			}
-
-
-			public ExpressionNode Value;
-			public StatementBlock Code;
 		}
-
-		public ExpressionNode TestExpression;
-		public List<Case> Cases = new List<Case>();
 	}
-
-	
 }
 

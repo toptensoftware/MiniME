@@ -5,18 +5,25 @@ using System.Text;
 
 namespace MiniME.ast
 {
+	// Represents a return or throw statement
 	class StatementReturnThrow : Statement
 	{
+		// Constructor 
 		public StatementReturnThrow(Token op)
 		{
 			Op = op;
 		}
 
+		// Constructor
 		public StatementReturnThrow(Token op, ExpressionNode value)
 		{
 			Op = op;
 			Value = value;
 		}
+
+		// Attributes
+		public Token Op;
+		public ExpressionNode Value;
 
 		public override void Dump(int indent)
 		{
@@ -43,6 +50,7 @@ namespace MiniME.ast
 			Value.Render(dest);
 			return true;
 		}
+
 		public override void OnVisitChildNodes(IVisitor visitor)
 		{
 			if (Value!=null)
@@ -51,7 +59,5 @@ namespace MiniME.ast
 
 
 
-		public Token Op;
-		public ExpressionNode Value;
 	}
 }

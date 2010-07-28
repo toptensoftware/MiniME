@@ -8,9 +8,8 @@ namespace MiniME
 	enum Token
 	{
 		eof,			// End of file
-		comment,		// C or C++ style comment
+		comment,		// C or C++ style comment (filtered out internally to tokenizer)
 		literal,
-
 		identifier,
 
 		// Operators
@@ -53,7 +52,7 @@ namespace MiniME
 		logicalAnd,
 
 		// Special symbols
-		ternary,			// ?
+		question,			// ?
 		colon,				// :
 		semicolon,			// ;
 		comma,				// ,
@@ -63,7 +62,7 @@ namespace MiniME
 		closeBrace,
 		openSquare,
 		closeSquare,
-		memberDot,
+		period,
 
 		// Keywords
 		kw_void,
@@ -92,25 +91,48 @@ namespace MiniME
 		kw_function,
 	}
 
-	internal class DoubleLiteral
+	// Simple class to store a double value and it's original
+	// string representation.  Used to pass through doubles without
+	// changing precision.
+	public class DoubleLiteral
 	{
 		public double Value;
 		public string Original;
 	}
 
-	internal class Tokenizer
+	// Tokenizer
+	//  - a fairly standard approach to input stream tokenization
+	//  - tokenizes all Javascript tokens
+	//  - special case for regex:
+	//     - parser must know when a regex is allowed, check for Token.divide
+	//       and then call ParseRegex, which simply returns the entire regex 
+	//       as a string
+	//  - uses a StringScanner for maintaining position in input
+	class Tokenizer
 	{
-		internal Tokenizer(string str, string strFileName)
+		// Constructor
+		public Tokenizer(string str, string strFileName)
 		{
+			// Store the filename
 			m_strFileName = strFileName;
+
+			// Build a map of keyword identifiers to token enums
 			BuildKeywordMap();
+
+			// Prep the string scanner
 			p = new StringScanner();
 			p.Reset(str);
+
+			// Used to detect line breaks between tokens for automatic
+			// semicolon insertion
 			m_bPreceededByLineBreak = false;
+
+			// Queue up the first token
 			Next();
 		}
 
-		internal string FileName
+		// Get the name of the input file
+		public string FileName
 		{
 			get
 			{
@@ -118,7 +140,8 @@ namespace MiniME
 			}
 		}
 
-		internal static string FormatToken(Token token)
+		// Helper to convert a token back to it's original form
+		public static string FormatToken(Token token)
 		{
 			switch (token)
 			{
@@ -160,7 +183,7 @@ namespace MiniME
 				case Token.logicalNot:return "!";
 				case Token.logicalOr:return "||";
 				case Token.logicalAnd:return "&&";
-				case Token.ternary:return "?";
+				case Token.question:return "?";
 				case Token.colon:return ":";
 				case Token.semicolon: return ";";
 				case Token.comma:return ",";
@@ -170,7 +193,7 @@ namespace MiniME
 				case Token.closeBrace:return "}";
 				case Token.openSquare:return "[";
 				case Token.closeSquare:return "]";
-				case Token.memberDot:return ".";
+				case Token.period:return ".";
 			}
 
 			var s=token.ToString();
@@ -180,7 +203,9 @@ namespace MiniME
 			return s;
 		}
 
-		internal string DescribeCurrentToken()
+		// Get a text representation of the current token 
+		//  - typically used for descriptive error messages
+		public string DescribeCurrentToken()
 		{
 			switch (token)
 			{
@@ -191,7 +216,8 @@ namespace MiniME
 			return string.Format("`{0}`", FormatToken(token));
 		}
 
-		internal Token token
+		// The current token
+		public Token token
 		{
 			get
 			{
@@ -199,7 +225,8 @@ namespace MiniME
 			}
 		}
 
-		internal bool more
+		// Check if more input is available
+		public bool more
 		{
 			get
 			{
@@ -207,34 +234,38 @@ namespace MiniME
 			}
 		}
 
-		internal int currentOffset
+		// Get the offset of the current token
+		public int currentOffset
 		{
 			get
 			{
-				return p.position;
+				return m_tokenStart;
 			}
 		}
 
-		internal int currentLine
+		// Get the line number of the current token
+		public int currentLine
 		{
 			get
 			{
 				int unused;
-				return p.LineNumberFromOffset(p.position, out unused);
+				return p.LineNumberFromOffset(m_tokenStart, out unused);
 			}
 		}
 
-		internal int currentLinePosition
+		// Get the line offset of the current token
+		public int currentLinePosition
 		{
 			get
 			{
 				int chpos;
-				p.LineNumberFromOffset(p.position, out chpos);
+				p.LineNumberFromOffset(m_tokenStart, out chpos);
 				return chpos;
 			}
 		}
 
-		internal string RawToken
+		// Get the raw text from which the current token was parsed
+		public string RawToken
 		{
 			get
 			{
@@ -242,23 +273,31 @@ namespace MiniME
 			}
 		}
 
-		internal object literal
+		// Get the value of a literal token
+		public object literal
 		{
 			get
 			{
+				System.Diagnostics.Debug.Assert(token == Token.literal);
 				return m_literal;
 			}
 		}
 
-		internal string identifier
+		// Get the name of an identifier token
+		public string identifier
 		{
 			get
 			{
+				System.Diagnostics.Debug.Assert(token == Token.identifier);
 				return m_strIdentifier;
 			}
 		}
 
-		internal bool IsAutoSemicolon()
+		// Check for cases where a semicolon is optional
+		//  - end of file
+		//  - immediately before a brace
+		//  - before a line break
+		public bool IsAutoSemicolon()
 		{
 			if (p.eof)
 				return true;
@@ -272,7 +311,8 @@ namespace MiniME
 			return false;
 		}
 
-		internal bool SkipOptional(Token t)
+		// Check for an optional token, skipping it if found
+		public bool SkipOptional(Token t)
 		{
 			if (token != t)
 			{
@@ -287,7 +327,9 @@ namespace MiniME
 			return true;
 		}
 
-		internal void SkipRequired(Token t)
+		// Check for a required token, skipping it if found, raising an
+		// error if not found
+		public void SkipRequired(Token t)
 		{
 			// Automatic semicolons?
 			if (t == Token.semicolon && token != Token.semicolon)
@@ -300,7 +342,8 @@ namespace MiniME
 			Next();
 		}
 
-		internal void Require(Token t)
+		// Raise an error if the current token isn't of the specified type
+		public void Require(Token t)
 		{
 			if (token != t)
 			{
@@ -308,18 +351,20 @@ namespace MiniME
 			}
 		}
 
-		internal string ParseRegEx()
+		// Parse a regex string
+		public string ParseRegEx()
 		{
-			// Rewind to start of the expression
+			// Rewind to start of the current token
 			p.position = m_tokenStart;
 
+			// Must start with a slash
 			System.Diagnostics.Debug.Assert(p.current=='/');
 
+			// Mark the position and skip the opening slash
 			p.Mark();
-
-			// Skip opening slash
 			p.SkipForward(1);
 
+			// Find the end
 			while (!p.eol)
 			{
 				if (p.current == '/')
@@ -338,6 +383,7 @@ namespace MiniME
 				throw new CompileError("Syntax error - unterminated regular expression", this);
 			}
 
+			// Closing slash
 			p.SkipForward(1);
 
 			// Flags
@@ -361,9 +407,9 @@ namespace MiniME
 			return regex;
 		}
 
-		internal Token Next()
+		// Get the next token, skipping comments as we go
+		public Token Next()
 		{
-			// Grab next non-comment token
 			do
 			{
 				m_currentToken = ParseToken();
@@ -373,7 +419,8 @@ namespace MiniME
 			return m_currentToken;
 		}
 
-		internal Token ParseToken()
+		// Main token parser
+		public Token ParseToken()
 		{
 			// Skip whitespace, but remember if there were any line breaks
 			bool bOldPreceededByLineBreak = m_bPreceededByLineBreak;
@@ -400,42 +447,28 @@ namespace MiniME
 				return ParseNumber();
 			}
 
-			// Identifier
+			// Identifier?
 			if (IsIdentifierLeadChar(ch))
 			{
 				ParseIdentifier();
 				return MapIdentifierToKeyword();
 			}
 
-
-			// C style comment
+			// Characters...
 			switch (ch)
 			{
-				case '@':
-					if (IsIdentifierLeadChar(p.CharAtOffset(1)))
-					{
-						p.SkipForward(1);
-						ParseIdentifier();
-						return Token.identifier;
-					}
-					if (p.CharAtOffset(1) == '\"')
-					{
-						return ParseRawString();
-					}
-					break;
-
 				case '.':
+					// Decimal point without leading digits
 					p.SkipForward(1);
 					if (p.current >= '0' && p.current <= '9')
 					{
 						p.SkipForward(-1);
 						return ParseNumber();
 					}
-					return Token.memberDot;
+					return Token.period;
 
 				case '/':
 					p.SkipForward(1);
-
 					switch (p.current)
 					{
 						case '*':
@@ -663,7 +696,7 @@ namespace MiniME
 
 				case '?':
 					p.SkipForward(1);
-					return Token.ternary;
+					return Token.question;
 
 				case ':':
 					p.SkipForward(1);
@@ -685,37 +718,7 @@ namespace MiniME
 			throw new CompileError(string.Format("Syntax error - unrecognized character: `{0}`", p.current), this);
 		}
 
-		Token ParseRawString()
-		{
-			sb.Length = 0;
-			p.SkipForward(2);		// The opening @"
-			while (!p.eof)
-			{
-				if (p.current == '\"')
-				{
-					if (p.CharAtOffset(1) == '\"')
-					{
-						sb.Append('\"');
-						p.SkipForward(2);
-					}
-					else
-					{
-						p.SkipForward(1);
-						m_literal = sb.ToString();
-						return Token.literal;
-					}
-				}
-				else
-				{
-					sb.Append(p.current);
-					p.SkipForward(1);
-				}
-			}
-
-			p.position = m_tokenStart;
-			throw new CompileError("Syntax error - unterminated string literal", this);
-		}
-
+		// Parse a string literal
 		Token ParseString()
 		{
 			char chTerminator = p.current;
@@ -837,7 +840,8 @@ namespace MiniME
 			throw new CompileError("Syntax error - unterminated string literal", this);
 		}
 
-		internal static bool IsIdentifier(string str)
+		// Check if a string conforms to identifier requirements
+		public static bool IsIdentifier(string str)
 		{
 			if (String.IsNullOrEmpty(str))
 				return false;
@@ -854,17 +858,20 @@ namespace MiniME
 			return true;
 		}
 
-		internal static bool IsIdentifierLeadChar(char ch)
+		// Is character valid as the first character in an identifier
+		public static bool IsIdentifierLeadChar(char ch)
 		{
 			return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch == '_') || (ch == '$');
 		}
 
-		internal static bool IsIdentifierChar(char ch)
+		// Is character valid elsewhere in an identifier
+		public static bool IsIdentifierChar(char ch)
 		{
 			return IsIdentifierLeadChar(ch) || (ch >= '0' && ch <= '9');
 		}
 
-		internal bool ParseIdentifier()
+		// Parse an indentifier
+		public bool ParseIdentifier()
 		{
 			p.Mark();
 			if (!IsIdentifierLeadChar(p.current))
@@ -880,8 +887,8 @@ namespace MiniME
 			return true;
 		}
 
-		internal Dictionary<string, Token> m_mapKeywords;
-
+		// Build a map of keyword to token
+		public Dictionary<string, Token> m_mapKeywords;
 		void BuildKeywordMap()
 		{
 			m_mapKeywords=new Dictionary<string,Token>();
@@ -896,6 +903,7 @@ namespace MiniME
 			}
 		}
 
+		// Convert an keyword identifier into a token
 		Token MapIdentifierToKeyword()
 		{
 			if (m_strIdentifier == "true")
@@ -916,7 +924,9 @@ namespace MiniME
 				return Token.identifier;
 		}
 
-		internal Token ParseNumber()
+		// Parse a number - either double, hex integer, decimal interer or octal integer
+		// Don't need to handle negatives as these are handled by Token.subtract unary operator
+		public Token ParseNumber()
 		{
 			// Base 10 by default
 			int b=10;
@@ -1012,6 +1022,7 @@ namespace MiniME
 			}
 		}
 
+		// Hex character types
 		static int HexDigit(char ch)
 		{
 			if (ch >= '0' && ch <= '9')
@@ -1023,6 +1034,7 @@ namespace MiniME
 			return -1;
 		}
 
+		// Octal character types
 		static int OctalDigit(char ch)
 		{
 			if (ch >= '0' && ch <= '7')
@@ -1030,6 +1042,7 @@ namespace MiniME
 			return -1;
 		}
 
+		// Decimal character types
 		static int DecimalDigit(char ch)
 		{
 			if (ch >= '0' && ch <= '9')
@@ -1037,11 +1050,13 @@ namespace MiniME
 			return -1;
 		}
 
+		// Mark the current input position
 		public int Mark()
 		{
 			return m_tokenStart;
 		}
 
+		// Rewind the tokenizer to a previously marked position
 		public void Rewind(int mark)
 		{
 			// Rewind and reparse

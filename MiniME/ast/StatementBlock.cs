@@ -5,19 +5,27 @@ using System.Text;
 
 namespace MiniME.ast
 {
+	// Represents a sequence of statements.
+	// Used for global script scope, function body, catch clauses
 	class StatementBlock : Statement
 	{
+		// Constructor
 		public StatementBlock()
 		{
 
 		}
 
+		// Attributes
+		public bool HasBraces = true;
+		public List<Statement> Content = new List<Statement>();
+
+		// If a statement block contains child statement blocks, roll them
+		// into the parent block.  Braces don't create scopes in Javascript
+		// so the additional braces are redundant
 		public void RemoveRedundant()
 		{
-			// Fold up contained statement blocks
 			for (int i=0; i<Content.Count; i++)
 			{
-				// Is this a statement block?
 				if (Content[i].GetType() == typeof(StatementBlock))
 				{
 					// yes, take it's content an replace it here
@@ -29,9 +37,9 @@ namespace MiniME.ast
 			}
 		}
 
+		// Combine consecutive variable declarations into a single `var` statment
 		public void CombineVarDecls()
 		{
-			// Combine consecutive variable declarations
 			for (int i = 1; i < Content.Count; i++)
 			{
 				if (Content[i - 1].GetType() == typeof(ast.StatementVariableDeclaration) &&
@@ -57,6 +65,10 @@ namespace MiniME.ast
 
 		public override bool Render(RenderContext dest)
 		{
+			// some statement blocks require braces, even if they only
+			// contain a single statement
+
+			// Opening brace
 			if (HasBraces)
 			{
 				dest.StartLine();
@@ -64,23 +76,28 @@ namespace MiniME.ast
 				dest.Indent();
 			}
 
+			// Render each statement, optionally putting a brace between them
 			bool bNeedSemicolon = false;
 			for (var i=0; i<Content.Count; i++)
 			{
+				// Pending semicolon?
 				if (bNeedSemicolon)
 					dest.Append(';');
 
+				// Get the next statement and render it
 				var s = Content[i];
-
 				dest.StartLine();
 				bNeedSemicolon=s.Render(dest);
 
+				// In formatted mode, append the terminating semicolon immediately
 				if (bNeedSemicolon && dest.Compiler.Formatted)
 				{
 					dest.Append(';');
 					bNeedSemicolon = false;
 				}
 			}
+
+			// Closing brace
 			if (HasBraces)
 			{
 				dest.Unindent();
@@ -100,7 +117,5 @@ namespace MiniME.ast
 			}
 		}
 
-		public bool HasBraces = true;
-		public List<Statement> Content=new List<Statement>();
 	}
 }

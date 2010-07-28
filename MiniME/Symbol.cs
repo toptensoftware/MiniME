@@ -5,6 +5,8 @@ using System.Text;
 
 namespace MiniME
 {
+	// Stores information about a single symbol, including
+	// it's name, scope, frequency and rank
 	class Symbol
 	{
 		public enum ScopeType
@@ -14,12 +16,15 @@ namespace MiniME
 			local,		// Symbol defined in current scope
 		}
 
+		// Constructor
 		public Symbol(string name, ScopeType scope)
 		{
 			Name = name;
 			Scope = scope;
 			Frequency = 0;
 		}
+
+		// Copy constructor
 		public Symbol(Symbol other)
 		{
 			Name = other.Name;
@@ -28,6 +33,7 @@ namespace MiniME
 			Rank = other.Rank;
 		}
 
+		// Attributes
 		public String Name;
 		public ScopeType Scope;
 		public int Frequency;

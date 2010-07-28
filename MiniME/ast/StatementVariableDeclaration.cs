@@ -5,12 +5,15 @@ using System.Text;
 
 namespace MiniME.ast
 {
+	// Represents a set of variable declaration.
 	class StatementVariableDeclaration : Statement
 	{
+		// Constructor
 		public StatementVariableDeclaration()
 		{
 		}
 
+		// Add another variable declaration
 		public void AddDeclaration(string Name, ast.ExpressionNode InitialValue)
 		{
 			var v = new Variable();
@@ -19,6 +22,8 @@ namespace MiniME.ast
 			Variables.Add(v);
 		}
 
+		// Check if any variables have an initial value
+		// (used to check for invalid variable declaration in for-in loop)
 		public bool HasInitialValue()
 		{
 			foreach (var v in Variables)
@@ -49,7 +54,10 @@ namespace MiniME.ast
 
 		public override bool Render(RenderContext dest)
 		{
+			// Statement
 			dest.Append("var ");
+
+			// Comma separated variables
 			bool bFirst = true;
 			foreach (var v in Variables)
 			{
@@ -62,7 +70,10 @@ namespace MiniME.ast
 					bFirst = false;
 				}
 
+				// Variable name, possibly obfuscated
 				dest.Append(dest.Symbols.GetObfuscatedSymbol(v.Name));
+
+				// Optional initial value
 				if (v.InitialValue != null)
 				{
 					dest.Append("=");
@@ -82,6 +93,7 @@ namespace MiniME.ast
 		}
 
 
+		// Represents a single variable declaration
 		public class Variable
 		{
 			public string Name;

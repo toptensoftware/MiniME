@@ -8,6 +8,7 @@ namespace MiniME
 {
 	public class TextFileUtils
 	{
+		// Check if leading bytes in a file match a specified preamble
 		static bool DoesPreambleMatch(byte[] data, byte[] preamble)
 		{
 			for (int i=0; i<preamble.Length; i++)
@@ -19,6 +20,8 @@ namespace MiniME
 			return true;
 		}
 
+		// Detect the encoding of a file by comparing it's leading bytes
+		// against all known encoding preambles.
 		public static EncodingInfo DetectFileEncoding(string FileName)
 		{
 			// Build a list of encodings sorted by preamble size (largest->smallest)
@@ -29,12 +32,15 @@ namespace MiniME
 						  orderby e.GetEncoding().GetPreamble().Length descending
 						  select e).ToList();
 
+			// Quit if there are none (that would be weird)
 			if (EncodingsByPreambleSize.Count==0)
 				return null;
 
+			// Work out the max preamble size and allocate a buffer for it
 			int MaxPreamble=EncodingsByPreambleSize[0].GetEncoding().GetPreamble().Length;
 			byte[] buf = new byte[MaxPreamble];
 
+			// Open the file, read the preamble
 			using (FileStream stream = File.OpenRead(FileName))
 			{
 				// Work out how much to read
@@ -46,12 +52,13 @@ namespace MiniME
 				stream.Read(buf, 0, (int)ReadLen);
 			}
 
-			// Find matching encoding
+			// Find an encoding with a matching preamble
 			return (from e in EncodingsByPreambleSize
 					where DoesPreambleMatch(buf, e.GetEncoding().GetPreamble())
 					select e).FirstOrDefault();
 		}
 
+		// Find an encoding given a name (used to parse command line arguments to MiniME)
 		public static Encoding EncodingFromName(string Name)
 		{
 			var ei=(from e in Encoding.GetEncodings()

@@ -462,37 +462,6 @@ namespace MiniME
 			return ch == '\r' || ch == '\n' || ch=='\0';
 		}
 
-		bool IsUrlChar(char ch)
-		{
-			switch (ch)
-			{
-				case '+':
-				case '&':
-				case '@':
-				case '#':
-				case '/':
-				case '%':
-				case '?':
-				case '=':
-				case '~':
-				case '_':
-				case '|':
-				case '[':
-				case ']':
-				case '(':
-				case ')':
-				case '!':
-				case ':':
-				case ',':
-				case '.':
-				case ';':
-					return true;
-
-				default:
-					return Char.IsLetterOrDigit(ch);
-			}
-		}
-
 		public int LineNumberFromOffset(int offset, out int lineoffset)
 		{
 			PrepareLineNumbers();
@@ -539,8 +508,6 @@ namespace MiniME
 				m_lineNumberOffsets.Add(pos);
 			}
 		}
-
-
 
 		// Attributes
 		string str;

@@ -5,11 +5,18 @@ using System.Text;
 
 namespace MiniME.ast
 {
+	// Represents a while statement
 	class StatementWhile : Statement
 	{
+		// Constructor
 		public StatementWhile()
 		{
 		}
+
+		// Attributes
+		public ExpressionNode Condition;
+		public Statement Code;
+
 
 		public override void Dump(int indent)
 		{
@@ -34,7 +41,5 @@ namespace MiniME.ast
 
 
 
-		public ExpressionNode Condition;
-		public Statement Code;
 	}
 }

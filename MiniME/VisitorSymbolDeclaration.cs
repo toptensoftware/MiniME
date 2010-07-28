@@ -5,8 +5,13 @@ using System.Text;
 
 namespace MiniME
 {
+	// Walk the AST, defining symbols on their containing scopes.
+	//  - need to walk tree twice since variables can be declared after use
+	//     - 1. to find symbol declarations (done by this class)
+	//     - 2. to count the usage of symbols (that's done by VisitorSymbolUsage)
 	class VisitorSymbolDeclaration : ast.IVisitor
 	{
+		// Constructor
 		public VisitorSymbolDeclaration(SymbolScope rootScope)
 		{
 			currentScope = rootScope;
@@ -22,7 +27,7 @@ namespace MiniME
 				// Define a symbol for the new function
 				if (!String.IsNullOrEmpty(fn.Name))
 				{
-					DefineSymbol(fn.Name);
+					currentScope.Symbols.DefineSymbol(fn.Name);
 				}
 			}
 
@@ -38,7 +43,7 @@ namespace MiniME
 			if (n.GetType() == typeof(ast.CatchClause))
 			{
 				var cc = (ast.CatchClause)n;
-				DefineSymbol(cc.ExceptionVariable);
+				currentScope.Symbols.DefineSymbol(cc.ExceptionVariable);
 				return;
 			}
 
@@ -47,7 +52,7 @@ namespace MiniME
 			{
 				var vardecl = (ast.StatementVariableDeclaration)n;
 				foreach (var v in vardecl.Variables)
-					DefineSymbol(v.Name);
+					currentScope.Symbols.DefineSymbol(v.Name);
 				return;
 			}
 
@@ -55,7 +60,7 @@ namespace MiniME
 			if (n.GetType() == typeof(ast.Parameter))
 			{
 				var p = (ast.Parameter)n;
-				DefineSymbol(p.Name);
+				currentScope.Symbols.DefineSymbol(p.Name);
 				return;
 			}
 		}
@@ -66,11 +71,6 @@ namespace MiniME
 			{
 				currentScope = n.Scope.OuterScope;
 			}
-		}
-
-		void DefineSymbol(string str)
-		{
-			currentScope.Symbols.DefineSymbol(str);
 		}
 
 		SymbolScope currentScope;
