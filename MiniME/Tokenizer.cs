@@ -771,17 +771,6 @@ namespace MiniME
 								sb.Append('\t');
 								break;
 
-							case '\'':
-								sb.Append('\'');
-								break;
-
-							case '\"':
-								sb.Append('\"');
-								break;
-
-							case '\\':
-								sb.Append('\\');
-								break;
 
 							case 'x':
 								{
@@ -824,7 +813,8 @@ namespace MiniME
 								}
 
 							default:
-								throw new CompileError(string.Format("Syntax error - unrecognised string escape character `{0}`", p.current), this);
+								sb.Append(p.current);
+								break;
 						}
 						p.SkipForward(1);
 					}
@@ -1071,29 +1061,3 @@ namespace MiniME
 	}
 }
 
-
-/*
-				while (t.more)
-				{
-					Console.WriteLine("{0} - `{1}`", t.token.ToString(), t.RawToken);
-					switch (t.token)
-					{
-						case Token.literalString:
-							Console.WriteLine("\tString=`{0}`", t.literalString);
-							break;
-
-						case Token.literalDouble:
-							Console.WriteLine("\tDouble={0}", t.literalDouble);
-							break;				
-
-						case Token.literalInteger:
-							Console.WriteLine("\tInteger={0}", t.literalInteger);
-							break;
-
-						case Token.identifier:
-							Console.WriteLine("\tIdenfifier={0}", t.literalString);
-							break;
-					}
-					t.Next();
-				}
-*/
