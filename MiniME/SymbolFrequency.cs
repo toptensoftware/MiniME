@@ -21,7 +21,6 @@ namespace MiniME
 			{
 				s = AddSymbol(new Symbol(str, Symbol.ScopeType.local));
 			}
-			s.Frequency++;
 		}
 
 		// Increase the frequency count of a symbol
@@ -149,6 +148,12 @@ namespace MiniME
 			{
 				Utils.WriteIndentedLine(indent, "{0}: {1}x '{2}' {3}", i.Scope.ToString(), i.Frequency, i.Name, i.Scope==Symbol.ScopeType.local ? "#"+i.Rank.ToString() : "");
 			}
+		}
+
+		public bool DoesDefineSymbol(string Name)
+		{
+			Symbol temp;
+			return FindSymbol(Name, Symbol.ScopeType.local, out temp);
 		}
 
 		// Find an existing symbol

@@ -191,16 +191,22 @@ namespace MiniME
 			SymbolScope rootScope = new SymbolScope(null);
 			statements.Visit(new VisitorScopeBuilder(rootScope));
 
+			// Combine consecutive var declarations into a single one
+			statements.Visit(new VisitorCombineVarDecl(rootScope));
+
+			// Find all variable declarations
+			statements.Visit(new VisitorSymbolDeclaration(rootScope));
+
+			// Try to eliminate const declarations
+			statements.Visit(new VisitorConstDetectorPass1(rootScope));
+			statements.Visit(new VisitorConstDetectorPass2(rootScope));
+
 			// If obfuscation is allowed, find all in-scope symbols and then
 			// count the frequency of their use.
 			if (!NoObfuscate)
 			{
-				statements.Visit(new VisitorSymbolDeclaration(rootScope));
 				statements.Visit(new VisitorSymbolUsage(rootScope));
 			}
-
-			// Combine consecutive var declarations into a single one
-			statements.Visit(new VisitorCombineVarDecl(rootScope));
 
 			// Process all symbol scopes, determining the "rank" of each symbol
 			rootScope.PrepareSymbolRanks();

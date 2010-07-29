@@ -159,6 +159,35 @@ namespace MiniME
 			}
 		}
 
+		public T GetVisitorData<T>() where T : new()
+		{
+			object data;
+			if (VisitorData.TryGetValue(typeof(T), out data))
+			{
+				return (T)data;
+			}
+
+			T newData = new T();
+			VisitorData.Add(typeof(T), newData);
+
+			return newData;
+		}
+
+		public SymbolScope FindScopeOfSymbol(string Name)
+		{
+			// Check self
+			if (Symbols.DoesDefineSymbol(Name))
+				return this;
+
+			// Check outer scope
+			if (OuterScope != null)
+				return OuterScope.FindScopeOfSymbol(Name);
+
+			// Not defined
+			return null;
+		}
+
+		public Dictionary<Type, object> VisitorData = new Dictionary<Type, object>();
 		public ast.Node Node;
 		public SymbolFrequency Symbols = new SymbolFrequency();
 		public SymbolScope OuterScope = null;

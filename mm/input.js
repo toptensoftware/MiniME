@@ -1,1 +1,12 @@
-	var C_Copyright = "Copyright © Cognethos Pty Ltd, 2009. All rights reserved";
+function DoSomething()
+{
+    var x=23;
+    var y=99;
+    
+    y++;
+    
+    function inner(x)
+    {
+        return x++;
+    }
+}

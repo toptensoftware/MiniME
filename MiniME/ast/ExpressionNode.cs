@@ -501,9 +501,9 @@ namespace MiniME.ast
 		}
 
 		// Attributes
-		ExpressionNode Lhs;
-		ExpressionNode Rhs;
-		Token Op;
+		public ExpressionNode Lhs;
+		public ExpressionNode Rhs;
+		public Token Op;
 
 		public override string ToString()
 		{
@@ -924,8 +924,8 @@ namespace MiniME.ast
 		}
 
 		// Attributes
-		ExpressionNode Lhs;
-		Token Op;
+		public ExpressionNode Lhs;
+		public Token Op;
 		
 		public override string ToString()
 		{
@@ -1245,7 +1245,10 @@ namespace MiniME.ast
 			// Enter a new symbol scope and tell symbol allocator
 			// about our local symbols
 			dest.Symbols.EnterScope();
-			Scope.ObfuscateSymbols(dest);
+
+			// Obfuscate symbols?
+			if (!dest.Compiler.NoObfuscate)
+				Scope.ObfuscateSymbols(dest);
 
 			// `function`
 			if (dest.Compiler.Formatted)
