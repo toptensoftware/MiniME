@@ -24,10 +24,25 @@ namespace MiniME
 			// Is is a "var <name>=<literal_int_or_double>"
 			if (n.GetType() == typeof(ast.StatementVariableDeclaration))
 			{
-				var decl = (ast.StatementVariableDeclaration)n;
+				var vardecl = (ast.StatementVariableDeclaration)n;
+				foreach (var v in vardecl.Variables)
+				{
+					// Must have initial value
+					if (v.InitialValue == null)
+						continue;
+
+					// Must evaluate to a constant
+					object val = v.InitialValue.EvalConstLiteral();
+					if (val==null)
+						continue;
+
+					// Must be a number
+					if (val.GetType() != typeof(long) && val.GetType() != typeof(DoubleLiteral))
+						continue;
+
+
+				}
 			}
-
-
 		}
 
 		public void OnLeaveNode(MiniME.ast.Node n)

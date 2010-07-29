@@ -52,7 +52,9 @@ namespace MiniME
 			{
 				var vardecl = (ast.StatementVariableDeclaration)n;
 				foreach (var v in vardecl.Variables)
+				{
 					currentScope.Symbols.DefineSymbol(v.Name);
+				}
 				return;
 			}
 
