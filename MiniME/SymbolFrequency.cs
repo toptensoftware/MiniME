@@ -36,6 +36,10 @@ namespace MiniME
 					s = AddSymbol(new Symbol(str, Symbol.ScopeType.outer));
 				}
 			}
+
+			// Don't bump frequency of symbols that are now const!
+			if (s.ConstValue != null)
+				return;
 			
 			// And bump...
 			s.Frequency++;
@@ -96,7 +100,11 @@ namespace MiniME
 			var l = new List<Symbol>();
 			foreach (var i in this)
 			{
-				l.Add(i.Value);
+				// Don't add eliminated symbols
+				if (i.Value.ConstValue == null)
+				{
+					l.Add(i.Value);
+				}
 			}
 
 			// Sort by frequency, rank, name and scope
@@ -150,10 +158,13 @@ namespace MiniME
 			}
 		}
 
-		public bool DoesDefineSymbol(string Name)
+		public Symbol FindLocalSymbol(string Name)
 		{
 			Symbol temp;
-			return FindSymbol(Name, Symbol.ScopeType.local, out temp);
+			if (!FindSymbol(Name, Symbol.ScopeType.local, out temp))
+				return null;
+
+			return temp;
 		}
 
 		// Find an existing symbol
@@ -168,6 +179,5 @@ namespace MiniME
 			Add(s.Name + "." + s.Scope.ToString(), s);
 			return s;
 		}
-
 	}
 }

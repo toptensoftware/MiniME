@@ -6,15 +6,8 @@ using System.IO;
 
 /*
  * TODO:
- * 
- * - Optimization of constants
- * - Better error reporting
- * - Allow semicolon after with (and possibly other) statements
  * - Diagnostic mode to reparse generated content
- * - Unit test cases
- * - Comments to prevent use of symbols //mm-reserve:top
  * - Preserved comments
- * 
  */
 
 namespace MiniME
@@ -26,6 +19,7 @@ namespace MiniME
 		public Compiler()
 		{
 			Reset();
+			DetectConsts = true;
 		}
 
 		// Attributes
@@ -45,6 +39,13 @@ namespace MiniME
 		// Enable/disable obfuscation of local symbols inside
 		// function closures
 		public bool NoObfuscate
+		{
+			get;
+			set;
+		}
+
+		// Enable/disable replacement of consts variables
+		public bool DetectConsts
 		{
 			get;
 			set;
@@ -198,8 +199,12 @@ namespace MiniME
 			statements.Visit(new VisitorSymbolDeclaration(rootScope));
 
 			// Try to eliminate const declarations
-			statements.Visit(new VisitorConstDetectorPass1(rootScope));
-			statements.Visit(new VisitorConstDetectorPass2(rootScope));
+			if (DetectConsts && !NoObfuscate)
+			{
+				statements.Visit(new VisitorConstDetectorPass1(rootScope));
+				statements.Visit(new VisitorConstDetectorPass2(rootScope));
+				statements.Visit(new VisitorConstDetectorPass3(rootScope));
+			}
 
 			// If obfuscation is allowed, find all in-scope symbols and then
 			// count the frequency of their use.
@@ -233,8 +238,18 @@ namespace MiniME
 				SymbolAllocator.ClaimSymbol(s);
 			}
 
+			// Create a member allocator
+			SymbolAllocator MemberAllocator = new SymbolAllocator(this);
+
 			// Render
-			RenderContext r = new RenderContext(this, SymbolAllocator);
+			RenderContext r = new RenderContext(this, SymbolAllocator, MemberAllocator, rootScope);
+
+			// Create a credit comment
+			int iInsertPos=0;
+			while (iInsertPos<statements.Content.Count && statements.Content[iInsertPos].GetType()==typeof(ast.StatementComment))
+				iInsertPos++;
+			statements.Content.Insert(iInsertPos, new ast.StatementComment("//! Minified by MiniME from toptensoftware.com"));
+
 			statements.Render(r);
 
 			// return the final script

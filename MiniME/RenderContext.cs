@@ -11,10 +11,12 @@ namespace MiniME
 	internal class RenderContext
 	{
 		// Constructor
-		public RenderContext(Compiler c, SymbolAllocator SymbolAllocator)
+		public RenderContext(Compiler c, SymbolAllocator SymbolAllocator, SymbolAllocator MemberAllocator, SymbolScope rootScope)
 		{
 			m_Compiler = c;
 			m_SymbolAllocator = SymbolAllocator;
+			m_MemberAllocator = MemberAllocator;
+			m_CurrentScope = rootScope;
 		}
 
 		// Get the owning compiler
@@ -35,6 +37,45 @@ namespace MiniME
 			}
 		}
 
+		// Get the member allocator
+		public SymbolAllocator Members
+		{
+			get
+			{
+				return m_MemberAllocator;
+			}
+		}
+
+
+		public SymbolScope CurrentScope
+		{
+			get
+			{
+				return m_CurrentScope;
+			}
+		}
+
+		public void EnterScope(SymbolScope Scope)
+		{
+			System.Diagnostics.Debug.Assert(Scope.OuterScope == m_CurrentScope);
+
+			m_CurrentScope = Scope;
+
+			m_SymbolAllocator.EnterScope();
+			m_MemberAllocator.EnterScope();
+
+			// Obfuscate symbols?
+			if (!Compiler.NoObfuscate)
+				Scope.ObfuscateSymbols(this);
+
+		}
+
+		public void LeaveScope()
+		{
+			m_SymbolAllocator.LeaveScope();
+			m_MemberAllocator.LeaveScope();
+			m_CurrentScope = m_CurrentScope.OuterScope;
+		}
 
 		// Track the current line position and insert breaks as necessary
 		//  - iCharacters=the number of characters about to be written
@@ -194,6 +235,16 @@ namespace MiniME
 			}
 		}
 
+		public void ForceLineBreak()
+		{
+			if (m_iLinePos != 0)
+			{
+				sb.Append("\n");
+				m_iLinePos = 0;
+			}
+		}
+
+		SymbolScope m_CurrentScope;
 		int m_iLinePos = 0;
 		int m_iIndent = 0;
 		int m_iLineBreaksDisabled = 0;
@@ -203,5 +254,6 @@ namespace MiniME
 		StringBuilder sb = new StringBuilder();
 		StringBuilder sbTemp = new StringBuilder();
 		SymbolAllocator m_SymbolAllocator;
+		SymbolAllocator m_MemberAllocator;
 	}
 }

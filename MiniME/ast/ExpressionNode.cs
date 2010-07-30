@@ -105,11 +105,20 @@ namespace MiniME.ast
 			{
 				WrapAndRender(dest, Lhs);
 				dest.Append(".");
-				dest.Append(Name);
+				dest.Append(dest.Members.GetObfuscatedSymbol(Name));
 			}
 			else
 			{
-				dest.Append(dest.Symbols.GetObfuscatedSymbol(Name));
+				// Find the symbol and check if it's a constant
+				var s = dest.CurrentScope.FindSymbol(Name);
+				if (s != null && s.ConstValue != null)
+				{
+					ExprNodeLiteral.RenderValue(dest, s.ConstValue);
+				}
+				else
+				{
+					dest.Append(dest.Symbols.GetObfuscatedSymbol(Name));
+				}
 			}
 			return true;
 		}
@@ -1244,11 +1253,7 @@ namespace MiniME.ast
 		{
 			// Enter a new symbol scope and tell symbol allocator
 			// about our local symbols
-			dest.Symbols.EnterScope();
-
-			// Obfuscate symbols?
-			if (!dest.Compiler.NoObfuscate)
-				Scope.ObfuscateSymbols(dest);
+			dest.EnterScope(Scope);
 
 			// `function`
 			if (dest.Compiler.Formatted)
@@ -1278,7 +1283,7 @@ namespace MiniME.ast
 			Code.Render(dest);
 
 			// Clean up scope and we're finished
-			dest.Symbols.LeaveScope();
+			dest.LeaveScope();
 			return false;
 		}
 

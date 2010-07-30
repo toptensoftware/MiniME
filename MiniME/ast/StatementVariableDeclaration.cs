@@ -54,6 +54,10 @@ namespace MiniME.ast
 
 		public override bool Render(RenderContext dest)
 		{
+			// Quit if all variables have been eliminated
+			if (Variables.Count == 0)
+				return false;
+
 			// Statement
 			dest.Append("var ");
 

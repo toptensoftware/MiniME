@@ -44,6 +44,10 @@ namespace MiniME
 				{
 					currentScope.Symbols.UseSymbol(m.Name);
 				}
+				else
+				{
+					currentScope.Members.UseSymbol(m.Name);
+				}
 			}
 
 			// Use catch clause exception variables in the inner scope

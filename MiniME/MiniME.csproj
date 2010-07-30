@@ -47,6 +47,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ast\StatementComment.cs" />
+    <Compile Include="ast\StatementPrivate.cs" />
     <Compile Include="ast\StatementTryCatchFinally.cs" />
     <Compile Include="ast\StatementWith.cs" />
     <Compile Include="ast\StatementForIn.cs" />

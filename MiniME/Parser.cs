@@ -823,6 +823,30 @@ namespace MiniME
 					return stmt;
 				}
 
+				case Token.directive_comment:
+				{
+					var stmt = new ast.StatementComment(t.RawToken);
+					t.Next();
+					return stmt;
+				}
+
+				case Token.directive_private:
+				{
+					var stmt = new ast.StatementPrivate();
+					foreach (var symbol in t.identifier.Split(','))
+					{
+						var spec = new ast.PrivateSpec();
+						if (!spec.Parse(symbol))
+						{
+							throw new CompileError(string.Format("Invalid private member declaration - `{0}`", symbol), t);
+						}
+						stmt.Specs.Add(spec);
+					}
+
+					t.Next();
+					return stmt;
+				}
+
 				default:
 				{
 					// Must be a variable declaration or an expression

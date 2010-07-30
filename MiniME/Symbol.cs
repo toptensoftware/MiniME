@@ -22,6 +22,7 @@ namespace MiniME
 			Name = name;
 			Scope = scope;
 			Frequency = 0;
+			ConstAllowed = true;
 		}
 
 		// Copy constructor
@@ -31,6 +32,7 @@ namespace MiniME
 			Scope = other.Scope;
 			Frequency = other.Frequency;
 			Rank = other.Rank;
+			ConstAllowed = false;
 		}
 
 		// Attributes
@@ -38,5 +40,7 @@ namespace MiniME
 		public ScopeType Scope;
 		public int Frequency;
 		public int Rank;
+		public object ConstValue;
+		public bool ConstAllowed;
 	}
 }

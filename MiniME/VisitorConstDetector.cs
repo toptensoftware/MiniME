@@ -5,39 +5,8 @@ using System.Text;
 
 namespace MiniME
 {
-	class ScopeConstInfo
-	{
-		public ScopeConstInfo()
-		{
-		}
-
-		class ConstInfo
-		{
-			public ast.StatementVariableDeclaration vardecl;
-			public ast.StatementVariableDeclaration.Variable variable;
-		}
-
-		Dictionary<string, ConstInfo> m_Constants = new Dictionary<string, ConstInfo>();
-
-		public void StorePossibleConst(ast.StatementVariableDeclaration vardecl, ast.StatementVariableDeclaration.Variable variable)
-		{
-			var ci = new ConstInfo();
-			ci.vardecl = vardecl;
-			ci.variable = variable;
-			m_Constants.Add(variable.Name, ci);
-
-		}
-
-		public void RejectConst(string Name)
-		{
-			if (m_Constants.ContainsKey(Name))
-			{
-				m_Constants.Remove(Name);
-			}
-		}
-
-	}
-
+	// Pass 1. Detect all `var <identifier>=<constantexpression>` and store the 
+	//         const value on the Symbol entry
 	class VisitorConstDetectorPass1 : ast.IVisitor
 	{
 		public VisitorConstDetectorPass1(SymbolScope rootScope)
@@ -73,11 +42,20 @@ namespace MiniME
 					if (val.GetType() != typeof(long) && val.GetType() != typeof(DoubleLiteral))
 						continue;
 
-					// Get const info for this class
-					var ci = currentScope.GetVisitorData<ScopeConstInfo>();
+					// Find the symbol in the current scope
+					Symbol s = currentScope.Symbols.FindLocalSymbol(v.Name);
+					System.Diagnostics.Debug.Assert(s != null);
 
-					// Store a possible const declaration
-					ci.StorePossibleConst(vardecl, v);
+					// Store the constant value for this symbol
+					if (s.ConstValue == null && s.ConstAllowed)
+					{
+						s.ConstValue = val;
+					}
+					else
+					{
+						s.ConstAllowed = false;
+						s.ConstValue = null;
+					}
 				}
 			}
 		}
@@ -94,6 +72,11 @@ namespace MiniME
 	}
 
 
+	// Pass 2. Find all assignments to `<identifier>` or `<identifier>++` or `++<identifier>`
+	//  	   	- find scope in which variable is defined
+	//		   	- zap the stored const value on the SymbolEntry
+	//  	   	- mark the symbol as not being eligible for further const declarations
+	//				  (in case there's a subsequent var decl the also looks like a const)
 	class VisitorConstDetectorPass2 : ast.IVisitor
 	{
 		public VisitorConstDetectorPass2(SymbolScope rootScope)
@@ -162,15 +145,67 @@ namespace MiniME
 			if (identifier.Lhs != null)
 				return;
 
-			// Walk all outer scopes until we find a possible const declaration for it
-			// and mark it as rejected
-			var s = currentScope.FindScopeOfSymbol(identifier.Name);
+			// Find the symbol and mark it as not a const
+			var s = currentScope.FindSymbol(identifier.Name);
 			if (s != null)
 			{
-				s.GetVisitorData<ScopeConstInfo>().RejectConst(identifier.Name);
+				s.ConstValue = null;
+				s.ConstAllowed = false;
 			}
 		}
 
+
+		public SymbolScope currentScope;
+	}
+
+
+	// Pass 3. Remove variable declarations for any variables that are consts.
+	class VisitorConstDetectorPass3 : ast.IVisitor
+	{
+		public VisitorConstDetectorPass3(SymbolScope rootScope)
+		{
+			currentScope = rootScope;
+		}
+
+		public void OnEnterNode(MiniME.ast.Node n)
+		{
+			// Descending into an inner scope
+			if (n.Scope != null)
+			{
+				System.Diagnostics.Debug.Assert(n.Scope.OuterScope == currentScope);
+				currentScope = n.Scope;
+			}
+
+			// Is it a variable declaration
+			if (n.GetType() == typeof(ast.StatementVariableDeclaration))
+			{
+				var vardecl = (ast.StatementVariableDeclaration)n;
+
+				for (int i = vardecl.Variables.Count - 1; i >= 0; i-- )
+				{
+					var v = vardecl.Variables[i];
+
+					// Find the symbol (must exist in current scope)
+					var s = currentScope.Symbols.FindLocalSymbol(v.Name);
+					System.Diagnostics.Debug.Assert(s != null);
+
+					// Is it a const?
+					if (s.ConstValue != null)
+					{
+						// Yes!  Remove it 
+						vardecl.Variables.RemoveAt(i);
+					}
+				}
+			}
+		}
+
+		public void OnLeaveNode(MiniME.ast.Node n)
+		{
+			if (n.Scope != null)
+			{
+				currentScope = n.Scope.OuterScope;
+			}
+		}
 
 		public SymbolScope currentScope;
 	}

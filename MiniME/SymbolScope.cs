@@ -41,6 +41,17 @@ namespace MiniME
 				Symbols.UpdateRanks(merged.Sort());
 			}
 
+			// Member symbol
+			Members.UpdateRanks(Members.Sort());
+			foreach (var i in InnerScopes)
+			{
+				var merged = new SymbolFrequency();
+				merged.CopyFrom(Members);
+				merged.MergeSymbols(i.AllMembers);
+
+				Members.UpdateRanks(merged.Sort());
+			}
+
 			// Recurse through all scopes
 			foreach (var i in InnerScopes)
 			{
@@ -62,6 +73,42 @@ namespace MiniME
 			}
 		}
 
+		public void ObfuscateSymbols(RenderContext ctx, SymbolFrequency SymbolFrequency, SymbolAllocator Allocator, string prefix)
+		{
+			// Walk through local symbols
+			int expectedRank = 0;
+			foreach (var i in SymbolFrequency.Sort())
+			{
+				if (i.Scope == Symbol.ScopeType.local)
+				{
+					// Reserve space for inner, higher frequency symbols
+					if (i.Rank > expectedRank)
+					{
+						if (ctx.Compiler.Formatted && ctx.Compiler.SymbolInfo)
+						{
+							for (int r = expectedRank; r < i.Rank; r++)
+							{
+								ctx.StartLine();
+								ctx.AppendFormat("// #{0} reserved", r);
+							}
+						}
+						Allocator.ReserveObfuscatedSymbols(i.Rank - expectedRank);
+					}
+
+					string newSymbol = Allocator.OnfuscateSymbol(i.Name);
+
+					// Show info
+					if (ctx.Compiler.Formatted && ctx.Compiler.SymbolInfo)
+					{
+						ctx.StartLine();
+						ctx.AppendFormat("// #{0} {3}{1} -> {3}{2}", i.Rank, i.Name, newSymbol, prefix);
+					}
+
+					expectedRank = i.Rank + 1;
+				}
+			}
+		}
+
 		// Obfuscate all local symbols
 		//  - enumerate all local symbols and tell the symbol allocator
 		//    that it can be obfuscated.
@@ -78,42 +125,25 @@ namespace MiniME
 					ctx.StartLine();
 					ctx.AppendFormat("// Obfuscation prevented by evil");
 				}
-				return;
+			}
+			else
+			{
+				ObfuscateSymbols(ctx, Symbols, ctx.Symbols, "");
 			}
 
-			// Walk through local symbols
-			int expectedRank = 0;
-			foreach (var i in Symbols.Sort())
+			ObfuscateSymbols(ctx, Members, ctx.Members, ".");
+
+			// Dump const eliminated variables
+			foreach (var i in Symbols.Where(x=>x.Value.ConstValue!=null))
 			{
-				if (i.Scope == Symbol.ScopeType.local)
+				// Show info
+				if (ctx.Compiler.Formatted && ctx.Compiler.SymbolInfo)
 				{
-					// Reserve space for inner, higher frequency symbols
-					if (i.Rank > expectedRank)
-					{
-						if (ctx.Compiler.Formatted && ctx.Compiler.SymbolInfo)
-						{
-							for (int r = expectedRank; r < i.Rank; r++)
-							{
-								ctx.StartLine();
-								ctx.AppendFormat("// #{0} reserved", r);
-							}
-						}
-						ctx.Symbols.ReserveObfuscatedSymbols(i.Rank - expectedRank);
-					}
-
-					// Obfuscate away...
-					string newSymbol=ctx.Symbols.OnfuscateSymbol(i.Name);
-
-					// Show info
-					if (ctx.Compiler.Formatted && ctx.Compiler.SymbolInfo)
-					{
-						ctx.StartLine();
-						ctx.AppendFormat("// #{0} {1} -> {2}", i.Rank, i.Name, newSymbol);
-					}
-
-					expectedRank = i.Rank+1;
+					ctx.StartLine();
+					ctx.AppendFormat("// {0} -> optimized away (const)", i.Value.Name);
 				}
 			}
+
 		}
 
 		// Dump to stdout
@@ -159,40 +189,90 @@ namespace MiniME
 			}
 		}
 
-		public T GetVisitorData<T>() where T : new()
+		// Get all symbols, including all symbols from inner scopes
+		// in a single frequency map
+		public SymbolFrequency AllMembers
 		{
-			object data;
-			if (VisitorData.TryGetValue(typeof(T), out data))
+			get
 			{
-				return (T)data;
+				if (m_AllMembers == null)
+				{
+					m_AllMembers = new SymbolFrequency();
+					m_AllMembers.CopyFrom(Members);
+					foreach (var s in InnerScopes)
+					{
+						m_AllMembers.MergeSymbols(s.AllMembers);
+					}
+				}
+				return m_AllMembers;
 			}
-
-			T newData = new T();
-			VisitorData.Add(typeof(T), newData);
-
-			return newData;
 		}
 
-		public SymbolScope FindScopeOfSymbol(string Name)
+		public Symbol FindSymbol(string Name)
 		{
 			// Check self
-			if (Symbols.DoesDefineSymbol(Name))
-				return this;
+			var s = Symbols.FindLocalSymbol(Name);
+			if (s!=null)
+				return s;
 
 			// Check outer scope
 			if (OuterScope != null)
-				return OuterScope.FindScopeOfSymbol(Name);
+				return OuterScope.FindSymbol(Name);
 
 			// Not defined
 			return null;
 		}
 
-		public Dictionary<Type, object> VisitorData = new Dictionary<Type, object>();
+		public void AddPrivateSpec(ast.PrivateSpec spec)
+		{
+			string strExplicit = spec.GetExplicitMemberName();
+			if (strExplicit != null)
+			{
+				Members.DefineSymbol(strExplicit);
+			}
+			else
+			{
+				m_PrivateSpecs.Add(spec);
+			}
+		}
+
+		public bool DoesIdentifierMatchPrivateSpec(ast.ExprNodeIdentifier identifier)
+		{
+			foreach (var s in m_PrivateSpecs)
+			{
+				if (s.DoesMatch(identifier))
+				{
+					return s.GetExplicitMemberName() == null;
+				}
+			}
+
+			return false;
+		}
+
+		public void DefinePrivateMemberIfMatchesAnySpec(ast.ExprNodeIdentifier identifier)
+		{
+			if (DoesIdentifierMatchPrivateSpec(identifier))
+			{
+				Members.DefineSymbol(identifier.Name);
+			}
+			else if (OuterScope!=null)
+			{
+				OuterScope.DefinePrivateMemberIfMatchesAnySpec(identifier);
+			}
+		}
+
 		public ast.Node Node;
-		public SymbolFrequency Symbols = new SymbolFrequency();
 		public SymbolScope OuterScope = null;
 		public List<SymbolScope> InnerScopes = new List<SymbolScope>();
-		public SymbolFrequency m_AllSymbols;
 		public bool ContainsEvil;		// Contains a 'with' or 'eval'
+
+		public SymbolFrequency Symbols = new SymbolFrequency();
+		public SymbolFrequency m_AllSymbols;
+
+		public SymbolFrequency Members = new SymbolFrequency();
+		public SymbolFrequency m_AllMembers;
+
+		public List<ast.PrivateSpec> m_PrivateSpecs=new List<ast.PrivateSpec>();
 	}
 }
+

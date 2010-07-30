@@ -12,6 +12,9 @@ namespace MiniME
 		literal,
 		identifier,
 
+		directive_private,			// Comment of form /* private */
+		directive_comment,			// Comment of form //! or /*!
+
 		// Operators
 		assign,
 		subtractAssign,
@@ -288,7 +291,6 @@ namespace MiniME
 		{
 			get
 			{
-				System.Diagnostics.Debug.Assert(token == Token.identifier);
 				return m_strIdentifier;
 			}
 		}
@@ -413,6 +415,25 @@ namespace MiniME
 			do
 			{
 				m_currentToken = ParseToken();
+
+				// Check for directive comments
+				if (m_currentToken == Token.comment)
+				{
+					if (m_strIdentifier.StartsWith("!"))
+					{
+						m_currentToken = Token.directive_comment;
+						break;
+					}
+
+					string str = m_strIdentifier.Trim();
+					if (str.StartsWith("private:"))
+					{
+						m_currentToken = Token.directive_private;
+						m_strIdentifier = str.Substring(8);
+						break;
+					}
+				}
+
 			} while (m_currentToken == Token.comment);
 
 			m_tokenEnd = p.position;
@@ -472,18 +493,24 @@ namespace MiniME
 					switch (p.current)
 					{
 						case '*':
+							p.SkipForward(2);
+							p.Mark();
 							if (!p.Find("*/"))
 							{
 								p.position = m_tokenStart;
 								throw new CompileError("Syntax error - unterminated C-style comment", this);
 							}
+							m_strIdentifier = p.Extract();
 
 							p.SkipForward(2);
 							m_bPreceededByLineBreak = bOldPreceededByLineBreak;
 							return Token.comment;
 
 						case '/':
+							p.SkipForward(1);
+							p.Mark();
 							p.SkipToEol();
+							m_strIdentifier = p.Extract();
 							return Token.comment;
 
 						case '=':

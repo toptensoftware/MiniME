@@ -97,10 +97,7 @@ namespace MiniME.ast
 		{
 			// Enter a new symbol scope since the exception variable
 			// can be obfuscated
-			dest.Symbols.EnterScope();
-
-			// Obfuscate our local symbols
-			Scope.ObfuscateSymbols(dest);
+			dest.EnterScope(Scope);
 
 			// Catch clause
 			dest.StartLine();
@@ -117,7 +114,7 @@ namespace MiniME.ast
 			Code.Render(dest);
 
 			// Done
-			dest.Symbols.LeaveScope();
+			dest.LeaveScope();
 			return false;
 		}
 

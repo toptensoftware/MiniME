@@ -38,7 +38,6 @@ namespace MiniME
 				currentScope = n.Scope;
 			}
 
-
 			// Define catch clause exception variables in the inner scope
 			if (n.GetType() == typeof(ast.CatchClause))
 			{
@@ -64,6 +63,39 @@ namespace MiniME
 				var p = (ast.Parameter)n;
 				currentScope.Symbols.DefineSymbol(p.Name);
 				return;
+			}
+
+			// Private member declaration?
+			if (n.GetType() == typeof(ast.StatementPrivate))
+			{
+				var p = (ast.StatementPrivate)n;
+				foreach (var s in p.Specs)
+				{
+					currentScope.AddPrivateSpec(s);
+				}
+			}
+
+			// Automatic declaration of private member?
+			// We're looking for an assignment to a matching private spec
+			if (n.GetType() == typeof(ast.StatementExpression))
+			{
+				var exprstmt = (ast.StatementExpression)n;
+				if (exprstmt.Expression.GetType()==typeof(ast.ExprNodeBinary))
+				{
+					var binOp = (ast.ExprNodeBinary)exprstmt.Expression;
+					if (binOp.Op == Token.assign)
+					{
+						// Lhs must be an identifier member
+						if (binOp.Lhs.GetType()==typeof(ast.ExprNodeIdentifier))
+						{
+							var identifier=(ast.ExprNodeIdentifier)binOp.Lhs;
+							if (identifier.Lhs!=null)
+							{
+								currentScope.DefinePrivateMemberIfMatchesAnySpec(identifier);
+							}
+						}
+					}
+				}
 			}
 		}
 
