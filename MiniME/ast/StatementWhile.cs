@@ -9,13 +9,13 @@ namespace MiniME.ast
 	class StatementWhile : Statement
 	{
 		// Constructor
-		public StatementWhile()
+		public StatementWhile(Bookmark bookmark) : base(bookmark)
 		{
 		}
 
 		// Attributes
 		public ExpressionNode Condition;
-		public Statement Code;
+		public CodeBlock Code;
 
 
 		public override void Dump(int indent)

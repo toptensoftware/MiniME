@@ -9,7 +9,7 @@ namespace MiniME.ast
 	class StatementExpression : Statement
 	{
 		// Constructor
-		public StatementExpression(ExpressionNode expression)
+		public StatementExpression(Bookmark bookmark, ExpressionNode expression) : base(bookmark)
 		{
 			Expression = expression;
 		}

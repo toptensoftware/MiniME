@@ -1,0 +1,23 @@
+﻿// private:priv_*
+
+var priv_var;			// Should be obfuscated
+function priv_fn()		// Should be obfuscated
+{
+	pub_fn()
+}	
+
+var pub_var;			// Should not be obfuscated
+function pub_fn()		// Should not be obfuscated
+{
+	priv_fn()
+}	
+
+// public:priv_no_public
+var priv_no_public;		// Should not be obfuscated, overridden by explicit public declaration
+
+// This use of a variable that matches the wildcard, but isn't declared should not be obfuscated
+// (Wildcard accessibility directives require a matching `var` or `function` to become effective)
+alert(priv_not_declared)
+-----
+var b;function a(){pub_fn()}var pub_var;function pub_fn(){a()}var priv_no_public;alert(priv_not_declared)
+-----

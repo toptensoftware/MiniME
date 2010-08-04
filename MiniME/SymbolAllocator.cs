@@ -49,6 +49,10 @@ namespace MiniME
 		// Returns the original symbol if not obfuscated
 		public string GetObfuscatedSymbol(string originalSymbol)
 		{
+			// Anonymous functions have a null name
+			if (originalSymbol == null)
+				return null;
+
 			// Walk the scope stack looking for a matching symbol
 			for (int i=m_ScopeStack.Count-1; i>=0; i--)
 			{

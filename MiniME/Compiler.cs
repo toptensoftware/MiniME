@@ -6,8 +6,20 @@ using System.IO;
 
 /*
  * TODO:
- * - Diagnostic mode to reparse generated content
- * - Preserved comments
+ * - Ability to change directives prefix `-prefix:mm`
+ * - A directive to declare external symbols that shouldn't be re-used	(or just use var keyword?) // mm:var 
+ * - Ability to obfuscate global scope variables
+ * - Ability to remove credit comment `-ivedonated`
+ * - Warning on unreachable code (after return, break or continue)
+ * - Warning on unused locals  (functions and variable - not parameters)
+ * - Automatic member privatisation by simple prefix  // mm:private
+ * - Privatisation of object literals
+ 
+ * - Ability to display a list of non-obfuscated symbols `-whatsleft`
+ * - Ability to show summary of what was done `-whathappened`
+ * - Diagnostic mode to reparse generated content `-diag-selfcheck`
+ * - Better optimizations of constant expressions
+ * - Ability to not obfuscate specific instances of members (use target.['member'])
  */
 
 namespace MiniME
@@ -20,6 +32,7 @@ namespace MiniME
 		{
 			Reset();
 			DetectConsts = true;
+			MaxLineLength = 120;
 		}
 
 		// Attributes
@@ -98,6 +111,13 @@ namespace MiniME
 			set;
 		}
 
+		// When true, don't include the "Minified by MiniME" credit comment
+		public bool NoCredit
+		{
+			get;
+			set;
+		}
+
 		// Reset this compiler
 		public void Reset()
 		{
@@ -161,8 +181,7 @@ namespace MiniME
 		{
 			// Create the global statement block
 			//  turn off braces
-			var statements = new ast.StatementBlock();
-			statements.HasBraces = false;
+			var code = new ast.CodeBlock(null, TriState.No);
 
 			// Process all files
 			foreach (var file in m_files)
@@ -174,7 +193,7 @@ namespace MiniME
 				Parser p = new Parser(t);
 
 				// Parse the file into a namespace
-				p.ParseStatements(statements);
+				p.ParseStatements(code);
 
 				// Ensure everything processed
 				if (t.more)
@@ -185,36 +204,37 @@ namespace MiniME
 
 			// Dump the abstract syntax tree
 			if (DumpAST)
-				statements.Dump(0);
+				code.Dump(0);
 
 			// Create the root symbol scope and build scopes for all 
 			// constained function scopes
-			SymbolScope rootScope = new SymbolScope(null);
-			statements.Visit(new VisitorScopeBuilder(rootScope));
+			SymbolScope rootScope = new SymbolScope(null, Accessibility.Public);
+			code.Visit(new VisitorScopeBuilder(rootScope));
 
 			// Combine consecutive var declarations into a single one
-			statements.Visit(new VisitorCombineVarDecl(rootScope));
+			code.Visit(new VisitorCombineVarDecl(rootScope));
 
 			// Find all variable declarations
-			statements.Visit(new VisitorSymbolDeclaration(rootScope));
+			code.Visit(new VisitorSymbolDeclaration(rootScope));
 
 			// Try to eliminate const declarations
 			if (DetectConsts && !NoObfuscate)
 			{
-				statements.Visit(new VisitorConstDetectorPass1(rootScope));
-				statements.Visit(new VisitorConstDetectorPass2(rootScope));
-				statements.Visit(new VisitorConstDetectorPass3(rootScope));
+				code.Visit(new VisitorConstDetectorPass1(rootScope));
+				code.Visit(new VisitorConstDetectorPass2(rootScope));
+				code.Visit(new VisitorConstDetectorPass3(rootScope));
 			}
 
 			// If obfuscation is allowed, find all in-scope symbols and then
 			// count the frequency of their use.
 			if (!NoObfuscate)
 			{
-				statements.Visit(new VisitorSymbolUsage(rootScope));
+				code.Visit(new VisitorSymbolUsage(rootScope));
 			}
 
-			// Process all symbol scopes, determining the "rank" of each symbol
-			rootScope.PrepareSymbolRanks();
+			// Process all symbol scopes, applying default accessibility levels
+			// and determining the "rank" of each symbol
+			rootScope.Prepare();
 
 			// Dump scopes to stdout
 			if (DumpScopes)
@@ -245,15 +265,20 @@ namespace MiniME
 			RenderContext r = new RenderContext(this, SymbolAllocator, MemberAllocator, rootScope);
 
 			// Create a credit comment
-			int iInsertPos=0;
-			while (iInsertPos<statements.Content.Count && statements.Content[iInsertPos].GetType()==typeof(ast.StatementComment))
-				iInsertPos++;
-			statements.Content.Insert(iInsertPos, new ast.StatementComment("//! Minified by MiniME from toptensoftware.com"));
+			if (!NoCredit)
+			{
+				int iInsertPos = 0;
+				while (iInsertPos < code.Content.Count && code.Content[iInsertPos].GetType() == typeof(ast.StatementComment))
+					iInsertPos++;
+				code.Content.Insert(iInsertPos, new ast.StatementComment(null, "// Minified by MiniME from toptensoftware.com"));
+			}
 
-			statements.Render(r);
+			code.Render(r);
+
+			string strResult = r.GetGeneratedOutput();
 
 			// return the final script
-			return r.GetGeneratedOutput();
+			return strResult;
 		}
 
 		// Compile all loaded files and write to the output file

@@ -9,14 +9,14 @@ namespace MiniME.ast
 	class StatementTryCatchFinally : Statement
 	{
 		// Constructor
-		public StatementTryCatchFinally()
+		public StatementTryCatchFinally(Bookmark bookmark) : base(bookmark)
 		{
 		}
 
 		// Attributes
-		public Statement Code;
+		public CodeBlock Code;
 		public List<CatchClause> CatchClauses = new List<CatchClause>();
-		public Statement FinallyClause;
+		public CodeBlock FinallyClause;
 
 		public override void Dump(int indent)
 		{
@@ -68,14 +68,14 @@ namespace MiniME.ast
 	class CatchClause : Statement
 	{
 		// Constructor
-		public CatchClause()
+		public CatchClause(Bookmark bookmark) : base(bookmark)
 		{
 		}
 
 		// Attributes
 		public string ExceptionVariable;
 		public ExpressionNode Condition;
-		public Statement Code;
+		public CodeBlock Code;
 
 		public override void Dump(int indent)
 		{
@@ -105,7 +105,7 @@ namespace MiniME.ast
 			dest.Append(dest.Symbols.GetObfuscatedSymbol(ExceptionVariable));
 			if (Condition != null)
 			{
-				dest.Append(" if ");
+				dest.Append("if");
 				Condition.Render(dest);
 			}
 			dest.Append(')');

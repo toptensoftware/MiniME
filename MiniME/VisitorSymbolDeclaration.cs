@@ -17,7 +17,7 @@ namespace MiniME
 			currentScope = rootScope;
 		}
 
-		public void OnEnterNode(MiniME.ast.Node n)
+		public bool OnEnterNode(MiniME.ast.Node n)
 		{
 			// Define name of function in outer scope, before descending
 			if (n.GetType() == typeof(ast.ExprNodeFunction))
@@ -28,6 +28,7 @@ namespace MiniME
 				if (!String.IsNullOrEmpty(fn.Name))
 				{
 					currentScope.Symbols.DefineSymbol(fn.Name);
+					currentScope.ProcessAccessibilitySpecs(fn.Name);
 				}
 			}
 
@@ -43,7 +44,7 @@ namespace MiniME
 			{
 				var cc = (ast.CatchClause)n;
 				currentScope.Symbols.DefineSymbol(cc.ExceptionVariable);
-				return;
+				return true;
 			}
 
 			// Define variables in the current scope
@@ -53,8 +54,9 @@ namespace MiniME
 				foreach (var v in vardecl.Variables)
 				{
 					currentScope.Symbols.DefineSymbol(v.Name);
+					currentScope.ProcessAccessibilitySpecs(v.Name);
 				}
-				return;
+				return true;
 			}
 
 			// Define parameters in the current scope
@@ -62,17 +64,8 @@ namespace MiniME
 			{
 				var p = (ast.Parameter)n;
 				currentScope.Symbols.DefineSymbol(p.Name);
-				return;
-			}
-
-			// Private member declaration?
-			if (n.GetType() == typeof(ast.StatementPrivate))
-			{
-				var p = (ast.StatementPrivate)n;
-				foreach (var s in p.Specs)
-				{
-					currentScope.AddPrivateSpec(s);
-				}
+				currentScope.ProcessAccessibilitySpecs(p.Name);
+				return true;
 			}
 
 			// Automatic declaration of private member?
@@ -91,12 +84,15 @@ namespace MiniME
 							var identifier=(ast.ExprNodeIdentifier)binOp.Lhs;
 							if (identifier.Lhs!=null)
 							{
-								currentScope.DefinePrivateMemberIfMatchesAnySpec(identifier);
+								currentScope.ProcessAccessibilitySpecs(identifier);
 							}
 						}
 					}
 				}
 			}
+
+			return true;
+
 		}
 
 		public void OnLeaveNode(MiniME.ast.Node n)

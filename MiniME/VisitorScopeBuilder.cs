@@ -16,12 +16,12 @@ namespace MiniME
 			m_Scopes.Push(rootScope);
 		}
 
-		public void OnEnterNode(MiniME.ast.Node n)
+		public bool OnEnterNode(MiniME.ast.Node n)
 		{
 			// Is it a function?
 			if (n.GetType() == typeof(ast.ExprNodeFunction) || n.GetType() == typeof(ast.CatchClause))
 			{
-				n.Scope = new SymbolScope(n);
+				n.Scope = new SymbolScope(n, Accessibility.Private);
 
 				// Add this function to the parent function's list of nested functions
 				m_Scopes.Peek().InnerScopes.Add(n.Scope);
@@ -30,14 +30,15 @@ namespace MiniME
 				// Enter scope
 				m_Scopes.Push(n.Scope);
 
-				return;
+				return true;
 			}
 
 			// Is it an evil?
 			if (n.GetType() == typeof(ast.StatementWith))
 			{
-				m_Scopes.Peek().ContainsEvil = true;
-				return;
+				Console.WriteLine("{0}: warning: use of `with` statement prevents local symbol obfuscation of all containing scopes", n.Bookmark);
+				m_Scopes.Peek().DefaultAccessibility = Accessibility.Public;
+				return true;
 			}
 
 			// More evil
@@ -46,10 +47,24 @@ namespace MiniME
 				var m = (ast.ExprNodeIdentifier)n;
 				if (m.Lhs == null && m.Name == "eval")
 				{
-					m_Scopes.Peek().ContainsEvil = true;
+					Console.WriteLine("{0}: warning: use of `eval` prevents local symbol obfuscation of all containing scopes", n.Bookmark);
+					m_Scopes.Peek().DefaultAccessibility = Accessibility.Public;
 				}
-				return;
+				return true;
 			}
+
+			// Private member declaration?
+			if (n.GetType() == typeof(ast.StatementAccessibility))
+			{
+				var p = (ast.StatementAccessibility)n;
+				foreach (var s in p.Specs)
+				{
+					m_Scopes.Peek().AddAccessibilitySpec(p.Bookmark, s);
+				}
+			}
+
+			return true;
+
 		}
 
 		public void OnLeaveNode(MiniME.ast.Node n)
@@ -59,14 +74,14 @@ namespace MiniME
 				System.Diagnostics.Debug.Assert(m_Scopes.Peek() == n.Scope);
 
 				// Check if scope contained evil
-				bool bEvil = m_Scopes.Peek().ContainsEvil;
+				Accessibility innerAccessibility = m_Scopes.Peek().DefaultAccessibility;
 
 				// Pop the stack
 				m_Scopes.Pop();
 
 				// Propagate evil
-				if (bEvil)
-					m_Scopes.Peek().ContainsEvil = true;
+				if (innerAccessibility==Accessibility.Public)
+					m_Scopes.Peek().DefaultAccessibility = Accessibility.Public;
 			}
 		}
 

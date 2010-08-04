@@ -9,7 +9,7 @@ namespace MiniME.ast
 	class StatementSwitch : Statement
 	{
 		// Constructor
-		public StatementSwitch(ExpressionNode testExpression)
+		public StatementSwitch(Bookmark bookmark, ExpressionNode testExpression) : base(bookmark)
 		{
 			TestExpression = testExpression;
 		}
@@ -66,7 +66,7 @@ namespace MiniME.ast
 				dest.StartLine();
 				if (c.Value != null)
 				{
-					dest.Append("case ");
+					dest.Append("case");
 					c.Value.Render(dest);
 					dest.Append(":");
 				}
@@ -126,7 +126,7 @@ namespace MiniME.ast
 
 			// Attributes
 			public ExpressionNode Value;
-			public StatementBlock Code;
+			public CodeBlock Code;
 
 			// Add code to this case clause.
 			public void AddCode(ast.Statement statement)
@@ -134,22 +134,10 @@ namespace MiniME.ast
 				// First time?
 				if (Code == null)
 				{
-					Code = new ast.StatementBlock();
-					Code.HasBraces = false;
+					Code = new ast.CodeBlock(statement.Bookmark, TriState.No);
 				}
 
-				// Merge child statement blocks
-				if (statement.GetType()==typeof(ast.StatementBlock))
-				{
-					foreach (var c in ((ast.StatementBlock)statement).Content)
-					{
-						Code.Content.Add(c);
-					}
-				}
-				else
-				{
-					Code.Content.Add(statement);
-				}
+				Code.AddStatement(statement);
 			}
 		}
 	}

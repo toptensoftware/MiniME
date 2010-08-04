@@ -1,12 +1,17 @@
 ﻿function fn(p1, p2)
 {
-	// Nothing here should be obfuscated as it contains evil eval
+	// p1 and p2 should not be obfuscated as it contains evil eval
 	return p1+p2;
-	
-	function zzz()
+
+	// To force obfuscation of local symbols we can explicitly mark
+	// them as private	
+	// private:priv_*
+	var priv_2;
+	function priv_1()
 	{
-		return eval("p1+p2");
+		return eval("p1+p2")+priv_2;
 	}
+	
 }
 function fn2(p3)
 {
@@ -14,5 +19,5 @@ function fn2(p3)
 	return p3;
 }
 -----
-function fn(p1,p2){return p1+p2;function zzz(){return eval("p1+p2")}}function fn2(a){return a}
+function fn(p1,p2){return p1+p2;var b;function a(){return eval("p1+p2")+b}}function fn2(a){return a}
 -----

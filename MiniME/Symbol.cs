@@ -5,6 +5,13 @@ using System.Text;
 
 namespace MiniME
 {
+	public enum Accessibility
+	{
+		Default,
+		Private,
+		Public,
+	}
+
 	// Stores information about a single symbol, including
 	// it's name, scope, frequency and rank
 	class Symbol
@@ -23,6 +30,7 @@ namespace MiniME
 			Scope = scope;
 			Frequency = 0;
 			ConstAllowed = true;
+			Accessibility= Accessibility.Default;
 		}
 
 		// Copy constructor
@@ -32,6 +40,7 @@ namespace MiniME
 			Scope = other.Scope;
 			Frequency = other.Frequency;
 			Rank = other.Rank;
+			Accessibility = other.Accessibility;
 			ConstAllowed = false;
 		}
 
@@ -42,5 +51,6 @@ namespace MiniME
 		public int Rank;
 		public object ConstValue;
 		public bool ConstAllowed;
+		public Accessibility Accessibility;
 	}
 }

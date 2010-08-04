@@ -12,22 +12,18 @@ namespace MiniME
 		internal CompileError(string message, Tokenizer t)
 		{
 			m_strMessage = message;
-			m_strFileName = t.FileName;
-			m_lineNumber = t.currentLine;
-			m_linePosition = t.currentLinePosition;
+			m_Bookmark = t.GetBookmark();
 		}
 
 		// Attributes
 		string m_strMessage;
-		string m_strFileName;
-		int m_lineNumber;
-		int m_linePosition;
+		Bookmark m_Bookmark;
 
 		public override string Message
 		{
 			get
 			{
-				return string.Format("{0}({1},{2}): {3}", m_strFileName, m_lineNumber+1, m_linePosition+1, m_strMessage);
+				return string.Format("{0}: {1}", m_Bookmark.ToString(), m_strMessage);
 			}
 		}
 

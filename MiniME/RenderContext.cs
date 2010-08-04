@@ -16,7 +16,7 @@ namespace MiniME
 			m_Compiler = c;
 			m_SymbolAllocator = SymbolAllocator;
 			m_MemberAllocator = MemberAllocator;
-			m_CurrentScope = rootScope;
+			EnterScope(rootScope);
 		}
 
 		// Get the owning compiler
@@ -83,12 +83,11 @@ namespace MiniME
 		{
 			// Don't insert breaks if we're doing formatted output, or line breaks disabled
 			// by the user
-			if (m_Compiler.Formatted || m_Compiler.MaxLineLength==0)
+			if (m_Compiler.Formatted || m_Compiler.MaxLineLength == 0)
+			{
+				m_iLinePos += iCharacters;
 				return;
-
-			// Are line breaks currently disabled?
-			if (m_iLineBreaksDisabled != 0)
-				return;
+			}
 
 			// If the line is currently empty, we just need to accept the new length
 			// regardless of whether it will fit.
@@ -104,6 +103,7 @@ namespace MiniME
 			{
 				m_iLinePos = iCharacters;
 				sb.Append("\n");
+				m_chLast = '\n';
 			}
 
 		}
@@ -123,11 +123,6 @@ namespace MiniME
 				{
 					// Reset the temp string builder
 					sbTemp.Length = 0;
-
-					// Swap string builders
-					var t = sb;
-					sb = sbTemp;
-					sbTemp = t;
 				}
 			}
 		}
@@ -141,13 +136,8 @@ namespace MiniME
 				System.Diagnostics.Debug.Assert(m_iLineBreaksDisabled >= 0);
 				if (m_iLineBreaksDisabled == 0)
 				{
-					// Swap string builders back again
-					var t = sb;
-					sb = sbTemp;
-					sbTemp = t;
-
 					// Append the temporarily accumulated text
-					Append(sbTemp.ToString());
+					AppendInternal(sbTemp.ToString());
 				}
 			}
 		}
@@ -167,16 +157,35 @@ namespace MiniME
 			m_chNeedSpaceIf = chNext;
 		}
 
+		public void AppendInternal(string val)
+		{
+			if (m_iLineBreaksDisabled != 0)
+			{
+				sbTemp.Append(val);
+			}
+			else
+			{
+				TrackLinePosition(val.Length);
+				sb.Append(val);
+			}
+
+			// Store the last character
+			m_chLast = val[val.Length - 1];
+		}
+
 		// Append a string to the output buffer
 		public void Append(string val)
 		{
+			if (string.IsNullOrEmpty(val))
+				return;
+
 			// Check if we need to insert a space for NeedSpaceIf()
 			if (m_chNeedSpaceIf != '\0')
 			{
 				if (val.Length > 0 && val[0] == m_chNeedSpaceIf)
 				{
 					m_chNeedSpaceIf = '\0';
-					Append(" ");
+					AppendInternal(" ");
 				}
 				else
 				{
@@ -184,9 +193,14 @@ namespace MiniME
 				}
 			}
 
+			// Do we need a space?
+			if (Tokenizer.IsIdentifierChar(m_chLast) && Tokenizer.IsIdentifierChar(val[0]))
+			{
+				AppendInternal(" ");
+			}
+
 			// Track the line position and append the text
-			TrackLinePosition(val.Length);
-			sb.Append(val);
+			AppendInternal(val);
 
 			// Auto enable line breaks?
 			if (m_bEnableLineBreaksAfterNextWrite)
@@ -232,6 +246,7 @@ namespace MiniME
 			{
 				sb.Append("\n");
 				sb.Append(new String(' ', m_iIndent * 4));
+				m_chLast = '\n';
 			}
 		}
 
@@ -241,10 +256,12 @@ namespace MiniME
 			{
 				sb.Append("\n");
 				m_iLinePos = 0;
+				m_chLast = '\n';
 			}
 		}
 
 		SymbolScope m_CurrentScope;
+		char m_chLast = '\0';
 		int m_iLinePos = 0;
 		int m_iIndent = 0;
 		int m_iLineBreaksDisabled = 0;

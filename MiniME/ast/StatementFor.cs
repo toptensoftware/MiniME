@@ -9,7 +9,7 @@ namespace MiniME.ast
 	class StatementFor : Statement
 	{
 		// Constructor
-		public StatementFor()
+		public StatementFor(Bookmark bookmark) : base(bookmark)
 		{
 		}
 
@@ -17,7 +17,7 @@ namespace MiniME.ast
 		public Statement Initialize;
 		public ExpressionNode Condition;
 		public ExpressionNode Increment;
-		public Statement Code;
+		public CodeBlock Code;
 
 		public override void Dump(int indent)
 		{

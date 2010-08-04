@@ -43,6 +43,8 @@ namespace MiniMETestCases
 			c.Formatted = t.Input.IndexOf("[Formatted]") >= 0;
 			c.NoObfuscate = t.Input.IndexOf("[NoObfuscate]") >= 0;
 			c.SymbolInfo = t.Input.IndexOf("[SymbolInfo]") >= 0;
+			c.NoCredit = true;
+			c.MaxLineLength = 0;
 			c.AddScript(resourceName, t.Input);
 
 			// Render it

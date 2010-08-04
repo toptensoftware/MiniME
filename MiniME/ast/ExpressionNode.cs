@@ -31,12 +31,19 @@ namespace MiniME.ast
 		add,
 		multiply,
 		negation,
+		function,
 		terminal,
 	}
 
 	// Base class for all expression nodes
 	abstract class ExpressionNode : Node
 	{
+		// Constructor
+		public ExpressionNode(Bookmark bookmark) : base(bookmark)
+		{
+
+		}
+
 		// Must be overridden in all node types to return the precedence
 		public abstract OperatorPrecedence GetPrecedence();
 
@@ -66,14 +73,18 @@ namespace MiniME.ast
 	// Represents a root level symbol, or a member on the rhs of a member dot.
 	class ExprNodeIdentifier : ExpressionNode
 	{
+		public ExprNodeIdentifier(Bookmark bookmark) : base(bookmark)
+		{
+
+		}
 		// Constructor
-		public ExprNodeIdentifier(string name)
+		public ExprNodeIdentifier(Bookmark bookmark, string name) : base(bookmark)
 		{
 			Name = name;
 		}
 
 		// Constructor
-		public ExprNodeIdentifier(string name, ExpressionNode lhs)
+		public ExprNodeIdentifier(Bookmark bookmark, string name, ExpressionNode lhs) : base(bookmark)
 		{
 			Name = name;
 			Lhs = lhs;
@@ -136,7 +147,7 @@ namespace MiniME.ast
 	class ExprNodeCall : ExpressionNode
 	{
 		// Constructor
-		public ExprNodeCall(ExpressionNode lhs)
+		public ExprNodeCall(Bookmark bookmark, ExpressionNode lhs) : base(bookmark)
 		{
 			Lhs = lhs;
 		}
@@ -189,7 +200,7 @@ namespace MiniME.ast
 	class ExprNodeNew : ExpressionNode
 	{
 		// Constructor
-		public ExprNodeNew(ExpressionNode objectType)
+		public ExprNodeNew(Bookmark bookmark, ExpressionNode objectType) : base(bookmark)
 		{
 			ObjectType= objectType;
 		}
@@ -216,7 +227,7 @@ namespace MiniME.ast
 
 		public override bool Render(RenderContext dest)
 		{
-			dest.Append("new ");
+			dest.Append("new");
 			WrapAndRender(dest, ObjectType);
 			dest.Append("(");
 			bool first = true;
@@ -242,7 +253,7 @@ namespace MiniME.ast
 	class ExprNodeIndexer : ExpressionNode
 	{
 		// Constructor
-		public ExprNodeIndexer(ExpressionNode lhs, ExpressionNode index)
+		public ExprNodeIndexer(Bookmark bookmark, ExpressionNode lhs, ExpressionNode index) : base(bookmark)
 		{
 			Lhs = lhs;
 			Index = index; 
@@ -265,12 +276,38 @@ namespace MiniME.ast
 			return OperatorPrecedence.terminal;
 		}
 
+		string GetIdentifier()
+		{
+			if (Index.GetType() != typeof(ast.ExprNodeLiteral))
+				return null;
+
+			object literal = ((ast.ExprNodeLiteral)Index).Value;
+			if (literal.GetType() != typeof(string))
+				return null;
+
+			string identifier=(string)literal;
+			if (!Tokenizer.IsIdentifier(identifier) && !Tokenizer.IsKeyword(identifier))
+				return null;
+
+			return identifier;
+		}
+
 		public override bool Render(RenderContext dest)
 		{
 			WrapAndRender(dest, Lhs);
-			dest.Append("[");
-			Index.Render(dest);
-			dest.Append("]");
+
+			string str = GetIdentifier();
+			if (str != null)
+			{
+				dest.Append('.');
+				dest.Append(str);
+			}
+			else
+			{
+				dest.Append("[");
+				Index.Render(dest);
+				dest.Append("]");
+			}
 			return true;
 		}
 
@@ -286,7 +323,7 @@ namespace MiniME.ast
 	class ExprNodeLiteral : ExpressionNode
 	{
 		// Constructor
-		public ExprNodeLiteral(object value)
+		public ExprNodeLiteral(Bookmark bookmark, object value) : base(bookmark)
 		{
 			Value = value;
 		}
@@ -318,7 +355,7 @@ namespace MiniME.ast
 				string str = (string)Value;
 
 				// Don't do line breaks
-				dest.DisableLineBreaks();
+				var buf = new StringBuilder();
 
 				// Count quotes and double quotes and use the less frequent as the
 				// string delimiter
@@ -334,7 +371,7 @@ namespace MiniME.ast
 				char chDelim = dquotes > quotes ? '\'' : '\"';
 
 				// Opening quote
-				dest.Append(chDelim);
+				buf.Append(chDelim);
 
 				// Encode the string
 				foreach (char ch in str)
@@ -344,70 +381,70 @@ namespace MiniME.ast
 						switch (ch)
 						{
 							case '\b':
-								dest.Append("\\b");
+								buf.Append("\\b");
 								break;
 
 							case '\f':
-								dest.Append("\\f");
+								buf.Append("\\f");
 								break;
 
 							case '\n':
-								dest.Append("\\n");
+								buf.Append("\\n");
 								break;
 
 							case '\r':
-								dest.Append("\\r");
+								buf.Append("\\r");
 								break;
 
 							case '\t':
-								dest.Append("\\t");
+								buf.Append("\\t");
 								break;
 
 							case '\'':
 								if (chDelim == '\'')
-									dest.Append("\\\'");
+									buf.Append("\\\'");
 								else
-									dest.Append('\'');
+									buf.Append('\'');
 								break;
 
 							case '\"':
 								if (chDelim == '\"')
-									dest.Append("\\\"");
+									buf.Append("\\\"");
 								else
-									dest.Append('\"');
+									buf.Append('\"');
 								break;
 
 							case '\\':
-								dest.Append("\\\\");
+								buf.Append("\\\\");
 								break;
 
 							default:
 								if (char.IsControl(ch))
 								{
-									dest.AppendFormat("\\x{0:X2}", (int)ch);
+									buf.AppendFormat("\\x{0:X2}", (int)ch);
 								}
 								else
 								{
-									dest.Append(ch);
+									buf.Append(ch);
 								}
 								break;
 						}
 					}
 					else if (ch <= 255)
 					{
-						dest.AppendFormat("\\x{0:X2}", (int)ch);
+						buf.AppendFormat("\\x{0:X2}", (int)ch);
 					}
 					else
 					{
-						dest.AppendFormat("\\u{0:X4}", (int)ch);
+						buf.AppendFormat("\\u{0:X4}", (int)ch);
 					}
 				}
 
 				// Closing quote
-				dest.Append(chDelim);
+				buf.Append(chDelim);
 
 				// Done
-				dest.EnableLineBreaks();
+				dest.Append(buf.ToString());
 				return;
 			}
 
@@ -463,7 +500,7 @@ namespace MiniME.ast
 	class ExprNodeRegEx : ExpressionNode
 	{
 		// Constructor
-		public ExprNodeRegEx(string re)
+		public ExprNodeRegEx(Bookmark bookmark, string re) : base(bookmark)
 		{
 			RegEx = re;
 		}
@@ -502,7 +539,7 @@ namespace MiniME.ast
 	class ExprNodeBinary : ExpressionNode
 	{
 		// Constructor
-		public ExprNodeBinary(ExpressionNode lhs, ExpressionNode rhs, Token op)
+		public ExprNodeBinary(Bookmark bookmark, ExpressionNode lhs, ExpressionNode rhs, Token op) : base(bookmark)
 		{
 			Lhs = lhs;
 			Rhs = rhs;
@@ -560,14 +597,16 @@ namespace MiniME.ast
 
 				case Token.compareEQ:
 				case Token.compareNE:
+				case Token.compareEQStrict:
+				case Token.compareNEStrict:
 					return OperatorPrecedence.equality;
 
 				case Token.compareLT:
 				case Token.compareLE:
 				case Token.compareGT:
 				case Token.compareGE:
-				case Token.compareEQStrict:
-				case Token.compareNEStrict:
+				case Token.kw_in:
+				case Token.kw_instanceof:
 					return OperatorPrecedence.relational;
 
 				case Token.bitwiseXor:
@@ -649,6 +688,11 @@ namespace MiniME.ast
 				case Token.logicalNot:
 				case Token.logicalOr:
 				case Token.logicalAnd:
+					dest.Append(Tokenizer.FormatToken(Op));
+					break;
+
+				case Token.kw_in:
+				case Token.kw_instanceof:
 					dest.Append(Tokenizer.FormatToken(Op));
 					break;
 
@@ -782,7 +826,7 @@ namespace MiniME.ast
 	class ExprNodeUnary : ExpressionNode
 	{
 		// Constrctor
-		public ExprNodeUnary(ExpressionNode rhs, Token op)
+		public ExprNodeUnary(Bookmark bookmark, ExpressionNode rhs, Token op) : base(bookmark)
 		{
 			Rhs = rhs;
 			Op = op;
@@ -833,7 +877,6 @@ namespace MiniME.ast
 				case Token.kw_void:
 				case Token.kw_delete:
 					dest.Append(Op.ToString().Substring(3));
-					dest.Append(' ');
 					break;
 
 				case Token.add:
@@ -926,7 +969,7 @@ namespace MiniME.ast
 	class ExprNodePostfix : ExpressionNode
 	{
 		// Constructor
-		public ExprNodePostfix(ExpressionNode lhs, Token op)
+		public ExprNodePostfix(Bookmark bookmark, ExpressionNode lhs, Token op) : base(bookmark)
 		{
 			Lhs = lhs;
 			Op = op;
@@ -983,7 +1026,7 @@ namespace MiniME.ast
 	class ExprNodeArrayLiteral : ExpressionNode
 	{
 		// Constructor
-		public ExprNodeArrayLiteral()
+		public ExprNodeArrayLiteral(Bookmark bookmark) : base(bookmark)
 		{
 
 		}
@@ -1017,8 +1060,13 @@ namespace MiniME.ast
 		public override bool Render(RenderContext dest)
 		{
 			dest.Append('[');
+			bool bFirst = true;
 			foreach (var e in Values)
 			{
+				if (!bFirst)
+					dest.Append(",");
+				else
+					bFirst = false;
 				WrapAndRender(dest, e);
 			}
 			dest.Append(']');
@@ -1050,7 +1098,7 @@ namespace MiniME.ast
 	class ExprNodeObjectLiteral : ExpressionNode
 	{
 		// Constructor
-		public ExprNodeObjectLiteral()
+		public ExprNodeObjectLiteral(Bookmark bookmark) : base(bookmark)
 		{
 
 		}
@@ -1080,15 +1128,24 @@ namespace MiniME.ast
 
 		public override bool Render(RenderContext dest)
 		{
+			if (Values.Count == 0)
+			{
+				dest.Append("{}");
+				return true;
+			}
+
 			dest.Append('{');
+			dest.Indent();
 			for (var i = 0; i < Values.Count; i++)
 			{
 				if (i > 0)
 					dest.Append(',');
 
+				dest.StartLine();
+
 				// Key - if key is a valid identifier, don't quote it
 				var kp = Values[i];
-				if (kp.Key.GetType() == typeof(String) && Tokenizer.IsIdentifier((string)kp.Key))
+				if (kp.Key.GetType() == typeof(String) && Tokenizer.IsIdentifier((string)kp.Key) && !Tokenizer.IsKeyword((string)kp.Key))
 				{
 					dest.Append((string)kp.Key);
 				}
@@ -1101,6 +1158,8 @@ namespace MiniME.ast
 				dest.Append(':');
 				kp.Value.Render(dest);
 			}
+			dest.Unindent();
+			dest.StartLine();
 			dest.Append('}');
 			return true;
 		}
@@ -1119,7 +1178,7 @@ namespace MiniME.ast
 	class ExprNodeConditional : ExpressionNode
 	{
 		// Constructor
-		public ExprNodeConditional(ExpressionNode condition)
+		public ExprNodeConditional(Bookmark bookmark, ExpressionNode condition) : base(bookmark)
 		{
 			Condition = condition;
 		}
@@ -1167,7 +1226,7 @@ namespace MiniME.ast
 	class ExprNodeComposite : ExpressionNode
 	{
 		// Constrictor
-		public ExprNodeComposite()
+		public ExprNodeComposite(Bookmark bookmark) : base(bookmark)
 		{
 		}
 
@@ -1215,14 +1274,14 @@ namespace MiniME.ast
 	class ExprNodeFunction : ExpressionNode
 	{
 		// Constructor
-		public ExprNodeFunction()
+		public ExprNodeFunction(Bookmark bookmark) : base(bookmark)
 		{
 		}
 
 		// Attributes
 		public string Name;
 		public List<Parameter> Parameters = new List<Parameter>();
-		public Statement Code;
+		public CodeBlock Code;
 
 
 		public override string ToString()
@@ -1246,27 +1305,25 @@ namespace MiniME.ast
 
 		public override OperatorPrecedence GetPrecedence()
 		{
-			return OperatorPrecedence.terminal;
+			return OperatorPrecedence.function;
 		}
 
 		public override bool Render(RenderContext dest)
 		{
+			// Get obfuscated name before we enter our own scope
+			string strObfuscatedName = dest.Symbols.GetObfuscatedSymbol(Name);
+
 			// Enter a new symbol scope and tell symbol allocator
 			// about our local symbols
 			dest.EnterScope(Scope);
 
 			// `function`
-			if (dest.Compiler.Formatted)
-			{
-				dest.StartLine();
-			}
 			dest.Append("function");
 
 			// Function name not present for anonymous functions
 			if (Name != null)
 			{
-				dest.Append(' ');
-				dest.Append(dest.Symbols.GetObfuscatedSymbol(Name));
+				dest.Append(strObfuscatedName);
 			}
 
 			// Parameters

@@ -1,0 +1,10 @@
+﻿x=new Date;
+x=new Date();
+x=(new Date).toString();
+function x()
+{
+	return new Date;
+}
+-----
+x=new Date();x=new Date();x=new Date().toString();function x(){return new Date()}
+-----

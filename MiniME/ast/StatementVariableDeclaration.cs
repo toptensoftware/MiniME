@@ -9,7 +9,7 @@ namespace MiniME.ast
 	class StatementVariableDeclaration : Statement
 	{
 		// Constructor
-		public StatementVariableDeclaration()
+		public StatementVariableDeclaration(Bookmark bookmark) : base(bookmark)
 		{
 		}
 
@@ -59,7 +59,7 @@ namespace MiniME.ast
 				return false;
 
 			// Statement
-			dest.Append("var ");
+			dest.Append("var");
 
 			// Comma separated variables
 			bool bFirst = true;

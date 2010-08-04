@@ -1,0 +1,8 @@
+﻿function fn(p1, p2) 
+{
+	// public:p2
+	return p1+p2;
+}
+-----
+function fn(a,p2){return a+p2}
+-----

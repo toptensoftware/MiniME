@@ -9,7 +9,7 @@ namespace MiniME.ast
 	class Parameter : Node
 	{
 		// Constructor
-		public Parameter(string name)
+		public Parameter(Bookmark bookmark, string name) : base(bookmark)
 		{
 			Name = name;
 		}

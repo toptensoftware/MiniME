@@ -9,7 +9,7 @@ namespace MiniME.ast
 	class StatementComment : Statement
 	{
 		// Constructor
-		public StatementComment(string Comment)
+		public StatementComment(Bookmark bookmark, string Comment) : base(bookmark)
 		{
 			this.Comment = Comment;
 		}
@@ -22,7 +22,7 @@ namespace MiniME.ast
 		public override bool Render(RenderContext dest)
 		{
 			dest.ForceLineBreak();
-			dest.Append(Comment.Substring(0,2) + Comment.Substring(3));
+			dest.Append(Comment);
 			dest.ForceLineBreak();
 			return false;
 		}

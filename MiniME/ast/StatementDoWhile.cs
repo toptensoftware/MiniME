@@ -9,13 +9,13 @@ namespace MiniME.ast
 	class StatementDoWhile : Statement
 	{
 		// Constructor
-		public StatementDoWhile()
+		public StatementDoWhile(Bookmark bookmark) : base(bookmark)
 		{
 		}
 
 		// Attributes
 		public ExpressionNode Condition;
-		public Statement Code;
+		public CodeBlock Code;
 
 		public override void Dump(int indent)
 		{
@@ -30,8 +30,6 @@ namespace MiniME.ast
 			// Render the statement, need special handling to insert
 			// a space if don't have a braced statement block
 			dest.Append("do");
-			if (Code.GetType() != typeof(StatementBlock))
-				dest.Append(' ');
 			if (Code.RenderIndented(dest))
 				dest.Append(';');
 			dest.StartLine();

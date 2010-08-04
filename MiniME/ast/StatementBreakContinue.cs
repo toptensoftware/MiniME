@@ -9,7 +9,7 @@ namespace MiniME.ast
 	class StatementBreakContinue : Statement
 	{
 		// Constructor
-		public StatementBreakContinue(Token op, string label)
+		public StatementBreakContinue(Bookmark bookmark, Token op, string label) : base(bookmark)
 		{
 			Op = op;
 			Label = label;
@@ -34,7 +34,6 @@ namespace MiniME.ast
 			dest.Append(Op.ToString().Substring(3));
 			if (Label != null)
 			{
-				dest.Append(' ');
 				dest.Append(Label);
 			}
 			dest.EnableLineBreaks();

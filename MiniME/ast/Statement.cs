@@ -9,5 +9,9 @@ namespace MiniME.ast
 	// (wow this does alot!)
 	abstract class Statement : Node
 	{
+		public Statement(Bookmark bookmark)
+			: base(bookmark)
+		{
+		}
 	}
 }

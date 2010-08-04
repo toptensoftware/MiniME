@@ -15,7 +15,7 @@ namespace MiniME
 			currentScope = rootScope;
 		}
 
-		public void OnEnterNode(MiniME.ast.Node n)
+		public bool OnEnterNode(MiniME.ast.Node n)
 		{
 			// Define name of function in outer scope, before descending
 			if (n.GetType() == typeof(ast.ExprNodeFunction))
@@ -55,7 +55,7 @@ namespace MiniME
 			{
 				var cc = (ast.CatchClause)n;
 				currentScope.Symbols.UseSymbol(cc.ExceptionVariable);
-				return;
+				return true;
 			}
 
 			// Use variables in the current scope
@@ -66,7 +66,7 @@ namespace MiniME
 				{
 					currentScope.Symbols.UseSymbol(v.Name);
 				}
-				return;
+				return true;
 			}
 
 			// Use parameters in the current scope
@@ -74,8 +74,31 @@ namespace MiniME
 			{
 				var p = (ast.Parameter)n;
 				currentScope.Symbols.UseSymbol(p.Name);
-				return;
+				return true;
 			}
+
+			// Look for assignment to undefined variable
+			if (n.GetType() == typeof(ast.ExprNodeBinary))
+			{
+				var binOp = (ast.ExprNodeBinary)n;
+				if (binOp.Op == Token.assign)
+				{
+					if (binOp.Lhs.GetType() == typeof(ast.ExprNodeIdentifier))
+					{
+						var identifier = (ast.ExprNodeIdentifier)binOp.Lhs;
+						if (identifier.Lhs == null)
+						{
+							// Assignment to an identifier
+							if (currentScope.FindSymbol(identifier.Name) == null)
+							{
+								Console.WriteLine("{0}: warning: assignment to undeclared variable `{1}` introduces new global variable", identifier.Bookmark, identifier.Name);
+							}
+						}
+					}
+				}
+			}
+
+			return true;
 
 		}
 

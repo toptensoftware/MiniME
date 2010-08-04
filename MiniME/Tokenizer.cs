@@ -5,6 +5,20 @@ using System.Text;
 
 namespace MiniME
 {
+	class Bookmark
+	{
+		public Tokenizer tokenizer;
+		public int position;
+		public Token token;
+
+		public override string ToString()
+		{
+			int offset;
+			int line = tokenizer.LineNumberFromOffset(position, out offset);
+			return String.Format("{0}({1},{2})", tokenizer.FileName, line + 1, offset + 1);
+		}
+	}
+
 	enum Token
 	{
 		eof,			// End of file
@@ -13,6 +27,7 @@ namespace MiniME
 		identifier,
 
 		directive_private,			// Comment of form /* private */
+		directive_public,			// Comment of form /* public */
 		directive_comment,			// Comment of form //! or /*!
 
 		// Operators
@@ -113,14 +128,17 @@ namespace MiniME
 	//  - uses a StringScanner for maintaining position in input
 	class Tokenizer
 	{
+		static Tokenizer()
+		{
+			// Build a map of keyword identifiers to token enums
+			BuildKeywordMap();
+		}
+
 		// Constructor
 		public Tokenizer(string str, string strFileName)
 		{
 			// Store the filename
 			m_strFileName = strFileName;
-
-			// Build a map of keyword identifiers to token enums
-			BuildKeywordMap();
 
 			// Prep the string scanner
 			p = new StringScanner();
@@ -131,6 +149,24 @@ namespace MiniME
 			m_bPreceededByLineBreak = false;
 
 			// Queue up the first token
+			Next();
+		}
+
+		public Bookmark GetBookmark()
+		{
+			var b = new Bookmark();
+			b.tokenizer = this;
+			b.position = this.m_tokenStart;
+			b.token = this.token;
+			return b;
+		}
+
+		// Rewind the tokenizer to a previously marked position
+		public void Rewind(Bookmark bmk)
+		{
+			System.Diagnostics.Debug.Assert(bmk.tokenizer == this);
+
+			p.position = bmk.position;
 			Next();
 		}
 
@@ -265,6 +301,11 @@ namespace MiniME
 				p.LineNumberFromOffset(m_tokenStart, out chpos);
 				return chpos;
 			}
+		}
+
+		public int LineNumberFromOffset(int position, out int lineoffset)
+		{
+			return p.LineNumberFromOffset(position, out lineoffset);
 		}
 
 		// Get the raw text from which the current token was parsed
@@ -432,6 +473,12 @@ namespace MiniME
 						m_strIdentifier = str.Substring(8);
 						break;
 					}
+					if (str.StartsWith("public:"))
+					{
+						m_currentToken = Token.directive_public;
+						m_strIdentifier = str.Substring(7);
+						break;
+					}
 				}
 
 			} while (m_currentToken == Token.comment);
@@ -493,7 +540,7 @@ namespace MiniME
 					switch (p.current)
 					{
 						case '*':
-							p.SkipForward(2);
+							p.SkipForward(1);
 							p.Mark();
 							if (!p.Find("*/"))
 							{
@@ -915,8 +962,8 @@ namespace MiniME
 		}
 
 		// Build a map of keyword to token
-		public Dictionary<string, Token> m_mapKeywords;
-		void BuildKeywordMap()
+		public static Dictionary<string, Token> m_mapKeywords;
+		static void BuildKeywordMap()
 		{
 			m_mapKeywords=new Dictionary<string,Token>();
 			var names=Enum.GetNames(typeof(Token));
@@ -949,6 +996,11 @@ namespace MiniME
 				return t;
 			else
 				return Token.identifier;
+		}
+
+		public static bool IsKeyword(string str)
+		{
+			return str=="true" || str=="false" || m_mapKeywords.ContainsKey(str);
 		}
 
 		// Parse a number - either double, hex integer, decimal interer or octal integer
@@ -1077,19 +1129,6 @@ namespace MiniME
 			return -1;
 		}
 
-		// Mark the current input position
-		public int Mark()
-		{
-			return m_tokenStart;
-		}
-
-		// Rewind the tokenizer to a previously marked position
-		public void Rewind(int mark)
-		{
-			// Rewind and reparse
-			p.position = mark;
-			Next();
-		}
 
 		String m_strFileName;
 		StringScanner p;

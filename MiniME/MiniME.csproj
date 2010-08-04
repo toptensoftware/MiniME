@@ -47,8 +47,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ast\StatementBlock.cs" />
     <Compile Include="ast\StatementComment.cs" />
-    <Compile Include="ast\StatementPrivate.cs" />
+    <Compile Include="ast\StatementAccessibility.cs" />
     <Compile Include="ast\StatementTryCatchFinally.cs" />
     <Compile Include="ast\StatementWith.cs" />
     <Compile Include="ast\StatementForIn.cs" />
@@ -66,7 +67,7 @@
     <Compile Include="ast\Node.cs" />
     <Compile Include="ast\Parameter.cs" />
     <Compile Include="ast\Statement.cs" />
-    <Compile Include="ast\StatementBlock.cs" />
+    <Compile Include="ast\CodeBlock.cs" />
     <Compile Include="TextFileUtils.cs" />
     <Compile Include="VisitorCombineVarDecls.cs" />
     <Compile Include="VisitorScopeBuilder.cs" />

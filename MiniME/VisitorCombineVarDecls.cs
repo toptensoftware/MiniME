@@ -13,13 +13,15 @@ namespace MiniME
 		{
 		}
 
-		public void OnEnterNode(MiniME.ast.Node n)
+		public bool OnEnterNode(MiniME.ast.Node n)
 		{
-			if (n.GetType() == typeof(ast.StatementBlock))
+			if (n.GetType() == typeof(ast.CodeBlock))
 			{
-				var block = (ast.StatementBlock)n;
+				var block = (ast.CodeBlock)n;
 				block.CombineVarDecls();
 			}
+
+			return true;
 		}
 
 		public void OnLeaveNode(MiniME.ast.Node n)

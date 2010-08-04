@@ -1,0 +1,23 @@
+﻿//! This should be kept
+
+var x=23;
+
+/*!
+
+So Should This
+
+*/
+
+var y=27;
+
+// But not this
+-----
+// This should be kept
+var x=23
+/*
+
+So Should This
+
+*/
+var y=27
+-----

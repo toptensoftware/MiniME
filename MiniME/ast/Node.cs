@@ -9,7 +9,7 @@ namespace MiniME.ast
 	// syntax tree as a visitor
 	interface IVisitor
 	{
-		void OnEnterNode(Node n);
+		bool OnEnterNode(Node n);
 		void OnLeaveNode(Node n);
 
 	}
@@ -17,35 +17,33 @@ namespace MiniME.ast
 	// Base class for all nodes in the AST
 	abstract class Node
 	{
+		public Node(Bookmark bookmark)
+		{
+			m_Bookmark = bookmark;
+		}
+
+		public Bookmark Bookmark
+		{
+			get
+			{
+				return m_Bookmark;
+			}
+		}
+
 		// Override to dump this node
 		public abstract void Dump(int indent);
 
 		// Override to render this node
 		public abstract bool Render(RenderContext dest);
 
-		// Render this node in an indented block (if in formatted mode)
-		public bool RenderIndented(RenderContext dest)
-		{
-			if (dest.Compiler.Formatted && GetType()!=typeof(StatementBlock))
-			{
-				dest.Indent();
-				dest.StartLine();
-				bool b = Render(dest);
-				dest.Unindent();
-				return b;
-			}
-			else
-			{
-				return Render(dest);
-			}
-		}
-
 		// Call visitor for this node and all child nodes
 		public void Visit(IVisitor visitor)
 		{
-			visitor.OnEnterNode(this);
-			OnVisitChildNodes(visitor);
-			visitor.OnLeaveNode(this);
+			if (visitor.OnEnterNode(this))
+			{
+				OnVisitChildNodes(visitor);
+				visitor.OnLeaveNode(this);
+			}
 		}
 
 		// Must be override to visit any child nodes
@@ -69,7 +67,8 @@ namespace MiniME.ast
 
 		// Scope that this node introduces.
 		// Only used by function and CatchClause nodes
-		public SymbolScope Scope;		
+		public SymbolScope Scope;
+		public Bookmark m_Bookmark;
 	}
 
 }

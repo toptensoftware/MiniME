@@ -1,0 +1,12 @@
+﻿// private:x.
+
+var x={};
+x.priv_var=23;			// Should be obfuscated
+x.priv_fn=function(){};	// Should be obfuscated
+var y={};
+y.pub_var=23;
+y.pub_fn=function(){};
+
+-----
+var x={};x.b=23;x.a=function(){};var y={};y.pub_var=23;y.pub_fn=function(){}
+-----

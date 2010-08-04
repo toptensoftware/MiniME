@@ -1,0 +1,28 @@
+﻿function fn(p1, p2, q1, q2) 
+{
+	// This directive says not to obfuscate anything starting with p
+	// public:p*
+	
+	return p1+p2+q1+q1+q2+q2+p3()+p4;
+	
+	// These inner parameters should still be obfuscated and not affected
+	// by outer wildcard
+	function zz(p1,q1)
+	{
+		return p1+q1;
+	}
+	
+	// This shouldn't be obfuscated
+	function p3()
+	{
+	}
+	
+	// This shouldn't be obfuscated
+	var p4;
+	
+	// Frequency of non-obfuscated symbol shouldn't affect allocation
+	return p4+p4+p4+p4+p4+p4+p4;
+}
+-----
+function fn(p1,p2,a,b){return p1+p2+a+a+b+b+p3()+p4;function e(c,d){return c+d}function p3(){}var p4;return p4+p4+p4+p4+p4+p4+p4}
+-----

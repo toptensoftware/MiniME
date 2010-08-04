@@ -156,6 +156,49 @@
   <ItemGroup>
     <EmbeddedResource Include="TestScripts\Semicolons.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\ObfuscateOptInGlobalsExplicit.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\ObfuscateOptInGlobalsWildcard.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\ObfuscateOptOutLocalsExplicit.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\ObfuscateOptOutLocalsWildcard.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\ObfuscateOptInMemberExplicit.txt" />
+    <EmbeddedResource Include="TestScripts\ObfuscateOptInMemberWildcard.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\ObfuscateOptInTargetExplicit.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\ObfuscateOptInTargetWildcard.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\PreservedComments.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\OperatorNew.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\FunctionInvokeAnonymous.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\LiteralObjects.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\LiteralArray.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\StatementSwitchFormatted.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\FunctionInvokeAnonymous2.txt" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -1,0 +1,13 @@
+﻿//
+var x=
+{
+	"Apple":"val",			// Quotes can be removed
+	"Apple2$":"val",		// Quotes can be removed
+	"Two Words":"val",		// Quotes can't be removed
+	"123":"val",			// Quotes can't be removed
+	"~~~":"val",			// Quotes can't be removed
+	"for":"val",			// Quotes can't be removed (it's a keyword)
+}
+-----
+var x={Apple:"val",Apple2$:"val","Two Words":"val","123":"val","~~~":"val","for":"val"}
+-----

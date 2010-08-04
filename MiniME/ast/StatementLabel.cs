@@ -9,7 +9,7 @@ namespace MiniME.ast
 	class StatementLabel : Statement
 	{
 		// Constructor
-		public StatementLabel(string label)
+		public StatementLabel(Bookmark bookmark, string label) : base(bookmark)
 		{
 			Label = label;
 		}

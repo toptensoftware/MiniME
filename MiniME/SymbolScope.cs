@@ -11,9 +11,17 @@ namespace MiniME
 	class SymbolScope
 	{
 		// Constructor
-		public SymbolScope(ast.Node node)
+		public SymbolScope(ast.Node node, Accessibility defaultAccessibility)
 		{
 			Node = node;
+			DefaultAccessibility = defaultAccessibility;
+		}
+
+		// Get/set default accessibility
+		public Accessibility DefaultAccessibility
+		{
+			get;
+			set;
 		}
 
 		// Prepare symbol ranks of all local symbols
@@ -21,11 +29,22 @@ namespace MiniME
 		//    of this scope with that of the inner scope
 		//  - Update the rank of each symbol
 		//  - Repeat for each inner scope
-		public void PrepareSymbolRanks()
+		public void Prepare()
 		{
-			// Quit if there's no point
-			if (ContainsEvil)
-				return;
+			// Recurse through all scopes
+			foreach (var i in InnerScopes)
+			{
+				i.Prepare();
+			}
+
+			// Apply default accessibility to own local symbols
+			foreach (var i in Symbols)
+			{
+				if (i.Value.Accessibility == Accessibility.Default)
+				{
+					i.Value.Accessibility = DefaultAccessibility;
+				}
+			}
 
 			// Calculate base rank based on frequency of our own
 			// local symbols
@@ -52,11 +71,6 @@ namespace MiniME
 				Members.UpdateRanks(merged.Sort());
 			}
 
-			// Recurse through all scopes
-			foreach (var i in InnerScopes)
-			{
-				i.PrepareSymbolRanks();
-			}
 		}
 
 		// Claim all local symbols in this scope, preventing use
@@ -64,47 +78,12 @@ namespace MiniME
 		// reserve global symbols
 		public void ClaimSymbols(SymbolAllocator symbols)
 		{
-			foreach (var i in Symbols.Sort())
+			foreach (var i in Symbols)
 			{
-				if (i.Scope == Symbol.ScopeType.local)
+				var s = i.Value;
+				if (s.Scope == Symbol.ScopeType.local && s.Accessibility==Accessibility.Public)
 				{
-					symbols.ClaimSymbol(i.Name);
-				}
-			}
-		}
-
-		public void ObfuscateSymbols(RenderContext ctx, SymbolFrequency SymbolFrequency, SymbolAllocator Allocator, string prefix)
-		{
-			// Walk through local symbols
-			int expectedRank = 0;
-			foreach (var i in SymbolFrequency.Sort())
-			{
-				if (i.Scope == Symbol.ScopeType.local)
-				{
-					// Reserve space for inner, higher frequency symbols
-					if (i.Rank > expectedRank)
-					{
-						if (ctx.Compiler.Formatted && ctx.Compiler.SymbolInfo)
-						{
-							for (int r = expectedRank; r < i.Rank; r++)
-							{
-								ctx.StartLine();
-								ctx.AppendFormat("// #{0} reserved", r);
-							}
-						}
-						Allocator.ReserveObfuscatedSymbols(i.Rank - expectedRank);
-					}
-
-					string newSymbol = Allocator.OnfuscateSymbol(i.Name);
-
-					// Show info
-					if (ctx.Compiler.Formatted && ctx.Compiler.SymbolInfo)
-					{
-						ctx.StartLine();
-						ctx.AppendFormat("// #{0} {3}{1} -> {3}{2}", i.Rank, i.Name, newSymbol, prefix);
-					}
-
-					expectedRank = i.Rank + 1;
+					symbols.ClaimSymbol(s.Name);
 				}
 			}
 		}
@@ -115,22 +94,51 @@ namespace MiniME
 		//	- where there are `holes` in the rank mapping, tell the symbol
 		//    allocator to reserve those symbols.  These holes are to be
 		//    filled by higher frequency symbols on the inner scopes.
-		public void ObfuscateSymbols(RenderContext ctx)
+		public void ObfuscateSymbols(RenderContext ctx, SymbolFrequency SymbolFrequency, SymbolAllocator Allocator, string prefix)
 		{
-			// Quit if obfuscation prevented by evil
-			if (ContainsEvil)
+			// Walk through local symbols
+			int expectedRank = 0;
+			foreach (var symbol in SymbolFrequency.Sort())
 			{
+				// Ignore public symbols
+				if (symbol.Accessibility != Accessibility.Private)
+					continue;
+
+				// Ignore non-local symbols
+				if (symbol.Scope != Symbol.ScopeType.local)
+					continue;
+
+				// Reserve space for inner, higher frequency symbols
+				if (symbol.Rank > expectedRank)
+				{
+					if (ctx.Compiler.Formatted && ctx.Compiler.SymbolInfo)
+					{
+						for (int r = expectedRank; r < symbol.Rank; r++)
+						{
+							ctx.StartLine();
+							ctx.AppendFormat("// #{0} reserved", r);
+						}
+					}
+					Allocator.ReserveObfuscatedSymbols(symbol.Rank - expectedRank);
+				}
+
+				string newSymbol = Allocator.OnfuscateSymbol(symbol.Name);
+
+				// Show info
 				if (ctx.Compiler.Formatted && ctx.Compiler.SymbolInfo)
 				{
 					ctx.StartLine();
-					ctx.AppendFormat("// Obfuscation prevented by evil");
+					ctx.AppendFormat("// #{0} {3}{1} -> {3}{2}", symbol.Rank, symbol.Name, newSymbol, prefix);
 				}
-			}
-			else
-			{
-				ObfuscateSymbols(ctx, Symbols, ctx.Symbols, "");
-			}
 
+				expectedRank = symbol.Rank + 1;
+			}
+		}
+
+		public void ObfuscateSymbols(RenderContext ctx)
+		{
+			// Obfuscate all symbols
+			ObfuscateSymbols(ctx, Symbols, ctx.Symbols, "");
 			ObfuscateSymbols(ctx, Members, ctx.Members, ".");
 
 			// Dump const eliminated variables
@@ -151,8 +159,11 @@ namespace MiniME
 		{
 			Utils.WriteIndentedLine(indent, "Scope: {0}", Node);
 
-			Utils.WriteIndentedLine(indent + 1, "Local:");
-			Symbols.Dump(indent + 2);
+			if (Symbols.Sort().Count>0)
+			{
+				Utils.WriteIndentedLine(indent + 1, "Local Symbols:");
+				Symbols.Dump(indent + 2);
+			}
 
 			foreach (var i in InnerScopes)
 			{
@@ -160,8 +171,11 @@ namespace MiniME
 				merged.CopyFrom(Symbols);
 				merged.MergeSymbols(i.AllSymbols);
 
-				Utils.WriteIndentedLine(indent + 1, "Merged for {0}", i.Node);
-				merged.Dump(indent + 2);
+				if (merged.Sort().Count > 0)
+				{
+					Utils.WriteIndentedLine(indent + 1, "Symbols after merge with {0}:", i.Node);
+					merged.Dump(indent + 2);
+				}
 			}
 
 			foreach (var i in InnerScopes)
@@ -223,56 +237,85 @@ namespace MiniME
 			return null;
 		}
 
-		public void AddPrivateSpec(ast.PrivateSpec spec)
+		public void AddAccessibilitySpec(Bookmark bmk, ast.AccessibilitySpec spec)
 		{
 			string strExplicit = spec.GetExplicitMemberName();
 			if (strExplicit != null)
 			{
-				Members.DefineSymbol(strExplicit);
+				Symbol s;
+				if (spec.GetSpecType() == ast.AccessibilitySpec.Type.Global)
+				{
+					s = Symbols.DefineSymbol(strExplicit);
+				}
+				else
+				{
+					s = Members.DefineSymbol(strExplicit);
+				}
+
+				// Mark obfuscation for this symbol
+				s.Accessibility = spec.GetAccessibility();
 			}
 			else
 			{
-				m_PrivateSpecs.Add(spec);
+				m_AccessibilitySpecs.Add(spec);
 			}
 		}
 
-		public bool DoesIdentifierMatchPrivateSpec(ast.ExprNodeIdentifier identifier)
+		public bool DoesIdentifierMatchAccessibilitySpec(ast.ExprNodeIdentifier identifier)
 		{
-			foreach (var s in m_PrivateSpecs)
-			{
-				if (s.DoesMatch(identifier))
-				{
-					return s.GetExplicitMemberName() == null;
-				}
-			}
 
 			return false;
 		}
 
-		public void DefinePrivateMemberIfMatchesAnySpec(ast.ExprNodeIdentifier identifier)
+		public void ProcessAccessibilitySpecs(string identifier)
 		{
-			if (DoesIdentifierMatchPrivateSpec(identifier))
+			// Check accessibility specs
+			foreach (var spec in m_AccessibilitySpecs)
 			{
-				Members.DefineSymbol(identifier.Name);
+				if (spec.IsWildcard() && spec.DoesMatchDeclaration(identifier))
+				{
+					var symbol=Symbols.DefineSymbol(identifier);
+					if (symbol.Accessibility==Accessibility.Default)
+						symbol.Accessibility = spec.GetAccessibility();
+					return;
+				}
 			}
-			else if (OuterScope!=null)
+
+			// Pass to outer scope
+			if (OuterScope!=null)
+				OuterScope.ProcessAccessibilitySpecs(identifier);
+		}
+
+		public void ProcessAccessibilitySpecs(ast.ExprNodeIdentifier identifier)
+		{
+			// Check accessibility specs
+			foreach (var spec in m_AccessibilitySpecs)
 			{
-				OuterScope.DefinePrivateMemberIfMatchesAnySpec(identifier);
+				if (spec.DoesMatch(identifier) && spec.GetExplicitMemberName()==null)
+				{
+					if (identifier.Lhs != null)
+					{
+						var symbol=Members.DefineSymbol(identifier.Name);
+						if (symbol.Accessibility == Accessibility.Default)
+							symbol.Accessibility = spec.GetAccessibility();
+						return;
+					}
+				}
 			}
+
+			// Pass to outer scope
+			if (OuterScope!=null)
+				OuterScope.ProcessAccessibilitySpecs(identifier);
 		}
 
 		public ast.Node Node;
 		public SymbolScope OuterScope = null;
 		public List<SymbolScope> InnerScopes = new List<SymbolScope>();
-		public bool ContainsEvil;		// Contains a 'with' or 'eval'
-
 		public SymbolFrequency Symbols = new SymbolFrequency();
 		public SymbolFrequency m_AllSymbols;
-
 		public SymbolFrequency Members = new SymbolFrequency();
 		public SymbolFrequency m_AllMembers;
-
-		public List<ast.PrivateSpec> m_PrivateSpecs=new List<ast.PrivateSpec>();
+		public List<ast.AccessibilitySpec> m_AccessibilitySpecs=new List<ast.AccessibilitySpec>();
 	}
 }
 

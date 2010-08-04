@@ -1,0 +1,9 @@
+﻿// private:x?.
+
+x1.priv_var1=23;			// Should be obfuscated
+x2.priv_var2=23;			// Should be obfuscated
+y.pub_var=23;				// Should not be obfuscated
+
+-----
+x1.a=23;x2.b=23;y.pub_var=23
+-----

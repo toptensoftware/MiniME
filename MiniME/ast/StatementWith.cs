@@ -9,13 +9,13 @@ namespace MiniME.ast
 	class StatementWith : Statement
 	{
 		// Constructor
-		public StatementWith()
+		public StatementWith(Bookmark bookmark) : base(bookmark)
 		{
 		}
 
 		// Attributes
 		public ExpressionNode Expression;
-		public Statement Code;
+		public CodeBlock Code;
 
 		public override void Dump(int indent)
 		{

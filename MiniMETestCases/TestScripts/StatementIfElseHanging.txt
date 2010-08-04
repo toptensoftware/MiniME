@@ -1,4 +1,5 @@
-﻿// Nested ifs (no hanging else)
+﻿//[NoObfuscate][Formatted]
+// Nested ifs (no hanging else)
 if (c)
 {
 	if (d)
@@ -26,7 +27,73 @@ else
 		f()
 }
 
+// Harder case
+if (c)
+{
+	while (true)
+	{
+		if (true)
+			break;
+		else
+			if (blah)
+				break;
+	}
+}
+else
+	f2();
+
+// No hanging else
+if (c)
+{
+	while (true)
+	{
+		if (true)
+			break;
+		else
+			break;
+	}
+}
+else
+	f2();
+
 // eof
 -----
-if(c)if(d)f();else f();else if(e)f();else f();if(c){if(d)f()}else if(e)f()
+if(c)
+    if(d)
+        f();
+    else
+        f();
+else
+    if(e)
+        f();
+    else
+        f();
+if(c)
+{
+    if(d)
+        f();
+}
+else
+    if(e)
+        f();
+if(c)
+{
+    while(true)
+        if(true)
+            break;
+        else
+            if(blah)
+                break;
+}
+else
+    f2();
+if(c)
+    while(true)
+        if(true)
+            break;
+        else
+            break;
+else
+    f2();
+
 -----

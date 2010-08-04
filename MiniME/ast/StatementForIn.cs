@@ -9,7 +9,7 @@ namespace MiniME.ast
 	class StatementForIn : Statement
 	{
 		// Constructor
-		public StatementForIn()
+		public StatementForIn(Bookmark bookmark) : base(bookmark)
 		{
 		}
 
@@ -18,7 +18,7 @@ namespace MiniME.ast
 		public Statement VariableDeclaration;		// for (var x in ...)
 		public ExpressionNode Iterator;				// for (x in ...)
 		public ExpressionNode Collection;
-		public Statement Code;
+		public CodeBlock Code;
 
 
 		public override void Dump(int indent)
@@ -32,7 +32,10 @@ namespace MiniME.ast
 				writeLine(indent, "for each loop, with existing variable");
 			}
 
-			Iterator.Dump(indent + 1);
+			if (VariableDeclaration != null)
+				VariableDeclaration.Dump(indent + 1);
+			else
+				Iterator.Dump(indent + 1);
 			writeLine(indent, "collection:");
 			Collection.Dump(indent + 1);
 			writeLine(indent, "do:");
@@ -46,7 +49,7 @@ namespace MiniME.ast
 				VariableDeclaration.Render(dest);
 			else
 				Iterator.Render(dest);
-			dest.Append(" in ");
+			dest.Append("in");
 			Collection.Render(dest);
 			dest.Append(")");
 			return Code.RenderIndented(dest);

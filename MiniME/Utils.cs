@@ -5,6 +5,13 @@ using System.Text;
 
 namespace MiniME
 {
+	enum TriState
+	{
+		Yes,
+		No,
+		Maybe,
+	}
+
 	// Miscellaneous utility and extension functions
 	static class Utils
 	{							   

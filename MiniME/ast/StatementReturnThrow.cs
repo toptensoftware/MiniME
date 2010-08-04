@@ -9,13 +9,13 @@ namespace MiniME.ast
 	class StatementReturnThrow : Statement
 	{
 		// Constructor 
-		public StatementReturnThrow(Token op)
+		public StatementReturnThrow(Bookmark bookmark, Token op) : base(bookmark)
 		{
 			Op = op;
 		}
 
 		// Constructor
-		public StatementReturnThrow(Token op, ExpressionNode value)
+		public StatementReturnThrow(Bookmark bookmark, Token op, ExpressionNode value) : base(bookmark)
 		{
 			Op = op;
 			Value = value;
@@ -45,7 +45,6 @@ namespace MiniME.ast
 	
 			dest.DisableLineBreaks();
 			dest.Append(Op.ToString().Substring(3));
-			dest.Append(' ');
 			dest.EnableLineBreaksAfterNextWrite();
 			Value.Render(dest);
 			return true;

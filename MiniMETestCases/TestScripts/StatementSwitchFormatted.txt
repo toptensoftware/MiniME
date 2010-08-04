@@ -1,0 +1,30 @@
+﻿// [Formatted]
+switch (c)
+{
+    case 1:
+        f();
+        break;
+        
+    case 2:
+        f();
+        break;
+    
+    default:
+        f();
+        break;
+}
+
+-----
+switch(c)
+{
+    case 1:
+        f();
+        break;
+    case 2:
+        f();
+        break;
+    default:
+        f();
+        break;
+}
+-----

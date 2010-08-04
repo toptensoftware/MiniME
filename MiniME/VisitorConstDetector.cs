@@ -14,7 +14,7 @@ namespace MiniME
 			currentScope = rootScope;
 		}
 
-		public void OnEnterNode(MiniME.ast.Node n)
+		public bool OnEnterNode(MiniME.ast.Node n)
 		{
 			// Descending into an inner scope
 			if (n.Scope != null)
@@ -58,6 +58,8 @@ namespace MiniME
 					}
 				}
 			}
+
+			return true;
 		}
 
 		public void OnLeaveNode(MiniME.ast.Node n)
@@ -84,7 +86,7 @@ namespace MiniME
 			currentScope = rootScope;
 		}
 
-		public void OnEnterNode(MiniME.ast.Node n)
+		public bool OnEnterNode(MiniME.ast.Node n)
 		{
 			// Descending into an inner scope
 			if (n.Scope != null)
@@ -123,6 +125,8 @@ namespace MiniME
 					RejectConstVariable(oneOp.Lhs);
 				}
 			}
+
+			return true;
 
 		}
 
@@ -167,7 +171,7 @@ namespace MiniME
 			currentScope = rootScope;
 		}
 
-		public void OnEnterNode(MiniME.ast.Node n)
+		public bool OnEnterNode(MiniME.ast.Node n)
 		{
 			// Descending into an inner scope
 			if (n.Scope != null)
@@ -197,6 +201,8 @@ namespace MiniME
 					}
 				}
 			}
+
+			return true;
 		}
 
 		public void OnLeaveNode(MiniME.ast.Node n)

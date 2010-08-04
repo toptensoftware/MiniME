@@ -45,11 +45,11 @@ namespace MiniME
 				if (TokenCheck(t.token))
 				{
 					// Save the operator token
-					var Op = t.token;
+					var bmk = t.GetBookmark();
 					t.Next();
 
 					// Parse the RHS and join to the LHS with appropriate operator.
-					lhs = new ast.ExprNodeBinary(lhs, Next(ctx), Op);
+					lhs = new ast.ExprNodeBinary(bmk, lhs, Next(ctx), bmk.token);
 				}
 				else
 					return lhs;
@@ -63,7 +63,7 @@ namespace MiniME
 			{
 				case Token.literal:
 				{
-					var temp = new ast.ExprNodeLiteral(t.literal);
+					var temp = new ast.ExprNodeLiteral(t.GetBookmark(), t.literal);
 					t.Next();
 					return temp;
 				}
@@ -78,7 +78,7 @@ namespace MiniME
 
 				case Token.identifier:
 				{
-					var temp = new ast.ExprNodeIdentifier(t.identifier);
+					var temp = new ast.ExprNodeIdentifier(t.GetBookmark(), t.identifier);
 					t.Next();
 					return temp;
 				}
@@ -87,7 +87,7 @@ namespace MiniME
 				{
 					// Array literal
 					t.Next();
-					var temp = new ast.ExprNodeArrayLiteral();
+					var temp = new ast.ExprNodeArrayLiteral(t.GetBookmark());
 					while (true)
 					{
 						if (t.token == Token.closeSquare)
@@ -122,11 +122,12 @@ namespace MiniME
 
 				case Token.openBrace:
 				{
+					// Create the literal
+					var temp = new ast.ExprNodeObjectLiteral(t.GetBookmark());
+
 					// Object literal
 					t.Next();
 
-					// Create the literal
-					var temp = new ast.ExprNodeObjectLiteral();
 					while (true)
 					{
 						if (t.token == Token.closeBrace)
@@ -165,7 +166,7 @@ namespace MiniME
 				case Token.divideAssign:
 				{
 					// Regular expressions
-					return new ast.ExprNodeRegEx(t.ParseRegEx());
+					return new ast.ExprNodeRegEx(t.GetBookmark(), t.ParseRegEx());
 				}
 
 				case Token.kw_function:
@@ -176,38 +177,42 @@ namespace MiniME
 
 				case Token.kw_new:
 				{
+					var bmk = t.GetBookmark();
+
 					t.Next();
 
 					// Parse the type
 					var newType = ParseExpressionMember(ctx | ParseContext.NoFunctionCalls);
 
 					// Create the new operator
-					var newOp = new ast.ExprNodeNew(newType);
+					var newOp = new ast.ExprNodeNew(bmk, newType);
 
 					// Parse parameters
-					t.SkipRequired(Token.openRound);
-
-					if (t.token != Token.closeRound)
+					if (t.SkipOptional(Token.openRound))
 					{
-						while (true)
+						if (t.token != Token.closeRound)
 						{
-							newOp.Arguments.Add(ParseSingleExpression(0));
-							if (t.SkipOptional(Token.comma))
-								continue;
-							else
-								break;
+							while (true)
+							{
+								newOp.Arguments.Add(ParseSingleExpression(0));
+								if (t.SkipOptional(Token.comma))
+									continue;
+								else
+									break;
+							}
 						}
-					}
 
-					t.SkipRequired(Token.closeRound);
+						t.SkipRequired(Token.closeRound);
+					}
 
 					return newOp;
 				}
 
 				case Token.kw_delete:
 				{
+					var bmk = t.GetBookmark();
 					t.Next();
-					return new ast.ExprNodeUnary(ParseExpressionMember(ctx), Token.kw_delete);
+					return new ast.ExprNodeUnary(bmk, ParseExpressionMember(ctx), Token.kw_delete);
 				}
 			}
 
@@ -225,7 +230,7 @@ namespace MiniME
 				if (t.SkipOptional(Token.period))
 				{
 					t.Require(Token.identifier);
-					lhs = new ast.ExprNodeIdentifier(t.identifier, lhs);
+					lhs = new ast.ExprNodeIdentifier(t.GetBookmark(), t.identifier, lhs);
 					t.Next();
 					continue;
 				}
@@ -233,7 +238,7 @@ namespace MiniME
 				// Array indexer '[]'
 				if (t.SkipOptional(Token.openSquare))
 				{
-					var temp = new ast.ExprNodeIndexer(lhs, ParseCompositeExpression(0));
+					var temp = new ast.ExprNodeIndexer(t.GetBookmark(), lhs, ParseCompositeExpression(0));
 					t.SkipRequired(Token.closeSquare);
 					lhs = temp;
 					continue;
@@ -242,7 +247,7 @@ namespace MiniME
 				// Function call '()'
 				if ((ctx & ParseContext.NoFunctionCalls)==0 && t.SkipOptional(Token.openRound))
 				{
-					var temp = new ast.ExprNodeCall(lhs);
+					var temp = new ast.ExprNodeCall(t.GetBookmark(), lhs);
 
 					if (t.token != Token.closeRound)
 					{
@@ -273,9 +278,9 @@ namespace MiniME
 			// Prefix increment
 			if (t.token == Token.increment || t.token == Token.decrement)
 			{
-				var temp = t.token;
+				var bmk = t.GetBookmark();
 				t.Next();
-				return new ast.ExprNodeUnary(ParseExpressionMember(ctx), temp);
+				return new ast.ExprNodeUnary(bmk, ParseExpressionMember(ctx), bmk.token);
 			}
 
 			// Unary ops
@@ -295,9 +300,9 @@ namespace MiniME
 					t.token == Token.kw_delete
 					)
 				{
-					var temp = t.token;
+					var bmk = t.GetBookmark();
 					t.Next();
-					return new ast.ExprNodeUnary(ParseExpressionNegation(ctx), temp);
+					return new ast.ExprNodeUnary(bmk, ParseExpressionNegation(ctx), bmk.token);
 				}
 				else
 					break;
@@ -310,9 +315,9 @@ namespace MiniME
 			// Postfix increment
 			if (t.token == Token.increment || t.token == Token.decrement)
 			{
-				var temp = t.token;
+				var bmk = t.GetBookmark();
 				t.Next();
-				return new ast.ExprNodePostfix(lhs, temp);
+				return new ast.ExprNodePostfix(bmk, lhs, bmk.token);
 			}
 
 			return lhs;
@@ -398,7 +403,7 @@ namespace MiniME
 			// Is it a ternary operator eg: condition ? true : false
 			if (t.SkipOptional(Token.question))
 			{
-				var result=new ast.ExprNodeConditional(lhs);
+				var result=new ast.ExprNodeConditional(t.GetBookmark(), lhs);
 
 				result.TrueResult=ParseExpressionTernary(ctx);
 
@@ -440,7 +445,7 @@ namespace MiniME
 			if (t.token != Token.comma)
 				return lhs;
 
-			var expr = new ast.ExprNodeComposite();
+			var expr = new ast.ExprNodeComposite(t.GetBookmark());
 			expr.Expressions.Add(lhs);
 
 			while (t.SkipOptional(Token.comma))
@@ -484,10 +489,12 @@ namespace MiniME
 			// Is it a variable declaration?
 			if (t.token == Token.kw_var)
 			{
+				var bmk = t.GetBookmark();
+
 				t.Next();
 
 				// Parse the first varaible declaration
-				var stmt = new ast.StatementVariableDeclaration();
+				var stmt = new ast.StatementVariableDeclaration(bmk);
 				
 				ParseVarDecl(ctx, stmt);
 
@@ -503,35 +510,80 @@ namespace MiniME
 			else
 			{
 				// Must be just a normal expression statement
-				return new ast.StatementExpression(ParseCompositeExpression(ctx));
+				return new ast.StatementExpression(t.GetBookmark(), ParseCompositeExpression(ctx));
+			}
+		}
+
+		// Parse a brace enclosed statement block
+		ast.CodeBlock ParseStatementBlock(TriState BracesInOutput)
+		{
+			var bmk = t.GetBookmark();
+
+			// Opening brace
+			t.SkipRequired(Token.openBrace);
+
+			// Statements
+			var code = new ast.CodeBlock(bmk, BracesInOutput);
+			ParseStatements(code);
+
+			// Closing brace
+			t.SkipRequired(Token.closeBrace);
+
+			return code;
+		}
+
+
+		// Parse a single statement
+		ast.CodeBlock ParseStatement()
+		{
+			if (t.token == Token.openBrace)
+			{
+				return ParseStatementBlock(TriState.Maybe);
+			}
+			else
+			{
+				var stmt = new ast.CodeBlock(t.GetBookmark(), TriState.Maybe);
+				stmt.AddStatement(ParseSingleStatement());
+				return stmt;
 			}
 		}
 
 		// Parse a single statement
-		ast.Statement ParseStatement()
+		ast.Statement ParseSingleStatement()
 		{
+			var bmk = t.GetBookmark();
+
 			// Special handling for labels
 			if (t.token == Token.identifier)
 			{
-				int mark = t.Mark();
 				string label = t.identifier;
 				t.Next();
 				if (t.SkipOptional(Token.colon))
 				{
-					return new ast.StatementLabel(label);
+					return new ast.StatementLabel(bmk, label);
 				}
 
-				t.Rewind(mark);
+				t.Rewind(bmk);
 			}
 
 			switch (t.token)
 			{
-				case Token.openBrace:
-					return ParseStatementBlock(true);
-
 				case Token.semicolon:
-					// Empty statement
-					return new ast.StatementBlock();
+				{
+					t.Next();
+					return null;
+				}
+
+				case Token.openBrace:
+				{
+					t.Next();
+					var stmt = new ast.StatementBlock(t.GetBookmark());
+					while (!t.SkipOptional(Token.closeBrace))
+					{
+						stmt.AddStatement(ParseSingleStatement());
+					}
+					return stmt;
+				}
 
 				case Token.kw_return:
 				{
@@ -539,11 +591,11 @@ namespace MiniME
 
 					if (t.SkipOptional(Token.semicolon))
 					{
-						return new ast.StatementReturnThrow(Token.kw_return);
+						return new ast.StatementReturnThrow(bmk, Token.kw_return);
 					}
 					else
 					{
-						var temp=new ast.StatementReturnThrow(Token.kw_return, ParseCompositeExpression(0));
+						var temp=new ast.StatementReturnThrow(bmk, Token.kw_return, ParseCompositeExpression(0));
 						t.SkipRequired(Token.semicolon);
 						return temp;
 					}
@@ -552,7 +604,7 @@ namespace MiniME
 				case Token.kw_throw:
 				{
 					t.Next();
-					var temp = new ast.StatementReturnThrow(Token.kw_throw, ParseCompositeExpression(0));
+					var temp = new ast.StatementReturnThrow(bmk, Token.kw_throw, ParseCompositeExpression(0));
 					t.SkipRequired(Token.semicolon);
 					return temp;
 				}
@@ -569,7 +621,7 @@ namespace MiniME
 					{
 						t.Require(Token.identifier);
 
-						var temp = new ast.StatementBreakContinue(op, t.identifier);
+						var temp = new ast.StatementBreakContinue(bmk, op, t.identifier);
 						t.Next();
 
 						t.Require(Token.semicolon);
@@ -578,7 +630,7 @@ namespace MiniME
 					}
 
 					// No label
-					return new ast.StatementBreakContinue(op, null);
+					return new ast.StatementBreakContinue(bmk, op, null);
 				}
 
 				case Token.kw_if:
@@ -587,7 +639,7 @@ namespace MiniME
 
 					// Condition
 					t.SkipRequired(Token.openRound);
-					var stmt=new ast.StatementIfElse(ParseCompositeExpression(0));
+					var stmt=new ast.StatementIfElse(bmk, ParseCompositeExpression(0));
 					t.SkipRequired(Token.closeRound);
 
 					// True code block
@@ -608,7 +660,7 @@ namespace MiniME
 
 					// Value
 					t.SkipRequired(Token.openRound);
-					var stmt = new ast.StatementSwitch(ParseCompositeExpression(0));
+					var stmt = new ast.StatementSwitch(bmk, ParseCompositeExpression(0));
 					t.SkipRequired(Token.closeRound);
 
 					// Opening brace
@@ -640,7 +692,7 @@ namespace MiniME
 							throw new CompileError("Unexpected code in switch statement before 'case' or 'default'", t);
 						}
 
-						currentCase.AddCode(ParseStatement());
+						currentCase.AddCode(ParseSingleStatement());
 					}
 
 					// Done
@@ -664,7 +716,7 @@ namespace MiniME
 						// Foreach iterator
 						if (t.SkipOptional(Token.kw_in))
 						{
-							var stmtForEach = new ast.StatementForIn();
+							var stmtForEach = new ast.StatementForIn(bmk);
 
 							var decl = init as ast.StatementVariableDeclaration;
 
@@ -707,7 +759,7 @@ namespace MiniME
 					}
 
 					// Create the statement, store the initialization expression(s)
-					var stmt = new ast.StatementFor();
+					var stmt = new ast.StatementFor(bmk);
 					stmt.Initialize = init;
 					t.SkipRequired(Token.semicolon);
 
@@ -728,7 +780,7 @@ namespace MiniME
 
 				case Token.kw_do:
 				{
-					var stmt = new ast.StatementDoWhile();
+					var stmt = new ast.StatementDoWhile(bmk);
 					t.Next();
 					stmt.Code = ParseStatement();
 					t.SkipRequired(Token.kw_while);
@@ -741,7 +793,7 @@ namespace MiniME
 
 				case Token.kw_while:
 				{
-					var stmt = new ast.StatementWhile();
+					var stmt = new ast.StatementWhile(bmk);
 					t.Next();
 					t.SkipRequired(Token.openRound);
 					stmt.Condition = ParseCompositeExpression(0);
@@ -752,7 +804,7 @@ namespace MiniME
 
 				case Token.kw_with:
 				{
-					var stmt = new ast.StatementWith();
+					var stmt = new ast.StatementWith(bmk);
 					t.Next();
 					t.SkipRequired(Token.openRound);
 					stmt.Expression = ParseCompositeExpression(0);
@@ -766,16 +818,17 @@ namespace MiniME
 					t.Next();
 
 					// Create the statement
-					var stmt = new ast.StatementTryCatchFinally();
+					var stmt = new ast.StatementTryCatchFinally(bmk);
 
 					// The code
 					t.Require(Token.openBrace);
-					stmt.Code = ParseStatementBlock(false);
+					stmt.Code = ParseStatementBlock(TriState.Yes);
 
 					// Catch clauses
+					bmk = t.GetBookmark();
 					while (t.SkipOptional(Token.kw_catch))
 					{
-						var cc=new ast.CatchClause();
+						var cc=new ast.CatchClause(bmk);
 
 						// Catch expression
 						t.SkipRequired(Token.openRound);
@@ -797,16 +850,18 @@ namespace MiniME
 
 						// Code block
 						t.Require(Token.openBrace);
-						cc.Code=ParseStatementBlock(false);
+						cc.Code=ParseStatementBlock(TriState.Yes);
 
 						stmt.CatchClauses.Add(cc);
+
+						bmk = t.GetBookmark();
 					}
 
 					// Finally
 					if (t.SkipOptional(Token.kw_finally))
 					{
 						t.Require(Token.openBrace);
-						stmt.FinallyClause=ParseStatementBlock(false);
+						stmt.FinallyClause = ParseStatementBlock(TriState.Yes);
 					}
 
 					return stmt;
@@ -818,25 +873,27 @@ namespace MiniME
 					// Function declaration
 					t.Next();
 					t.Require(Token.identifier);
-					var stmt = new ast.StatementExpression(ParseFunction());
+					var stmt = new ast.StatementExpression(bmk, ParseFunction());
 					t.SkipOptional(Token.semicolon);
 					return stmt;
 				}
 
 				case Token.directive_comment:
 				{
-					var stmt = new ast.StatementComment(t.RawToken);
+					var stmt = new ast.StatementComment(bmk, t.RawToken.Substring(0,2) + t.RawToken.Substring(3));
 					t.Next();
 					return stmt;
 				}
 
 				case Token.directive_private:
+				case Token.directive_public:
 				{
-					var stmt = new ast.StatementPrivate();
+					var stmt = new ast.StatementAccessibility(bmk);
 					foreach (var symbol in t.identifier.Split(','))
 					{
-						var spec = new ast.PrivateSpec();
-						if (!spec.Parse(symbol))
+						var spec = new ast.AccessibilitySpec();
+						if (!spec.Parse(t.token==Token.directive_private ? Accessibility.Private : Accessibility.Public, 
+											symbol))
 						{
 							throw new CompileError(string.Format("Invalid private member declaration - `{0}`", symbol), t);
 						}
@@ -858,7 +915,7 @@ namespace MiniME
 		}
 
 		// Parse series of statements into a statement block
-		public void ParseStatements(ast.StatementBlock block)
+		public void ParseStatements(ast.CodeBlock block)
 		{
 			while (t.token != Token.closeBrace && t.token!=Token.eof)
 			{
@@ -870,39 +927,7 @@ namespace MiniME
 				}
 
 				// Add the next statement
-				block.Content.Add(ParseStatement());
-			}
-		}
-
-		// Parse a brace enclosed statement block
-		ast.Statement ParseStatementBlock(bool bCanReduce)
-		{
-			// Opening brace
-			t.SkipRequired(Token.openBrace);
-
-			// Statements
-			var block = new ast.StatementBlock();
-			ParseStatements(block);
-
-			// Closing brace
-			t.SkipRequired(Token.closeBrace);
-
-			// Quit if reduction disabled
-			if (!bCanReduce)
-				return block;
-
-			// Roll inner statment blocks into parent
-			block.RemoveRedundant();
-
-			// If it's a single statement, do away with the block
-			// and just return the one statement
-			if (block.Content.Count == 1)
-			{
-				return block.Content[0];
-			}
-			else
-			{
-				return block;
+				block.AddStatement(ParseSingleStatement());
 			}
 		}
 
@@ -921,7 +946,7 @@ namespace MiniME
 			{
 				// Name
 				t.Require(Token.identifier);
-				fn.Parameters.Add(new ast.Parameter(t.identifier));
+				fn.Parameters.Add(new ast.Parameter(t.GetBookmark(), t.identifier));
 				t.Next();
 
 				// Another?
@@ -938,7 +963,7 @@ namespace MiniME
 		ast.ExprNodeFunction ParseFunction()
 		{
 			// Create the function
-			var fn = new ast.ExprNodeFunction();
+			var fn = new ast.ExprNodeFunction(t.GetBookmark());
 
 			// Functions can be anonymous
 			if (t.token == Token.identifier)
@@ -951,7 +976,7 @@ namespace MiniME
 			ParseParameters(fn);
 
 			// Body
-			fn.Code = ParseStatementBlock(false);
+			fn.Code = ParseStatementBlock(TriState.Yes);
 
 			return fn;
 		}

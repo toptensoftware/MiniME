@@ -5,6 +5,10 @@ using System.Text;
 using System.Reflection;
 namespace mm
 {
+
+	// "Z:\mobilize\www\mobSite\js\jQuery-1.4.2.js" -o:"Z:\mobilize\www\mobSite\js\jQuery-1.4.2.mm.js" -diag-formatted
+	// input.js -stdout -diag-ast
+
 	class Program
 	{
 		void ShowLogo()
@@ -24,7 +28,8 @@ namespace mm
             Console.WriteLine("   -o:<file>              Output filename (defaults to <file1name>.min.js)");
             Console.WriteLine("   -stdout                Send output to stdout instead of a file (use with -nologo)");
             Console.WriteLine("   -linelen:<chars>       Set the maximum line length (defaults to 0 which means no line breaks)");
-			Console.WriteLine("   -noobfuscate           Don't obfuscate symbols");
+			Console.WriteLine("   -no-obfuscate          Don't obfuscate symbols");
+			Console.WriteLine("   -ive-donated           Don't add 'Minified by MiniME' credit comment (enforced by Karma)");
 			Console.WriteLine("   -inputencoding:<name>  Set input file encoding (defaults to `auto`, applies to subsequent filename args)");
 			Console.WriteLine("   -outputencoding:<name> Set output file encoding (defaults to same as input file)");
 			Console.WriteLine("   -listencodings         Display a list of available encodings");
@@ -162,6 +167,10 @@ namespace mm
 							c.NoObfuscate = true;
 							break;
 
+						case "ive-dontated":
+							c.NoCredit = true;
+							break;
+
 						case "diag-formatted":
 							c.Formatted = true;
 							break;
@@ -179,6 +188,10 @@ namespace mm
 							c.DumpScopes = true;
 							break;
 
+						default:
+							Console.WriteLine("Unknown switch `-{0}`, aborting", a);
+							System.Environment.ExitCode = 7;
+							return;
 
 					}
 				}

@@ -14,13 +14,15 @@ namespace MiniME
 		}
 
 		// Define a new local symbol
-		public void DefineSymbol(string str)
+		public Symbol DefineSymbol(string str)
 		{
 			Symbol s;
 			if (!FindSymbol(str, Symbol.ScopeType.local, out s))
 			{
 				s = AddSymbol(new Symbol(str, Symbol.ScopeType.local));
 			}
+
+			return s;
 		}
 
 		// Increase the frequency count of a symbol
@@ -37,10 +39,6 @@ namespace MiniME
 				}
 			}
 
-			// Don't bump frequency of symbols that are now const!
-			if (s.ConstValue != null)
-				return;
-			
 			// And bump...
 			s.Frequency++;
 		}
@@ -68,6 +66,10 @@ namespace MiniME
 		{
 			foreach (var i in inner)
 			{
+				// Don't merge inner public symbols
+				if (i.Value.Accessibility == Accessibility.Public)
+					continue;
+
 				Symbol s;
 				switch (i.Value.Scope)
 				{
@@ -100,8 +102,8 @@ namespace MiniME
 			var l = new List<Symbol>();
 			foreach (var i in this)
 			{
-				// Don't add eliminated symbols
-				if (i.Value.ConstValue == null)
+				// Don't add symbols that can't be obfuscated
+				if (i.Value.Accessibility != Accessibility.Public) 
 				{
 					l.Add(i.Value);
 				}
@@ -134,6 +136,8 @@ namespace MiniME
 			int Rank = 0;
 			foreach (var s in SymbolsByFreq)
 			{
+				System.Diagnostics.Debug.Assert(s.Accessibility != Accessibility.Public);
+
 				if (s.Scope == Symbol.ScopeType.local)
 				{
 					Symbol originalSymbol;
