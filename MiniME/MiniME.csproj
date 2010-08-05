@@ -49,7 +49,7 @@
   <ItemGroup>
     <Compile Include="ast\ExprNodeFunction.cs" />
     <Compile Include="ast\ExprNodeComposite.cs" />
-    <Compile Include="ast\ExprNodeConditional.cs" />
+    <Compile Include="ast\ExprNodeTernary.cs" />
     <Compile Include="ast\ExprNodeObjectLiteral.cs" />
     <Compile Include="ast\ExprNodeArrayLiteral.cs" />
     <Compile Include="ast\ExprNodePostfix.cs" />

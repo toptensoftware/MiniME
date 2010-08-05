@@ -403,7 +403,7 @@ namespace MiniME
 			// Is it a ternary operator eg: condition ? true : false
 			if (t.SkipOptional(Token.question))
 			{
-				var result=new ast.ExprNodeConditional(t.GetBookmark(), lhs);
+				var result=new ast.ExprNodeTernary(t.GetBookmark(), lhs);
 
 				result.TrueResult=ParseExpressionTernary(ctx);
 

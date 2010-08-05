@@ -13,10 +13,10 @@ using System.Text;
 namespace MiniME.ast
 {
 	// Represents a condiditional expression eg: conditions ? true : false
-	class ExprNodeConditional : ExprNode
+	class ExprNodeTernary : ExprNode
 	{
 		// Constructor
-		public ExprNodeConditional(Bookmark bookmark, ExprNode condition) : base(bookmark)
+		public ExprNodeTernary(Bookmark bookmark, ExprNode condition) : base(bookmark)
 		{
 			Condition = condition;
 		}
