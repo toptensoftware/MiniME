@@ -73,15 +73,15 @@ namespace MiniME
 			if (n.GetType() == typeof(ast.StatementExpression))
 			{
 				var exprstmt = (ast.StatementExpression)n;
-				if (exprstmt.Expression.GetType()==typeof(ast.ExprNodeBinary))
+				if (exprstmt.Expression.GetType()==typeof(ast.ExprNodeAssignment))
 				{
-					var binOp = (ast.ExprNodeBinary)exprstmt.Expression;
-					if (binOp.Op == Token.assign)
+					var assignOp = (ast.ExprNodeAssignment)exprstmt.Expression;
+					if (assignOp.Op == Token.assign)
 					{
 						// Lhs must be an identifier member
-						if (binOp.Lhs.GetType()==typeof(ast.ExprNodeIdentifier))
+						if (assignOp.Lhs.GetType()==typeof(ast.ExprNodeIdentifier))
 						{
-							var identifier=(ast.ExprNodeIdentifier)binOp.Lhs;
+							var identifier=(ast.ExprNodeIdentifier)assignOp.Lhs;
 							if (identifier.Lhs!=null)
 							{
 								currentScope.ProcessAccessibilitySpecs(identifier);

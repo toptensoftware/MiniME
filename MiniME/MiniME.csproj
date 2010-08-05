@@ -47,6 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ast\ExprNodeLtr.cs" />
     <Compile Include="ast\ExprNodeFunction.cs" />
     <Compile Include="ast\ExprNodeComposite.cs" />
     <Compile Include="ast\ExprNodeTernary.cs" />

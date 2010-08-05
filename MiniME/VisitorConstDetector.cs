@@ -96,14 +96,11 @@ namespace MiniME
 			}
 
 			// Look for assignments to property
-			if (n.GetType() == typeof(ast.ExprNodeBinary))
+			if (n.GetType() == typeof(ast.ExprNodeAssignment))
 			{
 				// Is it an assignment
-				var binOp = (ast.ExprNodeBinary)n;
-				if (binOp.Op >= Token.assign && binOp.Op <= Token.bitwiseAndAssign)
-				{
-					RejectConstVariable(binOp.Lhs);
-				}
+				var assignOp = (ast.ExprNodeAssignment)n;
+				RejectConstVariable(assignOp.Lhs);
 			}
 
 			// Look for increment/decrement operators

@@ -28,15 +28,18 @@ namespace MiniME
 		// Attributes
 		Tokenizer t;
 
-	
-		// Parse binary is a helper function to parse binary operations.  Uses a function 
+
+
+		// ParseLtr is a helper function to parse ltr binary operations.  Uses a function 
 		// callbacks (TokenCheck) to check if a token is applicable to the current operator 
 		// precedence and a delegate (fnExprNode) to call the next higher precedence parser.
 		internal delegate ast.ExprNode fnExprNode(ParseContext ctx);
-		ast.ExprNode ParseBinary(fnExprNode Next, ParseContext ctx, Func<Token, bool> TokenCheck)
+		ast.ExprNode ParseLtr(fnExprNode Next, ParseContext ctx, Func<Token, bool> TokenCheck)
 		{
 			// Parse the LHS
 			var lhs = Next(ctx);
+
+			ast.ExprNodeLtr ltr = null;
 
 			// Parse all consecutive RHS
 			while (true)
@@ -44,15 +47,20 @@ namespace MiniME
 				// Check operator at same precedence level
 				if (TokenCheck(t.token))
 				{
+					if (ltr == null)
+					{
+						ltr = new ast.ExprNodeLtr(lhs.Bookmark, lhs);
+					}
+
 					// Save the operator token
 					var bmk = t.GetBookmark();
 					t.Next();
 
-					// Parse the RHS and join to the LHS with appropriate operator.
-					lhs = new ast.ExprNodeBinary(bmk, lhs, Next(ctx), bmk.token);
+					// Parse the rhs
+					ltr.AddTerm(bmk.token, Next(ctx));
 				}
 				else
-					return lhs;
+					return ltr == null ? lhs : ltr;
 			}
 		}
 
@@ -325,25 +333,25 @@ namespace MiniME
 
 		ast.ExprNode ParseExpressionMultiply(ParseContext ctx)
 		{
-			return ParseBinary(ParseExpressionNegation, ctx, 
+			return ParseLtr(ParseExpressionNegation, ctx, 
 				x=>x == Token.multiply || x == Token.divide || x == Token.modulus);
 		}
 
 		ast.ExprNode ParseExpressionAdd(ParseContext ctx)
 		{
-			return ParseBinary(ParseExpressionMultiply, ctx,
+			return ParseLtr(ParseExpressionMultiply, ctx,
 				x => x == Token.add || x == Token.subtract);
 		}
 
 		ast.ExprNode ParseExpressionShift(ParseContext ctx)
 		{
-			return ParseBinary(ParseExpressionAdd, ctx,
+			return ParseLtr(ParseExpressionAdd, ctx,
 				x => x == Token.shl || x == Token.shr || x==Token.shrz);
 		}
 
 		ast.ExprNode ParseExpressionCompareRelation(ParseContext ctx)
 		{
-			return ParseBinary(ParseExpressionShift,  ctx,
+			return ParseLtr(ParseExpressionShift,  ctx,
 						x => 
 							x == Token.compareLT || 
 							x == Token.compareLE || 
@@ -357,7 +365,7 @@ namespace MiniME
 
 		ast.ExprNode ParseExpressionCompareEquality(ParseContext ctx)
 		{
-			return ParseBinary(ParseExpressionCompareRelation, ctx,
+			return ParseLtr(ParseExpressionCompareRelation, ctx,
 						x =>
 							x == Token.compareEQ ||
 							x == Token.compareNE ||
@@ -368,31 +376,31 @@ namespace MiniME
 
 		ast.ExprNode ParseExpressionBitwiseAnd(ParseContext ctx)
 		{
-			return ParseBinary(ParseExpressionCompareEquality, ctx,
+			return ParseLtr(ParseExpressionCompareEquality, ctx,
 				x => x == Token.bitwiseAnd);
 		}
 
 		ast.ExprNode ParseExpressionBitwiseXor(ParseContext ctx)
 		{
-			return ParseBinary(ParseExpressionBitwiseAnd, ctx,
+			return ParseLtr(ParseExpressionBitwiseAnd, ctx,
 				x => x == Token.bitwiseXor);
 		}
 
 		ast.ExprNode ParseExpressionBitwiseOr(ParseContext ctx)
 		{
-			return ParseBinary(ParseExpressionBitwiseXor, ctx,
+			return ParseLtr(ParseExpressionBitwiseXor, ctx,
 				x => x == Token.bitwiseOr);
 		}
 
 		ast.ExprNode ParseExpressionLogicalAnd(ParseContext ctx)
 		{
-			return ParseBinary(ParseExpressionBitwiseOr, ctx,
+			return ParseLtr(ParseExpressionBitwiseOr, ctx,
 				x => x == Token.logicalAnd);
 		}
 
 		ast.ExprNode ParseExpressionLogicalOr(ParseContext ctx)
 		{
-			return ParseBinary(ParseExpressionLogicalAnd, ctx,
+			return ParseLtr(ParseExpressionLogicalAnd, ctx,
 				x => x == Token.logicalOr);
 		}
 
@@ -420,21 +428,25 @@ namespace MiniME
 
 		ast.ExprNode ParseExpressionAssignment(ParseContext ctx)
 		{
-			return ParseBinary(ParseExpressionTernary, ctx,
-						x =>
-							x == Token.assign ||
-							x == Token.addAssign ||
-							x == Token.subtractAssign||
-							x == Token.multiplyAssign ||
-							x == Token.divideAssign ||
-							x == Token.modulusAssign ||
-							x == Token.shlAssign ||
-							x == Token.shrAssign ||
-							x == Token.shrzAssign ||
-							x == Token.bitwiseAndAssign ||
-							x == Token.bitwiseOrAssign ||
-							x == Token.bitwiseXorAssign
-							);
+			// Parse the LHS
+			var lhs = ParseExpressionTernary(ctx);
+
+			// Parse all consecutive RHS
+			while (true)
+			{
+				// Check operator at same precedence level
+				if (t.token>=Token.assign && t.token<=Token.bitwiseAndAssign)
+				{
+					// Save the operator token
+					var bmk = t.GetBookmark();
+					t.Next();
+
+					// Parse the RHS and join to the LHS with appropriate operator.
+					lhs = new ast.ExprNodeAssignment(bmk, lhs, ParseExpressionTernary(ctx), bmk.token);
+				}
+				else
+					return lhs;
+			}
 		}
 
 		// Parse an expression that might include comma separated multiple

@@ -78,14 +78,14 @@ namespace MiniME
 			}
 
 			// Look for assignment to undefined variable
-			if (n.GetType() == typeof(ast.ExprNodeBinary))
+			if (n.GetType() == typeof(ast.ExprNodeAssignment))
 			{
-				var binOp = (ast.ExprNodeBinary)n;
-				if (binOp.Op == Token.assign)
+				var rtlOp = (ast.ExprNodeAssignment)n;
+				if (rtlOp.Op == Token.assign)
 				{
-					if (binOp.Lhs.GetType() == typeof(ast.ExprNodeIdentifier))
+					if (rtlOp.Lhs.GetType() == typeof(ast.ExprNodeIdentifier))
 					{
-						var identifier = (ast.ExprNodeIdentifier)binOp.Lhs;
+						var identifier = (ast.ExprNodeIdentifier)rtlOp.Lhs;
 						if (identifier.Lhs == null)
 						{
 							// Assignment to an identifier
