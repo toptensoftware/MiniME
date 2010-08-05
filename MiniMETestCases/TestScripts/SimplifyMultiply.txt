@@ -1,0 +1,29 @@
+﻿// [Formatted][NoObfuscate]
+var x;
+x=a*b*c;		
+x=a*(b*c);		// Parens can be removed
+x=-a*-b;		// Negative * negative = positive
+x=-a*-b*-c;		// Triple negative = single negative
+x=a/(b*c);		// This should stay as is.  We don't optimize division of nested terms.
+x=a/(b/c);		// Same here.
+x=a*(b%c);		// Never optimize modulus
+x=a*(b*c%d);
+x=a*(b/c);
+x=a*(b/(c%d));
+x=a*(b%c*d);
+x=a*(b%c*d/e);
+-----
+var x;
+x=a*b*c;
+x=a*b*c;
+x=a*b;
+x=-a*b*c;
+x=a/(b*c);
+x=a/(b/c);
+x=a*(b%c);
+x=a*(b*c%d);
+x=a*b/c;
+x=a*b/(c%d);
+x=a*(b%c)*d;
+x=a*(b%c)*d/e;
+-----

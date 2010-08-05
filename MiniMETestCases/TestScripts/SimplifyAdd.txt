@@ -1,0 +1,19 @@
+﻿// [Formatted][NoObfuscate]
+var x;
+x=a+b+c;
+x=a+(b+c);
+x=a-(b+c);
+x=(a-b)+c;
+x=(a-b)-(c-d);
+x=a+-1;
+x=a-(-b+c);
+-----
+var x;
+x=a+b+c;
+x=a+b+c;
+x=a-b-c;
+x=a-b+c;
+x=a-b-c+d;
+x=a-1;
+x=a+b-c;
+-----
