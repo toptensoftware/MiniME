@@ -84,7 +84,10 @@ namespace MiniME.ast
 
 		public override ExprNode Simplify()
 		{
-			Lhs = Lhs.Simplify();
+			if (Lhs != null)
+			{
+				Lhs = Lhs.Simplify();
+			}
 			return this;
 		}
 

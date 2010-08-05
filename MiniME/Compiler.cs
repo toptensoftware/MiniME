@@ -347,6 +347,9 @@ namespace MiniME
 					code.Visit(new VisitorConstDetectorPass3(rootScope));
 				}
 
+				// Simplify expressions
+				code.Visit(new VisitorSimplifyExpressions());
+
 				// If obfuscation is allowed, find all in-scope symbols and then
 				// count the frequency of their use.
 				if (!NoObfuscate)

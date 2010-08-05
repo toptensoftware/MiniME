@@ -25,7 +25,9 @@ namespace MiniME
 			// Simplify
 			expr.RootNode = expr.RootNode.Simplify();
 
-			return false;
+
+			return true;	// NB: Need to recurse into expressions in case it's a ExprNodeFunction which has a code block
+							//		which will almost certainly contain deeper expressions that also could use simplification.
 
 		}
 
