@@ -138,7 +138,7 @@ namespace MiniME
 			}
 		}
 
-		public void RejectConstVariable(ast.ExpressionNode node)
+		public void RejectConstVariable(ast.ExprNode node)
 		{
 			// Is the lhs a global?
 			if (node.GetType() != typeof(ast.ExprNodeIdentifier))

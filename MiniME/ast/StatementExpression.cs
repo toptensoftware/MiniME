@@ -9,13 +9,13 @@ namespace MiniME.ast
 	class StatementExpression : Statement
 	{
 		// Constructor
-		public StatementExpression(Bookmark bookmark, ExpressionNode expression) : base(bookmark)
+		public StatementExpression(Bookmark bookmark, ExprNode expression) : base(bookmark)
 		{
 			Expression = expression;
 		}
 
 		// Attributes
-		public ExpressionNode Expression;
+		public ExprNode Expression;
 
 		public override void Dump(int indent)
 		{

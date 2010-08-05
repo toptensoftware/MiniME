@@ -14,7 +14,7 @@ namespace MiniME.ast
 		}
 
 		// Add another variable declaration
-		public void AddDeclaration(string Name, ast.ExpressionNode InitialValue)
+		public void AddDeclaration(string Name, ast.ExprNode InitialValue)
 		{
 			var v = new Variable();
 			v.Name = Name;
@@ -101,7 +101,7 @@ namespace MiniME.ast
 		public class Variable
 		{
 			public string Name;
-			public ExpressionNode InitialValue;
+			public ExprNode InitialValue;
 		}
 
 		public List<Variable> Variables=new List<Variable>();

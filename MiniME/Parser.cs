@@ -32,8 +32,8 @@ namespace MiniME
 		// Parse binary is a helper function to parse binary operations.  Uses a function 
 		// callbacks (TokenCheck) to check if a token is applicable to the current operator 
 		// precedence and a delegate (fnExprNode) to call the next higher precedence parser.
-		internal delegate ast.ExpressionNode fnExprNode(ParseContext ctx);
-		ast.ExpressionNode ParseBinary(fnExprNode Next, ParseContext ctx, Func<Token, bool> TokenCheck)
+		internal delegate ast.ExprNode fnExprNode(ParseContext ctx);
+		ast.ExprNode ParseBinary(fnExprNode Next, ParseContext ctx, Func<Token, bool> TokenCheck)
 		{
 			// Parse the LHS
 			var lhs = Next(ctx);
@@ -57,7 +57,7 @@ namespace MiniME
 		}
 
 		// Parse an expression terminal
-		ast.ExpressionNode ParseExpressionTerminal(ParseContext ctx)
+		ast.ExprNode ParseExpressionTerminal(ParseContext ctx)
 		{
 			switch (t.token)
 			{
@@ -220,7 +220,7 @@ namespace MiniME
 		}
 
 		// Parse member dots, array indexers, function calls
-		ast.ExpressionNode ParseExpressionMember(ParseContext ctx)
+		ast.ExprNode ParseExpressionMember(ParseContext ctx)
 		{
 			var lhs = ParseExpressionTerminal(ctx);
 
@@ -273,7 +273,7 @@ namespace MiniME
 		}
 
 		// Unary operators such as negation, not, increment/decrement
-		ast.ExpressionNode ParseExpressionNegation(ParseContext ctx)
+		ast.ExprNode ParseExpressionNegation(ParseContext ctx)
 		{
 			// Prefix increment
 			if (t.token == Token.increment || t.token == Token.decrement)
@@ -323,25 +323,25 @@ namespace MiniME
 			return lhs;
 		}
 
-		ast.ExpressionNode ParseExpressionMultiply(ParseContext ctx)
+		ast.ExprNode ParseExpressionMultiply(ParseContext ctx)
 		{
 			return ParseBinary(ParseExpressionNegation, ctx, 
 				x=>x == Token.multiply || x == Token.divide || x == Token.modulus);
 		}
 
-		ast.ExpressionNode ParseExpressionAdd(ParseContext ctx)
+		ast.ExprNode ParseExpressionAdd(ParseContext ctx)
 		{
 			return ParseBinary(ParseExpressionMultiply, ctx,
 				x => x == Token.add || x == Token.subtract);
 		}
 
-		ast.ExpressionNode ParseExpressionShift(ParseContext ctx)
+		ast.ExprNode ParseExpressionShift(ParseContext ctx)
 		{
 			return ParseBinary(ParseExpressionAdd, ctx,
 				x => x == Token.shl || x == Token.shr || x==Token.shrz);
 		}
 
-		ast.ExpressionNode ParseExpressionCompareRelation(ParseContext ctx)
+		ast.ExprNode ParseExpressionCompareRelation(ParseContext ctx)
 		{
 			return ParseBinary(ParseExpressionShift,  ctx,
 						x => 
@@ -355,7 +355,7 @@ namespace MiniME
 		}
 
 
-		ast.ExpressionNode ParseExpressionCompareEquality(ParseContext ctx)
+		ast.ExprNode ParseExpressionCompareEquality(ParseContext ctx)
 		{
 			return ParseBinary(ParseExpressionCompareRelation, ctx,
 						x =>
@@ -366,37 +366,37 @@ namespace MiniME
 							);
 		}
 
-		ast.ExpressionNode ParseExpressionBitwiseAnd(ParseContext ctx)
+		ast.ExprNode ParseExpressionBitwiseAnd(ParseContext ctx)
 		{
 			return ParseBinary(ParseExpressionCompareEquality, ctx,
 				x => x == Token.bitwiseAnd);
 		}
 
-		ast.ExpressionNode ParseExpressionBitwiseXor(ParseContext ctx)
+		ast.ExprNode ParseExpressionBitwiseXor(ParseContext ctx)
 		{
 			return ParseBinary(ParseExpressionBitwiseAnd, ctx,
 				x => x == Token.bitwiseXor);
 		}
 
-		ast.ExpressionNode ParseExpressionBitwiseOr(ParseContext ctx)
+		ast.ExprNode ParseExpressionBitwiseOr(ParseContext ctx)
 		{
 			return ParseBinary(ParseExpressionBitwiseXor, ctx,
 				x => x == Token.bitwiseOr);
 		}
 
-		ast.ExpressionNode ParseExpressionLogicalAnd(ParseContext ctx)
+		ast.ExprNode ParseExpressionLogicalAnd(ParseContext ctx)
 		{
 			return ParseBinary(ParseExpressionBitwiseOr, ctx,
 				x => x == Token.logicalAnd);
 		}
 
-		ast.ExpressionNode ParseExpressionLogicalOr(ParseContext ctx)
+		ast.ExprNode ParseExpressionLogicalOr(ParseContext ctx)
 		{
 			return ParseBinary(ParseExpressionLogicalAnd, ctx,
 				x => x == Token.logicalOr);
 		}
 
-		ast.ExpressionNode ParseExpressionTernary(ParseContext ctx)
+		ast.ExprNode ParseExpressionTernary(ParseContext ctx)
 		{
 			var lhs=ParseExpressionLogicalOr(ctx);
 
@@ -418,7 +418,7 @@ namespace MiniME
 
 		}
 
-		ast.ExpressionNode ParseExpressionAssignment(ParseContext ctx)
+		ast.ExprNode ParseExpressionAssignment(ParseContext ctx)
 		{
 			return ParseBinary(ParseExpressionTernary, ctx,
 						x =>
@@ -439,7 +439,7 @@ namespace MiniME
 
 		// Parse an expression that might include comma separated multiple
 		// expressions.
-		ast.ExpressionNode ParseCompositeExpression(ParseContext ctx)
+		ast.ExprNode ParseCompositeExpression(ParseContext ctx)
 		{
 			var lhs = ParseExpressionAssignment(ctx);
 			if (t.token != Token.comma)
@@ -457,7 +457,7 @@ namespace MiniME
 		}
 
 		// Parse a single expression (ie: doesn't support comma operator)
-		ast.ExpressionNode ParseSingleExpression(ParseContext ctx)
+		ast.ExprNode ParseSingleExpression(ParseContext ctx)
 		{
 			return ParseExpressionAssignment(ctx);
 		}
@@ -471,7 +471,7 @@ namespace MiniME
 			t.Next();
 
 			// Optional initial value
-			ast.ExpressionNode InitialValue = null;
+			ast.ExprNode InitialValue = null;
 			if (t.SkipOptional(Token.assign))
 			{
 				InitialValue = ParseSingleExpression(ctx);

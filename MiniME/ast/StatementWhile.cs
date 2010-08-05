@@ -14,7 +14,7 @@ namespace MiniME.ast
 		}
 
 		// Attributes
-		public ExpressionNode Condition;
+		public ExprNode Condition;
 		public CodeBlock Code;
 
 

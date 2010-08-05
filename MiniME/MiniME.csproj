@@ -47,6 +47,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ast\ExprNodeFunction.cs" />
+    <Compile Include="ast\ExprNodeComposite.cs" />
+    <Compile Include="ast\ExprNodeConditional.cs" />
+    <Compile Include="ast\ExprNodeObjectLiteral.cs" />
+    <Compile Include="ast\ExprNodeArrayLiteral.cs" />
+    <Compile Include="ast\ExprNodePostfix.cs" />
+    <Compile Include="ast\ExprNodeUnary.cs" />
+    <Compile Include="ast\ExprNodeBinary.cs" />
+    <Compile Include="ast\ExprNodeRegEx.cs" />
+    <Compile Include="ast\ExprNodeLiteral.cs" />
+    <Compile Include="ast\ExprNodeIndexer.cs" />
+    <Compile Include="ast\ExprNodeNew.cs" />
+    <Compile Include="ast\ExprNodeCall.cs" />
+    <Compile Include="ast\ExprNodeIdentifier.cs" />
     <Compile Include="ast\StatementBlock.cs" />
     <Compile Include="ast\StatementComment.cs" />
     <Compile Include="ast\StatementAccessibility.cs" />
@@ -62,7 +76,7 @@
     <Compile Include="ast\StatementVariableDeclaration.cs" />
     <Compile Include="ast\StatementFor.cs" />
     <Compile Include="ast\StatementIfElse.cs" />
-    <Compile Include="ast\ExpressionNode.cs" />
+    <Compile Include="ast\ExprNode.cs" />
     <Compile Include="ast\StatementReturnThrow.cs" />
     <Compile Include="ast\Node.cs" />
     <Compile Include="ast\Parameter.cs" />
