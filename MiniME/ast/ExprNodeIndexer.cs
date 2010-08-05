@@ -80,5 +80,13 @@ namespace MiniME.ast
 			Index.Visit(visitor);
 		}
 
+
+		public override ExprNode Simplify()
+		{
+			Lhs = Lhs.Simplify();
+			Index = Index.Simplify();
+			return this;
+		}
+
 	}
 }

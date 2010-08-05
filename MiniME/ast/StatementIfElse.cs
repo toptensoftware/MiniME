@@ -9,13 +9,13 @@ namespace MiniME.ast
 	class StatementIfElse : Statement
 	{
 		// Constructor
-		public StatementIfElse(Bookmark bookmark, ExprNode condition) : base(bookmark)
+		public StatementIfElse(Bookmark bookmark, Expression condition) : base(bookmark)
 		{
 			Condition = condition;
 		}
 
 		// Attributes
-		public ExprNode Condition;
+		public Expression Condition;
 		public CodeBlock TrueStatement;
 		public CodeBlock FalseStatement;
 

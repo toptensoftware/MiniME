@@ -153,5 +153,12 @@ namespace MiniME.ast
 			return null;
 		}
 
+
+		public override ExprNode Simplify()
+		{
+			Rhs = Rhs.Simplify();
+			return this;
+		}
+
 	}
 }

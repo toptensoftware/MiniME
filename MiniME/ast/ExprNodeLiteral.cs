@@ -187,5 +187,11 @@ namespace MiniME.ast
 			return Value;
 		}
 
+
+		public override ExprNode Simplify()
+		{
+			return this;
+		}
+
 	}
 }

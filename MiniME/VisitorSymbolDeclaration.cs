@@ -73,9 +73,9 @@ namespace MiniME
 			if (n.GetType() == typeof(ast.StatementExpression))
 			{
 				var exprstmt = (ast.StatementExpression)n;
-				if (exprstmt.Expression.GetType()==typeof(ast.ExprNodeAssignment))
+				if (exprstmt.Expression.RootNode.GetType()==typeof(ast.ExprNodeAssignment))
 				{
-					var assignOp = (ast.ExprNodeAssignment)exprstmt.Expression;
+					var assignOp = (ast.ExprNodeAssignment)exprstmt.Expression.RootNode;
 					if (assignOp.Op == Token.assign)
 					{
 						// Lhs must be an identifier member

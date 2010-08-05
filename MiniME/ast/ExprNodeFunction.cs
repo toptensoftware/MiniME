@@ -94,5 +94,11 @@ namespace MiniME.ast
 			}
 			Code.Visit(visitor);
 		}
+
+		public override ExprNode Simplify()
+		{
+			return this;
+		}
+
 	}
 }

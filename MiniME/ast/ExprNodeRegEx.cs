@@ -49,6 +49,12 @@ namespace MiniME.ast
 		{
 		}
 
+
+		public override ExprNode Simplify()
+		{
+			return this;
+		}
+
 	}
 
 }

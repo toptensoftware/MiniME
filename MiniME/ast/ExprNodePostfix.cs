@@ -67,5 +67,12 @@ namespace MiniME.ast
 			Lhs.Visit(visitor);
 		}
 
+		public override ExprNode Simplify()
+		{
+			Lhs = Lhs.Simplify();
+			return this;
+		}
+
+
 	}
 }

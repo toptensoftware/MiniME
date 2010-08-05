@@ -15,7 +15,7 @@ namespace MiniME.ast
 		}
 
 		// Constructor
-		public StatementReturnThrow(Bookmark bookmark, Token op, ExprNode value) : base(bookmark)
+		public StatementReturnThrow(Bookmark bookmark, Token op, Expression value) : base(bookmark)
 		{
 			Op = op;
 			Value = value;
@@ -23,7 +23,7 @@ namespace MiniME.ast
 
 		// Attributes
 		public Token Op;
-		public ExprNode Value;
+		public Expression Value;
 
 		public override void Dump(int indent)
 		{

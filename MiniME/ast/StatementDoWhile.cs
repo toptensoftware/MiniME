@@ -14,7 +14,7 @@ namespace MiniME.ast
 		}
 
 		// Attributes
-		public ExprNode Condition;
+		public Expression Condition;
 		public CodeBlock Code;
 
 		public override void Dump(int indent)

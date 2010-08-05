@@ -58,5 +58,14 @@ namespace MiniME.ast
 			FalseResult.Visit(visitor);
 		}
 
+
+		public override ExprNode Simplify()
+		{
+			Condition = Condition.Simplify();
+			TrueResult = Condition.Simplify();
+			FalseResult = Condition.Simplify();
+			return this;
+		}
+
 	}
 }

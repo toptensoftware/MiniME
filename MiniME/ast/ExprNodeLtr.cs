@@ -319,5 +319,16 @@ namespace MiniME.ast
 			return lhs;
 		}
 
+
+		public override ExprNode Simplify()
+		{
+			Lhs = Lhs.Simplify();
+			foreach (var t in Terms)
+			{
+				t.Rhs = t.Rhs.Simplify();
+			}
+			return this;
+		}
+
 	}
 }

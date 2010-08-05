@@ -15,8 +15,8 @@ namespace MiniME.ast
 
 		// Attributes
 		public Statement Initialize;
-		public ExprNode Condition;
-		public ExprNode Increment;
+		public Expression Condition;
+		public Expression Increment;
 		public CodeBlock Code;
 
 		public override void Dump(int indent)

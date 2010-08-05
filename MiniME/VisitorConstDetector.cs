@@ -34,7 +34,7 @@ namespace MiniME
 						continue;
 
 					// Must evaluate to a constant
-					object val = v.InitialValue.EvalConstLiteral();
+					object val = v.InitialValue.RootNode.EvalConstLiteral();
 					if (val==null)
 						continue;
 

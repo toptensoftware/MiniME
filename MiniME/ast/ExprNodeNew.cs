@@ -63,5 +63,13 @@ namespace MiniME.ast
 			foreach (var c in Arguments)
 				c.Visit(visitor);
 		}
+
+		public override ExprNode Simplify()
+		{
+			ObjectType = ObjectType.Simplify();
+			SimplifyList(Arguments);
+			return this;
+		}
+
 	}
 }

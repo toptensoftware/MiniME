@@ -16,8 +16,8 @@ namespace MiniME.ast
 		// Attributes
 		// Either VariableDeclaration or Iterator used, not both
 		public Statement VariableDeclaration;		// for (var x in ...)
-		public ExprNode Iterator;				// for (x in ...)
-		public ExprNode Collection;
+		public Expression Iterator;				// for (x in ...)
+		public Expression Collection;
 		public CodeBlock Code;
 
 

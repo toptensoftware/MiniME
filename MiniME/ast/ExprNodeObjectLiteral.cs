@@ -102,5 +102,15 @@ namespace MiniME.ast
 			}
 		}
 
+		public override ExprNode Simplify()
+		{
+			foreach (var i in Values)
+			{
+				i.Value = i.Value.Simplify();
+			}
+			return this;
+		}
+
+
 	}
 }

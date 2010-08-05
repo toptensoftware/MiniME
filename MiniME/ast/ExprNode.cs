@@ -70,6 +70,23 @@ namespace MiniME.ast
 			return null;
 		}
 
-	}
+		// Override in expression nodes that can simplify themselves.
+		public abstract ExprNode Simplify();
 
+		// Simplify a list of nodes
+		public static void SimplifyList(List<ExprNode> nodes)
+		{
+			// Simplify all nodes
+			for (int i = 0; i < nodes.Count; i++)
+			{
+				var v = nodes[i];
+				var vNew = v.Simplify();
+				if (v != vNew)
+				{
+					nodes.RemoveAt(i);
+					nodes.Insert(i, vNew);
+				}
+			}
+		}
+	}
 }

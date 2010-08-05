@@ -47,6 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ast\Expression.cs" />
     <Compile Include="ast\ExprNodeLtr.cs" />
     <Compile Include="ast\ExprNodeFunction.cs" />
     <Compile Include="ast\ExprNodeComposite.cs" />
@@ -55,7 +56,7 @@
     <Compile Include="ast\ExprNodeArrayLiteral.cs" />
     <Compile Include="ast\ExprNodePostfix.cs" />
     <Compile Include="ast\ExprNodeUnary.cs" />
-    <Compile Include="ast\ExprNodeBinary.cs" />
+    <Compile Include="ast\ExprNodeAssignment.cs" />
     <Compile Include="ast\ExprNodeRegEx.cs" />
     <Compile Include="ast\ExprNodeLiteral.cs" />
     <Compile Include="ast\ExprNodeIndexer.cs" />
@@ -84,6 +85,7 @@
     <Compile Include="ast\Statement.cs" />
     <Compile Include="ast\CodeBlock.cs" />
     <Compile Include="CommandLine.cs" />
+    <Compile Include="VisitorSimplifyExpressions.cs" />
     <Compile Include="TextFileUtils.cs" />
     <Compile Include="VisitorCombineVarDecls.cs" />
     <Compile Include="VisitorScopeBuilder.cs" />

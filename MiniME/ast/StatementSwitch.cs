@@ -9,13 +9,13 @@ namespace MiniME.ast
 	class StatementSwitch : Statement
 	{
 		// Constructor
-		public StatementSwitch(Bookmark bookmark, ExprNode testExpression) : base(bookmark)
+		public StatementSwitch(Bookmark bookmark, Expression testExpression) : base(bookmark)
 		{
 			TestExpression = testExpression;
 		}
 
 		// Attributes
-		public ExprNode TestExpression;
+		public Expression TestExpression;
 		public List<Case> Cases = new List<Case>();
 
 		public override void Dump(int indent)
@@ -108,7 +108,7 @@ namespace MiniME.ast
 
 
 		// Create a new case clause
-		public Case AddCase(ExprNode Value)
+		public Case AddCase(Expression Value)
 		{
 			var c=new Case(Value);
 			Cases.Add(c);
@@ -119,13 +119,13 @@ namespace MiniME.ast
 		public class Case
 		{
 			// Constructor
-			public Case(ExprNode value)
+			public Case(Expression value)
 			{
 				Value = value;
 			}
 
 			// Attributes
-			public ExprNode Value;
+			public Expression Value;
 			public CodeBlock Code;
 
 			// Add code to this case clause.

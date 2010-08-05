@@ -58,5 +58,12 @@ namespace MiniME.ast
 		}
 
 
+		public override ExprNode Simplify()
+		{
+			SimplifyList(Expressions);
+			return this;
+		}
+
+
 	}
 }

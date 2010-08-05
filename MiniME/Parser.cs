@@ -79,7 +79,7 @@ namespace MiniME
 				case Token.openRound:
 				{
 					t.Next();
-					var temp = ParseCompositeExpression(0);
+					var temp = ParseCompositeExpressionNode(0);
 					t.SkipRequired(Token.closeRound);
 					return temp;
 				}
@@ -110,7 +110,7 @@ namespace MiniME
 						else
 						{
 							// Non-empty expression
-							temp.Values.Add(ParseSingleExpression(0));
+							temp.Values.Add(ParseSingleExpressionNode(0));
 
 							// End of list?
 							if (!t.SkipOptional(Token.comma))
@@ -159,7 +159,7 @@ namespace MiniME
 						t.SkipRequired(Token.colon);
 
 						// Value
-						temp.Values.Add(new ast.KeyExpressionPair(key, ParseSingleExpression(0)));
+						temp.Values.Add(new ast.KeyExpressionPair(key, ParseSingleExpressionNode(0)));
 
 						// Another key/value pair
 						if (!t.SkipOptional(Token.comma))
@@ -202,7 +202,7 @@ namespace MiniME
 						{
 							while (true)
 							{
-								newOp.Arguments.Add(ParseSingleExpression(0));
+								newOp.Arguments.Add(ParseSingleExpressionNode(0));
 								if (t.SkipOptional(Token.comma))
 									continue;
 								else
@@ -246,7 +246,7 @@ namespace MiniME
 				// Array indexer '[]'
 				if (t.SkipOptional(Token.openSquare))
 				{
-					var temp = new ast.ExprNodeIndexer(t.GetBookmark(), lhs, ParseCompositeExpression(0));
+					var temp = new ast.ExprNodeIndexer(t.GetBookmark(), lhs, ParseCompositeExpressionNode(0));
 					t.SkipRequired(Token.closeSquare);
 					lhs = temp;
 					continue;
@@ -261,7 +261,7 @@ namespace MiniME
 					{
 						while (true)
 						{
-							temp.Arguments.Add(ParseSingleExpression(0));
+							temp.Arguments.Add(ParseSingleExpressionNode(0));
 							if (t.SkipOptional(Token.comma))
 								continue;
 							else
@@ -451,7 +451,7 @@ namespace MiniME
 
 		// Parse an expression that might include comma separated multiple
 		// expressions.
-		ast.ExprNode ParseCompositeExpression(ParseContext ctx)
+		ast.ExprNode ParseCompositeExpressionNode(ParseContext ctx)
 		{
 			var lhs = ParseExpressionAssignment(ctx);
 			if (t.token != Token.comma)
@@ -469,9 +469,23 @@ namespace MiniME
 		}
 
 		// Parse a single expression (ie: doesn't support comma operator)
-		ast.ExprNode ParseSingleExpression(ParseContext ctx)
+		ast.ExprNode ParseSingleExpressionNode(ParseContext ctx)
 		{
 			return ParseExpressionAssignment(ctx);
+		}
+
+		
+		// Parse an expression that might include comma separated multiple
+		// expressions.
+		ast.Expression ParseCompositeExpression(ParseContext ctx)
+		{
+			return new ast.Expression(ParseCompositeExpressionNode(ctx));
+		}
+
+		// Parse a single expression (ie: doesn't support comma operator)
+		ast.Expression ParseSingleExpression(ParseContext ctx)
+		{
+			return new ast.Expression(ParseSingleExpressionNode(ctx));
 		}
  
 		// Parse a single variable declaration
@@ -483,7 +497,7 @@ namespace MiniME
 			t.Next();
 
 			// Optional initial value
-			ast.ExprNode InitialValue = null;
+			ast.Expression InitialValue = null;
 			if (t.SkipOptional(Token.assign))
 			{
 				InitialValue = ParseSingleExpression(ctx);
@@ -751,8 +765,8 @@ namespace MiniME
 								{
 									throw new CompileError("Syntax error - invalid iterator variable declarations in for loop", t);
 								}
-								if ((exprstmtForEach.Expression as ast.ExprNodeIdentifier) == null &&
-									(exprstmtForEach.Expression as ast.ExprNodeIndexer) == null)
+								if ((exprstmtForEach.Expression.RootNode as ast.ExprNodeIdentifier) == null &&
+									(exprstmtForEach.Expression.RootNode as ast.ExprNodeIndexer) == null)
 								{
 									throw new CompileError("Syntax error - invalid iterator variable declarations in for loop", t);
 								}
@@ -885,7 +899,7 @@ namespace MiniME
 					// Function declaration
 					t.Next();
 					t.Require(Token.identifier);
-					var stmt = new ast.StatementExpression(bmk, ParseFunction());
+					var stmt = new ast.StatementExpression(bmk, new ast.Expression(ParseFunction()));
 					t.SkipOptional(Token.semicolon);
 					return stmt;
 				}
