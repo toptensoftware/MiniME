@@ -39,7 +39,7 @@ namespace MiniME.ast
 
 		public override OperatorPrecedence GetPrecedence()
 		{
-			return OperatorPrecedence.negation;
+			return OperatorPrecedence.unary;
 		}
 
 		public override bool Render(RenderContext dest)

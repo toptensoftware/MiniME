@@ -200,7 +200,16 @@
     <EmbeddedResource Include="TestScripts\ConstElimination.txt" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="TestScripts\OperatorPrecedence.txt" />
+    <EmbeddedResource Include="TestScripts\SimplifyAdd.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\SimplifyUnary.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\SimplifyMultiply.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TestScripts\OperatorLtrPrecedence.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

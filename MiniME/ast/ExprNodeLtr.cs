@@ -17,6 +17,11 @@ namespace MiniME.ast
 	{
 		public class Term
 		{
+			public Term(ExprNode rhs, Token op)
+			{
+				Rhs = rhs;
+				Op = op;
+			}
 			public ExprNode Rhs;
 			public Token Op;
 		}
@@ -29,10 +34,7 @@ namespace MiniME.ast
 
 		public void AddTerm(Token Op, ExprNode Rhs)
 		{
-			var t = new Term();
-			t.Op = Op;
-			t.Rhs = Rhs;
-			Terms.Add(t);
+			Terms.Add(new Term(Rhs, Op));
 		}
 
 		// Attributes
@@ -108,9 +110,6 @@ namespace MiniME.ast
 				case Token.bitwiseAnd:
 					return OperatorPrecedence.bitand;
 
-				case Token.logicalNot:
-					return OperatorPrecedence.logand;
-
 				case Token.logicalOr:
 					return OperatorPrecedence.logor;
 
@@ -178,7 +177,6 @@ namespace MiniME.ast
 					case Token.bitwiseXor:
 					case Token.bitwiseOr:
 					case Token.bitwiseAnd:
-					case Token.logicalNot:
 					case Token.logicalOr:
 					case Token.logicalAnd:
 					case Token.kw_in:
@@ -319,14 +317,172 @@ namespace MiniME.ast
 			return lhs;
 		}
 
+		public Token InverseOp(Token op)
+		{
+			switch (op)
+			{
+				case Token.add:
+					return Token.subtract;
+				case Token.subtract:
+					return Token.add;
+				case Token.multiply:
+					return Token.divide;
+				case Token.divide:
+					return Token.multiply;
+			}
+
+			System.Diagnostics.Debug.Assert(false);
+			return Token.eof;
+		}
+
+		public int IndexOfLastModulusOp()
+		{
+			for (int i = Terms.Count - 1; i >= 0; i--)
+			{
+				if (Terms[i].Op == Token.modulus)
+					return i;
+			}
+
+			return -1;
+		}
 
 		public override ExprNode Simplify()
 		{
+			// First, simplify all our terms
 			Lhs = Lhs.Simplify();
 			foreach (var t in Terms)
 			{
 				t.Rhs = t.Rhs.Simplify();
 			}
+
+			// Combine add/subtract subterms
+			if (GetPrecedence() == OperatorPrecedence.add)
+			{
+				for (int i=0; i<Terms.Count; i++)
+				{
+					var t = Terms[i];
+
+					// Negative term, swap our own operator
+					// eg: a - -b -> a+b
+					var unaryTerm = t.Rhs as ExprNodeUnary;
+					if (unaryTerm != null)
+					{
+						if (unaryTerm.Op == Token.subtract)
+						{
+							t.Op = InverseOp(t.Op);
+							t.Rhs = unaryTerm.Rhs;
+						}
+					}
+
+					// Nested LTR add operation
+					// eg: x-(a+b) => x-a-b
+					var ltrTerm = t.Rhs as ExprNodeLtr;
+					if (ltrTerm != null && ltrTerm.GetPrecedence()==OperatorPrecedence.add)
+					{
+						// Move the first child term to self
+						t.Rhs=ltrTerm.Lhs;
+
+						// Negate the other child terms
+						if (t.Op == Token.subtract)
+						{
+							// Swap the operator of other terms
+							foreach (var nestedTerm in ltrTerm.Terms)
+							{
+								nestedTerm.Op = InverseOp(nestedTerm.Op);
+							}
+						}
+
+						// Insert the inner terms
+						Terms.InsertRange(i + 1, ltrTerm.Terms);
+
+						// Continue with self again to catch new subtract of negative
+						//  eg: we've now done this: x-(-a+b) => x- -a + b
+						//      need to reprocess this term to get		x+a+b
+						i--;
+					}
+				}
+			}
+
+			// Combine add/subtract subterms
+			if (GetPrecedence() == OperatorPrecedence.multiply)
+			{
+				// Remove negatives on any modulus ops  eg: a%-b => a%b
+				foreach (var t in Terms)
+				{
+					if (t.Op == Token.modulus)
+					{
+						var unaryTerm = t.Rhs as ExprNodeUnary;
+						if (unaryTerm != null && unaryTerm.Op == Token.subtract)
+						{
+							t.Rhs = unaryTerm.Rhs;
+						}
+					}
+				}
+
+				// Nested LTR multiply operation
+				// eg: x*(a*b) => x*a*b
+				for (int i = 0; i < Terms.Count; i++)
+				{
+					var t = Terms[i];
+
+					// nb: we don't do x/(a*b)=>x/a/b on the (possibly flawed) assumption div is slower
+					if (t.Op != Token.multiply)
+						continue;
+
+					var ltrTerm = t.Rhs as ExprNodeLtr;
+					if (ltrTerm != null && ltrTerm.GetPrecedence() == OperatorPrecedence.multiply)
+					{
+						int iLastMod = ltrTerm.IndexOfLastModulusOp();
+
+						if (iLastMod < 0)
+						{
+							// Move the first child term to self
+							t.Rhs = ltrTerm.Lhs;
+
+							// Insert the inner terms
+							Terms.InsertRange(i + 1, ltrTerm.Terms);
+						}
+						else
+						{
+							// Move the trailing multiply/divs to self
+							// ie: a*(b%c*d) => a*(b%c)*d
+							int iInsertPos = i + 1;
+							while (iLastMod + 1 < ltrTerm.Terms.Count)
+							{
+								Terms.Insert(iInsertPos++, ltrTerm.Terms[iLastMod+1]);
+								ltrTerm.Terms.RemoveAt(iLastMod + 1);
+							}
+						}
+					}
+				}
+
+				// Remove -ve * -ve    eg: -a * -b => a*b
+
+				// Step 1 - make all negated terms, positive.
+				//			and count how many
+				int negateCount = 0;
+				foreach (var t in Terms)
+				{
+					var unaryTerm = t.Rhs as ExprNodeUnary;
+					if (unaryTerm != null && unaryTerm.Op == Token.subtract)
+					{
+						// Remove the negate
+						t.Rhs = unaryTerm.Rhs;
+						negateCount++;
+					}
+				}
+
+				// Step 2 - if there was an odd number of negates in the 
+				//			other terms, negate the Lhs term
+				if ((negateCount % 2) == 1)
+				{
+					var temp = new ExprNodeUnary(Lhs.Bookmark, Lhs, Token.subtract);
+					Lhs = temp.Simplify();
+				}
+
+
+			}
+
 			return this;
 		}
 

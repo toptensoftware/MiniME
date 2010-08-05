@@ -41,16 +41,18 @@ namespace MiniME.ast
 		{
 			switch (Op)
 			{
-				case Token.bitwiseNot:
-				case Token.logicalNot:
 				case Token.add:
 				case Token.subtract:
+					return OperatorPrecedence.unary;
+
+				case Token.bitwiseNot:
+				case Token.logicalNot:
 				case Token.increment:
 				case Token.decrement:
 				case Token.kw_typeof:
 				case Token.kw_void:
 				case Token.kw_delete:
-					return OperatorPrecedence.negation;
+					return OperatorPrecedence.unary;
 
 				default:
 					System.Diagnostics.Debug.Assert(false);
@@ -156,7 +158,88 @@ namespace MiniME.ast
 
 		public override ExprNode Simplify()
 		{
+			// Simplify the RHS
 			Rhs = Rhs.Simplify();
+
+			// Redundant positive operator?
+			if (Op == Token.add)
+			{
+				return Rhs;
+			}
+
+			// Negatives?
+			if (Op == Token.subtract)
+			{
+				// Double negative
+				var rhsUnary = Rhs as ExprNodeUnary;
+				if (rhsUnary!=null && rhsUnary.Op == Token.subtract)
+				{
+					return rhsUnary.Rhs;
+				}
+
+				// Negative Add/Subtract
+				var rhsLtr = Rhs as ExprNodeLtr;
+				if (rhsLtr != null && rhsLtr.GetPrecedence() == OperatorPrecedence.add)
+				{
+					//eg: convert -(a+b) to -a-b
+
+					// Swap all operators
+
+					// Wrap the LHS in a unary negative, then simplify it again
+					rhsLtr.Lhs = new ast.ExprNodeUnary(Bookmark, rhsLtr.Lhs, Token.subtract);
+					rhsLtr.Lhs = rhsLtr.Lhs.Simplify();
+
+					// Swap the add/subtract on all other terms
+					foreach (var t in rhsLtr.Terms)
+					{
+						switch (t.Op)
+						{
+							case Token.add:
+								t.Op = Token.subtract;
+								break;
+
+							case Token.subtract:
+								t.Op = Token.add;
+								break;
+
+							default:
+								System.Diagnostics.Debug.Assert(false);
+								break;
+						}
+					}
+
+					// Return the simplified LTR expression
+					return rhsLtr;
+				}
+
+				// Negative of multiply terms
+				if (rhsLtr != null && rhsLtr.GetPrecedence() == OperatorPrecedence.multiply)
+				{
+					// eg: convert -(a*b) to -a*b
+
+					// Wrap the first term in a unary negative, then simplify it again
+					rhsLtr.Lhs = new ast.ExprNodeUnary(Bookmark, rhsLtr.Lhs, Token.subtract);
+					return rhsLtr.Simplify();
+				}
+			}
+
+			if (Op == Token.bitwiseNot || Op == Token.logicalNot)
+			{
+				/*
+				// Double negative  eg: !!x   or ~~x
+				var rhsUnary = Rhs as ExprNodeUnary;
+				if (rhsUnary != null && rhsUnary.Op == Op)
+				{
+					return rhsUnary.Rhs;
+				}
+				 */
+
+				// Actually, don't do the above cause 
+				//		!! converts to bool
+				//		~~ converts bool to integer
+
+			}
+
 			return this;
 		}
 

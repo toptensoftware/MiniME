@@ -30,7 +30,7 @@ namespace MiniME.ast
 		bitshift,
 		add,
 		multiply,
-		negation,
+		unary,
 		function,
 		terminal,
 	}
