@@ -216,6 +216,5 @@ namespace MiniME
 
 		Compiler m_Compiler;
 		List<Scope> m_ScopeStack = new List<Scope>();
-		StringBuilder m_sb = new StringBuilder();
 	}
 }

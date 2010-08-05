@@ -32,6 +32,7 @@ namespace MiniME
 
 		// Operators
 		assign,
+		addAssign,
 		subtractAssign,
 		multiplyAssign,
 		divideAssign,
@@ -52,7 +53,6 @@ namespace MiniME
 		shl,
 		shr,
 		shrz,
-		addAssign,
 		compareEQ,
 		compareNE,
 		compareLT,

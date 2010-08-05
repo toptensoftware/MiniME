@@ -48,9 +48,11 @@ namespace MiniME.ast
 		public abstract OperatorPrecedence GetPrecedence();
 
 		// Render an child node, wrapping it in parentheses if necessary
-		public void WrapAndRender(RenderContext dest, ExpressionNode other)
+		public void WrapAndRender(RenderContext dest, ExpressionNode other, bool bWrapEqualPrecedence)
 		{
-			if (other.GetPrecedence() < this.GetPrecedence())
+			var precOther=other.GetPrecedence();
+			var precThis = this.GetPrecedence();
+			if (precOther < precThis || (precOther==precThis && bWrapEqualPrecedence))
 			{
 				dest.Append("(");
 				other.Render(dest);
@@ -114,7 +116,7 @@ namespace MiniME.ast
 		{
 			if (Lhs != null)
 			{
-				WrapAndRender(dest, Lhs);
+				WrapAndRender(dest, Lhs, false);
 				dest.Append(".");
 				dest.Append(dest.Members.GetObfuscatedSymbol(Name));
 			}
@@ -174,7 +176,7 @@ namespace MiniME.ast
 
 		public override bool Render(RenderContext dest)
 		{
-			WrapAndRender(dest, Lhs);
+			WrapAndRender(dest, Lhs, false);
 			dest.Append("(");
 			bool first = true;
 			foreach (var a in Arguments)
@@ -228,7 +230,7 @@ namespace MiniME.ast
 		public override bool Render(RenderContext dest)
 		{
 			dest.Append("new");
-			WrapAndRender(dest, ObjectType);
+			WrapAndRender(dest, ObjectType, false);
 			dest.Append("(");
 			bool first = true;
 			foreach (var a in Arguments)
@@ -294,7 +296,7 @@ namespace MiniME.ast
 
 		public override bool Render(RenderContext dest)
 		{
-			WrapAndRender(dest, Lhs);
+			WrapAndRender(dest, Lhs, false);
 
 			string str = GetIdentifier();
 			if (str != null)
@@ -636,7 +638,7 @@ namespace MiniME.ast
 		public override bool Render(RenderContext dest)
 		{
 			// LHS
-			WrapAndRender(dest, Lhs);
+			WrapAndRender(dest, Lhs, false);
 
 			// Operator
 			switch (Op)
@@ -702,7 +704,7 @@ namespace MiniME.ast
 			}
 
 			// RHS
-			WrapAndRender(dest, Rhs);
+			WrapAndRender(dest, Rhs, true);
 			return true;
 		}
 
@@ -900,7 +902,7 @@ namespace MiniME.ast
 			}
 
 			// RHS
-			WrapAndRender(dest, Rhs);
+			WrapAndRender(dest, Rhs, false);
 			return true;
 		}
 
@@ -999,7 +1001,7 @@ namespace MiniME.ast
 		{
 			dest.DisableLineBreaks();
 
-			WrapAndRender(dest, Lhs);
+			WrapAndRender(dest, Lhs, false);
 			switch (Op)
 			{
 				case Token.increment:
@@ -1067,7 +1069,7 @@ namespace MiniME.ast
 					dest.Append(",");
 				else
 					bFirst = false;
-				WrapAndRender(dest, e);
+				WrapAndRender(dest, e, false);
 			}
 			dest.Append(']');
 			return true;
@@ -1205,11 +1207,11 @@ namespace MiniME.ast
 
 		public override bool Render(RenderContext dest)
 		{
-			WrapAndRender(dest, Condition);
+			WrapAndRender(dest, Condition, false);
 			dest.Append('?');
-			WrapAndRender(dest, TrueResult);
+			WrapAndRender(dest, TrueResult, false);
 			dest.Append(':');
-			WrapAndRender(dest, FalseResult);
+			WrapAndRender(dest, FalseResult, false);
 			return true;
 		}
 
@@ -1254,7 +1256,7 @@ namespace MiniME.ast
 				if (i > 0)
 					dest.Append(',');
 
-				WrapAndRender(dest, Expressions[i]);
+				WrapAndRender(dest, Expressions[i], false);
 			}
 			return true;
 		}

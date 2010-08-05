@@ -11,12 +11,11 @@ namespace MiniME
 	internal class RenderContext
 	{
 		// Constructor
-		public RenderContext(Compiler c, SymbolAllocator SymbolAllocator, SymbolAllocator MemberAllocator, SymbolScope rootScope)
+		public RenderContext(Compiler c, SymbolAllocator SymbolAllocator, SymbolAllocator MemberAllocator)
 		{
 			m_Compiler = c;
 			m_SymbolAllocator = SymbolAllocator;
 			m_MemberAllocator = MemberAllocator;
-			EnterScope(rootScope);
 		}
 
 		// Get the owning compiler

@@ -68,6 +68,7 @@
     <Compile Include="ast\Parameter.cs" />
     <Compile Include="ast\Statement.cs" />
     <Compile Include="ast\CodeBlock.cs" />
+    <Compile Include="CommandLine.cs" />
     <Compile Include="TextFileUtils.cs" />
     <Compile Include="VisitorCombineVarDecls.cs" />
     <Compile Include="VisitorScopeBuilder.cs" />
