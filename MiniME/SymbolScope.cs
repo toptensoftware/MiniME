@@ -237,34 +237,28 @@ namespace MiniME
 			return null;
 		}
 
-		public void AddAccessibilitySpec(Bookmark bmk, ast.AccessibilitySpec spec)
+		public void AddAccessibilitySpec(Bookmark bmk, AccessibilitySpec spec)
 		{
-			string strExplicit = spec.GetExplicitMemberName();
-			if (strExplicit != null)
+			// Just store wildcards for now
+			if (spec.IsWildcard())
 			{
-				Symbol s;
-				if (spec.GetSpecType() == ast.AccessibilitySpec.Type.Global)
-				{
-					s = Symbols.DefineSymbol(strExplicit);
-				}
-				else
-				{
-					s = Members.DefineSymbol(strExplicit);
-				}
+				m_AccessibilitySpecs.Add(spec);
+				return;
+			}
 
-				// Mark obfuscation for this symbol
-				s.Accessibility = spec.GetAccessibility();
+
+			Symbol s;
+			if (spec.IsMemberSpec())
+			{
+				s = Members.DefineSymbol(spec.GetExplicitName());
 			}
 			else
 			{
-				m_AccessibilitySpecs.Add(spec);
+				s = Symbols.DefineSymbol(spec.GetExplicitName());
 			}
-		}
 
-		public bool DoesIdentifierMatchAccessibilitySpec(ast.ExprNodeIdentifier identifier)
-		{
-
-			return false;
+			// Mark obfuscation for this symbol
+			s.Accessibility = spec.GetAccessibility();
 		}
 
 		public void ProcessAccessibilitySpecs(string identifier)
@@ -272,7 +266,7 @@ namespace MiniME
 			// Check accessibility specs
 			foreach (var spec in m_AccessibilitySpecs)
 			{
-				if (spec.IsWildcard() && spec.DoesMatchDeclaration(identifier))
+				if (spec.IsWildcard() && spec.DoesMatch(identifier))
 				{
 					var symbol=Symbols.DefineSymbol(identifier);
 					if (symbol.Accessibility==Accessibility.Default)
@@ -286,20 +280,17 @@ namespace MiniME
 				OuterScope.ProcessAccessibilitySpecs(identifier);
 		}
 
-		public void ProcessAccessibilitySpecs(ast.ExprNodeIdentifier identifier)
+		public void ProcessAccessibilitySpecs(ast.ExprNodeIdentifier target, string identifier)
 		{
 			// Check accessibility specs
 			foreach (var spec in m_AccessibilitySpecs)
 			{
-				if (spec.DoesMatch(identifier) && spec.GetExplicitMemberName()==null)
+				if (spec.IsWildcard() && spec.DoesMatch(target, identifier))
 				{
-					if (identifier.Lhs != null)
-					{
-						var symbol=Members.DefineSymbol(identifier.Name);
-						if (symbol.Accessibility == Accessibility.Default)
-							symbol.Accessibility = spec.GetAccessibility();
-						return;
-					}
+					var symbol=Members.DefineSymbol(identifier);
+					if (symbol.Accessibility == Accessibility.Default)
+						symbol.Accessibility = spec.GetAccessibility();
+					return;
 				}
 			}
 
@@ -315,7 +306,7 @@ namespace MiniME
 		public SymbolFrequency m_AllSymbols;
 		public SymbolFrequency Members = new SymbolFrequency();
 		public SymbolFrequency m_AllMembers;
-		public List<ast.AccessibilitySpec> m_AccessibilitySpecs=new List<ast.AccessibilitySpec>();
+		public List<AccessibilitySpec> m_AccessibilitySpecs=new List<AccessibilitySpec>();
 	}
 }
 

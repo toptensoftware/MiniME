@@ -6,20 +6,14 @@ using System.IO;
 
 /*
  * TODO:
+ * - Privatisation of object literals
  * - Ability to change directives prefix `-prefix:mm`
- * - A directive to declare external symbols that shouldn't be re-used	(or just use var keyword?) // mm:var 
- * - Ability to obfuscate global scope variables
- * - Ability to remove credit comment `-ivedonated`
+ * - Ability to display a list of non-obfuscated symbols `-whatsleft`
+ * - Ability to show summary of what was done `-whathappened`
  * - Warning on unreachable code (after return, break or continue)
  * - Warning on unused locals  (functions and variable - not parameters)
  * - Automatic member privatisation by simple prefix  // mm:private
- * - Privatisation of object literals
- 
- * - Ability to display a list of non-obfuscated symbols `-whatsleft`
- * - Ability to show summary of what was done `-whathappened`
- * - Diagnostic mode to reparse generated content `-diag-selfcheck`
  * - Better optimizations of constant expressions
- * - Ability to not obfuscate specific instances of members (use target.['member'])
  */
 
 namespace MiniME

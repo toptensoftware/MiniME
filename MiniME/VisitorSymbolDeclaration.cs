@@ -79,14 +79,47 @@ namespace MiniME
 					if (assignOp.Op == Token.assign)
 					{
 						// Lhs must be an identifier member
+						// eg: target.member=<expr>
 						if (assignOp.Lhs.GetType()==typeof(ast.ExprNodeIdentifier))
 						{
 							var identifier=(ast.ExprNodeIdentifier)assignOp.Lhs;
 							if (identifier.Lhs!=null)
 							{
-								currentScope.ProcessAccessibilitySpecs(identifier);
+								// For member specs, the identifier must have a lhs
+								if (identifier.Lhs.GetType() != typeof(ast.ExprNodeIdentifier))
+									return false;
+
+								currentScope.ProcessAccessibilitySpecs((ast.ExprNodeIdentifier)identifier.Lhs, identifier.Name);
 							}
 						}
+
+						// Assignment of an object literal
+						// eg: target={member:value,member:value};
+						if (assignOp.Lhs.GetType() == typeof(ast.ExprNodeIdentifier) &&
+							assignOp.Rhs.GetType() == typeof(ast.ExprNodeObjectLiteral))
+						{
+							var target = (ast.ExprNodeIdentifier)assignOp.Lhs;
+							var literal=(ast.ExprNodeObjectLiteral)assignOp.Rhs;
+
+							if (target.Lhs == null)
+							{
+								foreach (var x in literal.Values)
+								{
+									var identifierKey=x.Key as ast.ExprNodeIdentifier;
+									if (identifierKey!=null && identifierKey.Lhs==null)
+									{
+										currentScope.ProcessAccessibilitySpecs(target, identifierKey.Name);
+									}
+								}
+							
+							}
+						}
+						/*
+						if (assignOp.Rhs.GetType() == typeof(ast.ExprNodeObjectLiteral))
+						{
+							var literal=ast.ExprNode
+						}
+						 */
 					}
 				}
 			}

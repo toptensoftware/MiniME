@@ -85,6 +85,7 @@
     <Compile Include="ast\Statement.cs" />
     <Compile Include="ast\CodeBlock.cs" />
     <Compile Include="CommandLine.cs" />
+    <Compile Include="AccessibilitySpec.cs" />
     <Compile Include="VisitorSimplifyExpressions.cs" />
     <Compile Include="TextFileUtils.cs" />
     <Compile Include="VisitorCombineVarDecls.cs" />

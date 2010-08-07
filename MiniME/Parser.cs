@@ -146,7 +146,7 @@ namespace MiniME
 						object key;
 						if (t.token == Token.identifier)
 						{
-							key = t.identifier;
+							key = new ast.ExprNodeIdentifier(t.GetBookmark(), t.identifier);
 						}
 						else
 						{
@@ -917,7 +917,7 @@ namespace MiniME
 					var stmt = new ast.StatementAccessibility(bmk);
 					foreach (var symbol in t.identifier.Split(','))
 					{
-						var spec = new ast.AccessibilitySpec();
+						var spec = new AccessibilitySpec();
 						if (!spec.Parse(t.token==Token.directive_private ? Accessibility.Private : Accessibility.Public, 
 											symbol))
 						{

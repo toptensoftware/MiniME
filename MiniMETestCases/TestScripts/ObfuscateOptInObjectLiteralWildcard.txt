@@ -1,0 +1,7 @@
+﻿// private:x.
+
+x={priv_var1:23, priv_var2: 24}
+alert(x.priv_var1);
+-----
+x={a:23,b:24};alert(x.a)
+-----

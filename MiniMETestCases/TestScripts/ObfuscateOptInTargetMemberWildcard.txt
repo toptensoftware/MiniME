@@ -1,0 +1,12 @@
+﻿// private:pt.m_*
+
+var pt={};
+pt.m_x=23;			// Should be obfuscated
+pt.m_y=24;			// Should be obfuscated
+var delta={}
+delta.m_dx=23;			// Should not be obfuscated
+delta.m_dy=24;			// Should not be obfuscated
+
+-----
+var pt={};pt.a=23;pt.b=24;var delta={};delta.m_dx=23;delta.m_dy=24
+-----

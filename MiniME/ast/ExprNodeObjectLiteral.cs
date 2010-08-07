@@ -75,7 +75,11 @@ namespace MiniME.ast
 
 				// Key - if key is a valid identifier, don't quote it
 				var kp = Values[i];
-				if (kp.Key.GetType() == typeof(String) && Tokenizer.IsIdentifier((string)kp.Key) && !Tokenizer.IsKeyword((string)kp.Key))
+				if (kp.Key.GetType() == typeof(ast.ExprNodeIdentifier))
+				{
+					dest.Append(dest.Members.GetObfuscatedSymbol(((ast.ExprNodeIdentifier)kp.Key).Name));
+				}
+				else if (kp.Key.GetType() == typeof(String) && Tokenizer.IsIdentifier((string)kp.Key) && !Tokenizer.IsKeyword((string)kp.Key))
 				{
 					dest.Append((string)kp.Key);
 				}
