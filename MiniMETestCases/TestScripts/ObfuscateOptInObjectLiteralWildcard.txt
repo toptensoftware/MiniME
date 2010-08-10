@@ -2,6 +2,14 @@
 
 x={priv_var1:23, priv_var2: 24}
 alert(x.priv_var1);
+
+// private:.m_*
+y={m_x:23, p_y:24}
+alert(y.m_x);
+
+var z={m_y:23, p_z:24}
+alert(z.m_y);
+
 -----
-x={a:23,b:24};alert(x.a)
+x={c:23,d:24};alert(x.c);y={a:23,p_y:24};alert(y.a);var z={b:23,p_z:24};alert(z.b)
 -----

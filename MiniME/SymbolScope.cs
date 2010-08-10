@@ -264,8 +264,10 @@ namespace MiniME
 		public void ProcessAccessibilitySpecs(string identifier)
 		{
 			// Check accessibility specs
-			foreach (var spec in m_AccessibilitySpecs)
+			for (int i=m_AccessibilitySpecs.Count-1; i>=0; i--)
 			{
+				var spec = m_AccessibilitySpecs[i];
+
 				if (spec.IsWildcard() && spec.DoesMatch(identifier))
 				{
 					var symbol=Symbols.DefineSymbol(identifier);
@@ -283,8 +285,9 @@ namespace MiniME
 		public void ProcessAccessibilitySpecs(ast.ExprNodeIdentifier target, string identifier)
 		{
 			// Check accessibility specs
-			foreach (var spec in m_AccessibilitySpecs)
+			for (int i = m_AccessibilitySpecs.Count - 1; i >= 0; i--)
 			{
+				var spec = m_AccessibilitySpecs[i];
 				if (spec.IsWildcard() && spec.DoesMatch(target, identifier))
 				{
 					var symbol=Members.DefineSymbol(identifier);

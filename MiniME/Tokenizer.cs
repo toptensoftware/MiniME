@@ -7,15 +7,15 @@ namespace MiniME
 {
 	class Bookmark
 	{
-		public Tokenizer tokenizer;
+		public StringScanner file;
 		public int position;
 		public Token token;
 
 		public override string ToString()
 		{
 			int offset;
-			int line = tokenizer.LineNumberFromOffset(position, out offset);
-			return String.Format("{0}({1},{2})", tokenizer.FileName, line + 1, offset + 1);
+			int line = file.LineNumberFromOffset(position, out offset);
+			return String.Format("{0}({1},{2})", file.FileName, line + 1, offset + 1);
 		}
 	}
 
@@ -137,25 +137,39 @@ namespace MiniME
 		// Constructor
 		public Tokenizer(string str, string strFileName)
 		{
-			// Store the filename
-			m_strFileName = strFileName;
-
 			// Prep the string scanner
 			p = new StringScanner();
 			p.Reset(str);
+			p.FileName = strFileName;
 
 			// Used to detect line breaks between tokens for automatic
 			// semicolon insertion
-			m_bPreceededByLineBreak = false;
+			m_bPreceededByLineBreak = true;
 
 			// Queue up the first token
 			Next();
 		}
 
+
+		public void OpenIncludeFile(string text, string fileName)
+		{
+			// Save the current string parser
+			m_IncludeStack.Push(p);
+
+			// Prep the string scanner
+			p = new StringScanner();
+			p.Reset(text);
+			p.FileName = fileName;
+
+			// Used to detect line breaks between tokens for automatic
+			// semicolon insertion
+			m_bPreceededByLineBreak = true;
+		}
+
 		public Bookmark GetBookmark()
 		{
 			var b = new Bookmark();
-			b.tokenizer = this;
+			b.file = this.p;
 			b.position = this.m_tokenStart;
 			b.token = this.token;
 			return b;
@@ -164,19 +178,10 @@ namespace MiniME
 		// Rewind the tokenizer to a previously marked position
 		public void Rewind(Bookmark bmk)
 		{
-			System.Diagnostics.Debug.Assert(bmk.tokenizer == this);
+			System.Diagnostics.Debug.Assert(bmk.file == this.p);
 
 			p.position = bmk.position;
 			Next();
-		}
-
-		// Get the name of the input file
-		public string FileName
-		{
-			get
-			{
-				return m_strFileName;
-			}
 		}
 
 		// Helper to convert a token back to it's original form
@@ -269,7 +274,7 @@ namespace MiniME
 		{
 			get
 			{
-				return m_currentToken != Token.eof;
+				return m_currentToken != Token.eof && m_IncludeStack.Count==0;
 			}
 		}
 
@@ -457,6 +462,14 @@ namespace MiniME
 			{
 				m_currentToken = ParseToken();
 
+				if (m_currentToken == Token.eof && m_IncludeStack.Count > 0)
+				{
+					// Pop include stack
+					p = m_IncludeStack.Pop();
+					return Next();
+				}
+
+
 				// Check for directive comments
 				if (m_currentToken == Token.comment)
 				{
@@ -478,6 +491,25 @@ namespace MiniME
 						m_currentToken = Token.directive_public;
 						m_strIdentifier = str.Substring(7);
 						break;
+					}
+
+					if (str.StartsWith("include:"))
+					{
+						// Get file name
+						string strFile = str.Substring(8).Trim();
+
+						// Work out fully qualified name, relative to current file being processed
+						string strDir = System.IO.Path.GetDirectoryName(p.FileName);
+						string strOldDir = System.IO.Directory.GetCurrentDirectory();
+						System.IO.Directory.SetCurrentDirectory(strDir);
+						strFile = System.IO.Path.GetFullPath(strFile);
+						System.IO.Directory.SetCurrentDirectory(strOldDir);
+
+						// Open the include file
+						OpenIncludeFile(System.IO.File.ReadAllText(strFile), strFile);
+
+						// Recurse
+						return Next();
 					}
 				}
 
@@ -502,7 +534,9 @@ namespace MiniME
 
 			// check for eof
 			if (p.eof)
+			{
 				return Token.eof;
+			}
 
 			// Save current position
 			m_tokenStart = p.position;
@@ -1130,9 +1164,9 @@ namespace MiniME
 		}
 
 
-		String m_strFileName;
-		StringScanner p;
 		StringBuilder sb = new StringBuilder();
+		StringScanner p;
+		Stack<StringScanner> m_IncludeStack=new Stack<StringScanner>();
 		Token m_currentToken;
 		bool m_bPreceededByLineBreak;
 		string m_strIdentifier;

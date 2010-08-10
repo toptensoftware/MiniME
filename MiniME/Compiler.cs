@@ -4,18 +4,6 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-/*
- * TODO:
- * - Privatisation of object literals
- * - Ability to change directives prefix `-prefix:mm`
- * - Ability to display a list of non-obfuscated symbols `-whatsleft`
- * - Ability to show summary of what was done `-whathappened`
- * - Warning on unreachable code (after return, break or continue)
- * - Warning on unused locals  (functions and variable - not parameters)
- * - Automatic member privatisation by simple prefix  // mm:private
- * - Better optimizations of constant expressions
- */
-
 namespace MiniME
 {
 	// Main api into the MiniME minifier/obfuscator

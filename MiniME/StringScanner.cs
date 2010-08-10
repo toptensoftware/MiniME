@@ -36,6 +36,13 @@ namespace MiniME
 			Reset(str, pos, len);
 		}
 
+		// Store file name
+		public string FileName
+		{
+			get;
+			set;
+		}
+
 		// Reset
 		public void Reset(string str)
 		{

@@ -55,7 +55,27 @@ namespace MiniME
 				{
 					currentScope.Symbols.DefineSymbol(v.Name);
 					currentScope.ProcessAccessibilitySpecs(v.Name);
+
+					if (v.InitialValue!=null && v.InitialValue.RootNode.GetType()==typeof(ast.ExprNodeObjectLiteral))
+					{
+						// Get the object literal
+						var literal=(ast.ExprNodeObjectLiteral)v.InitialValue.RootNode;
+
+						// Create a fake/temp identifier node while we process accessibility specs
+						var target = new ast.ExprNodeIdentifier(null, v.Name);
+
+						// Process all keys that are identifiers
+						foreach (var x in literal.Values)
+						{
+							var identifierKey=x.Key as ast.ExprNodeIdentifier;
+							if (identifierKey!=null && identifierKey.Lhs==null)
+							{
+								currentScope.ProcessAccessibilitySpecs(target, identifierKey.Name);
+							}
+						}
+					}
 				}
+
 				return true;
 			}
 
