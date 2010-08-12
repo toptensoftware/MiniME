@@ -62,8 +62,8 @@ namespace MiniME.ast
 		public override ExprNode Simplify()
 		{
 			Condition = Condition.Simplify();
-			TrueResult = Condition.Simplify();
-			FalseResult = Condition.Simplify();
+			TrueResult = TrueResult.Simplify();
+			FalseResult = FalseResult.Simplify();
 			return this;
 		}
 
