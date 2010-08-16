@@ -299,7 +299,7 @@ namespace MiniME
 
 			// Pass to outer scope
 			if (OuterScope!=null)
-				OuterScope.ProcessAccessibilitySpecs(identifier);
+				OuterScope.ProcessAccessibilitySpecs(target, identifier);
 		}
 
 		public ast.Node Node;
