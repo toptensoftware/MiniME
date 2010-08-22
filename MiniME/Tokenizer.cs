@@ -107,6 +107,7 @@ namespace MiniME
 		kw_catch,
 		kw_finally,
 		kw_function,
+		kw_class,
 	}
 
 	// Simple class to store a double value and it's original
