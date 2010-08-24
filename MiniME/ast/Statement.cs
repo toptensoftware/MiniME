@@ -13,5 +13,15 @@ namespace MiniME.ast
 			: base(bookmark)
 		{
 		}
+
+		public virtual bool BreaksExecutionFlow()
+		{
+			return false;
+		}
+
+		public virtual bool IsDeclarationOnly()
+		{
+			return false;
+		}
 	}
 }

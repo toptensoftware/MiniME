@@ -12,19 +12,26 @@
 
 - Warn on comma in expression (except in for loops)
 
-# Blocks Scopes
+# Unreachable code
 
-* Warn on redundant block
-* Warn on use of variable outside the block it was declared in
+- Warn on code after break, continue, throw, return 
 
 # No side effects
 
-* Warn on expressions with no side effects
+- Warn on expressions with no side effects
 
 # Switch breaks
 
-* Warn on fall through from one case to another (require break, continue, return or throw)
-* Allow a comment of the form `// fall through` do disable this warning
+- Warn on fall through from one case to another (require break, continue, return or throw)
+- Allow a comment of the form `// fall through` do disable this warning
+
+# debugger
+
+- warn on use of `debugger` statement
+
+# Blocks Scopes
+
+- Warn on redundant block
 
 # Variables
 
@@ -41,27 +48,10 @@
 * Warn on duplicate label, or conflict with variable/parameter
 * Warn on label on something other than a loop statement
 
-# Unreachable code
-
-* Warn on code after break, continue, throw, return 
-
-# Use of `void`
-
-* Is this really necessary
-
 # Objects and arrays
 
 * Suggest [] and {} instead of `new Object` and `new Array`
 * Warn on trailing comma eg: [1,2,]
-
-# debugger
-
-* warn on use of `debugger` statement
-
-# Unfiltered for-in statement
-
-* Not sure about this one
-
 
 # Members
 

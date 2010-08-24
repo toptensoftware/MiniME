@@ -36,6 +36,13 @@ namespace MiniME.ast
 			Expression.Visit(visitor);
 		}
 
+		public override bool IsDeclarationOnly()
+		{
+			if ((Expression.RootNode as ExprNodeFunction)!=null)
+				return true;
+			else
+				return false;
+		}
 
 
 	}

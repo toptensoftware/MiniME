@@ -47,6 +47,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ast\ExprNodeParens.cs" />
+    <Compile Include="ast\StatementDebugger.cs" />
     <Compile Include="ast\Expression.cs" />
     <Compile Include="ast\ExprNodeLtr.cs" />
     <Compile Include="ast\ExprNodeFunction.cs" />
@@ -86,6 +88,7 @@
     <Compile Include="ast\CodeBlock.cs" />
     <Compile Include="CommandLine.cs" />
     <Compile Include="AccessibilitySpec.cs" />
+    <Compile Include="VisitorLint.cs" />
     <Compile Include="VisitorSimplifyExpressions.cs" />
     <Compile Include="TextFileUtils.cs" />
     <Compile Include="VisitorCombineVarDecls.cs" />

@@ -79,10 +79,11 @@ namespace MiniME
 
 				case Token.openRound:
 				{
+					var bmk = t.GetBookmark();
 					t.Next();
 					var temp = ParseCompositeExpressionNode(0);
 					t.SkipRequired(Token.closeRound);
-					return temp;
+					return new ast.ExprNodeParens(bmk, temp);
 				}
 
 				case Token.identifier:
@@ -608,6 +609,11 @@ namespace MiniME
 
 				case Token.openBrace:
 				{
+					if (t.Warnings)
+					{
+						Console.WriteLine("{0}: warning: code block doesn't provide variable scope", t.GetBookmark());
+					}
+
 					t.Next();
 					var stmt = new ast.StatementBlock(t.GetBookmark());
 					while (!t.SkipOptional(Token.closeBrace))
@@ -615,6 +621,14 @@ namespace MiniME
 						stmt.AddStatement(ParseSingleStatement());
 					}
 					return stmt;
+				}
+
+				case Token.kw_debugger:
+				{
+					t.Next();
+					t.SkipRequired(Token.semicolon);
+
+					return new ast.StatementDebugger(bmk, Token.kw_debugger);
 				}
 
 				case Token.kw_return:
@@ -639,6 +653,14 @@ namespace MiniME
 					var temp = new ast.StatementReturnThrow(bmk, Token.kw_throw, ParseCompositeExpression(0));
 					t.SkipRequired(Token.semicolon);
 					return temp;
+				}
+
+				case Token.kw_fallthrough:
+				{
+					// Fake statement - comment // fall through
+					Token op = t.token;
+					t.Next();
+					return new ast.StatementBreakContinue(bmk, op, null);
 				}
 
 				case Token.kw_break:

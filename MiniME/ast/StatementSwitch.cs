@@ -56,8 +56,11 @@ namespace MiniME.ast
 			// Cases
 			dest.Indent();
 			bool bNeedSemicolon=false;
-			foreach (var c in Cases)
+
+			for (int i=0; i<Cases.Count; i++)
 			{
+				var c = Cases[i];
+
 				// Separator
 				if (bNeedSemicolon)
 					dest.Append(';');
@@ -79,6 +82,15 @@ namespace MiniME.ast
 				if (c.Code != null)
 				{
 					bNeedSemicolon = c.Code.RenderIndented(dest);
+
+					// Check for no break between case blocks
+					if (Bookmark.warnings && c.Code.Content.Count > 0 && i!=Cases.Count-1)
+					{
+						if (!c.Code.Content[c.Code.Content.Count - 1].BreaksExecutionFlow())
+						{
+							Console.WriteLine("{0}: warning: execution falls through 'case'.   Insert a comment \"// fall through\" to disable this warning", Cases[i+1].Code.Bookmark);
+						}
+					}
 				}
 				else
 				{

@@ -106,6 +106,7 @@ namespace MiniME
 		kw_default,
 		kw_break,
 		kw_continue,
+		kw_fallthrough,
 		kw_else,
 		kw_for,
 		kw_do,
@@ -117,6 +118,7 @@ namespace MiniME
 		kw_finally,
 		kw_function,
 		kw_class,
+		kw_debugger,
 	}
 
 	// Simple class to store a double value and it's original
@@ -509,6 +511,13 @@ namespace MiniME
 					}
 
 					string str = m_strIdentifier.Trim();
+
+					if (str=="fall through")
+					{
+						m_currentToken=Token.kw_fallthrough;
+						break;
+					}
+
 					if (str.StartsWith("private:"))
 					{
 						m_currentToken = Token.directive_private;

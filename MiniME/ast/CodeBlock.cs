@@ -70,9 +70,20 @@ namespace MiniME.ast
 
 			// Render each statement, optionally putting a brace between them
 			bool bNeedSemicolon = false;
+			bool bUnreachable = false;
 			for (var i=0; i<Content.Count; i++)
 			{
 				var s = Content[i];
+
+				// Unreachable code?
+				if (bUnreachable && s.Bookmark.warnings)
+				{
+					if (!s.IsDeclarationOnly())
+					{
+						Console.WriteLine("{0}: warning: unreachable code", Content[i].Bookmark);
+						bUnreachable = false;
+					}
+				}
 
 				// Pending semicolon?
 				if (bNeedSemicolon)
@@ -83,6 +94,8 @@ namespace MiniME.ast
 
 				// Get the next statement and render it
 				bNeedSemicolon=s.Render(dest);
+
+				bUnreachable |= s.BreaksExecutionFlow();
 
 				// In formatted mode, append the terminating semicolon immediately
 				if (bNeedSemicolon && dest.Compiler.Formatted)

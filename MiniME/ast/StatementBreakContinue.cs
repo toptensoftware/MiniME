@@ -30,6 +30,9 @@ namespace MiniME.ast
 
 		public override bool Render(RenderContext dest)
 		{
+			if (Op == Token.kw_fallthrough)
+				return false;
+
 			dest.DisableLineBreaks();
 			dest.Append(Op.ToString().Substring(3));
 			if (Label != null)
@@ -44,5 +47,9 @@ namespace MiniME.ast
 		{
 		}
 
+		public override bool BreaksExecutionFlow()
+		{
+			return true;
+		}
 	}
 }

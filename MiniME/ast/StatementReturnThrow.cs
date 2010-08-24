@@ -56,7 +56,10 @@ namespace MiniME.ast
 				Value.Visit(visitor);
 		}
 
-
+		public override bool BreaksExecutionFlow()
+		{
+			return true;
+		}
 
 	}
 }

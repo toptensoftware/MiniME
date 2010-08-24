@@ -323,6 +323,9 @@ namespace MiniME
 				// Find all variable declarations
 				code.Visit(new VisitorSymbolDeclaration(rootScope));
 
+				// Do lint stuff
+				code.Visit(new VisitorLint(rootScope));
+
 				// Try to eliminate const declarations
 				if (DetectConsts && !NoObfuscate)
 				{
