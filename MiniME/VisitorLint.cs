@@ -61,6 +61,24 @@ namespace MiniME
 				CheckControlCondition(forStatement, forStatement.Condition);
 			}
 
+			// Check for new Object and new Array
+			var newStatement = n as ast.ExprNodeNew;
+			if (newStatement!=null && newStatement.Arguments.Count==0 && newStatement.Bookmark.warnings)
+			{
+				var id = newStatement.ObjectType as ast.ExprNodeIdentifier;
+				if (id != null && id.Lhs==null)
+				{
+					if (id.Name == "Object")
+					{
+						Console.WriteLine("{0}: warning: use of `new Object()`. Suggest using `{{}}` instead", newStatement.Bookmark);
+					}
+					if (id.Name == "Array")
+					{
+						Console.WriteLine("{0}: warning: use of `new Array()`. Suggest using `[]` instead", newStatement.Bookmark);
+					}
+				}
+			}
+
 			return true;
 
 		}

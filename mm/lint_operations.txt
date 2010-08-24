@@ -37,6 +37,12 @@
 
 - Warn on if (a=b), did you mean (a==b)
 
+# Misc.
+
+- Suspicious semicolon eg: while(<cond>);
+- Suggest [] and {} instead of `new Object` and `new Array`
+
+
 # Variables
 
 * Warn on variable used before declared
@@ -50,7 +56,6 @@
 
 # Objects and arrays
 
-* Suggest [] and {} instead of `new Object` and `new Array`
 * Warn on trailing comma eg: [1,2,]
 
 # Members
@@ -61,7 +66,6 @@
 # Other
 
 * Function masks variable  (function name same as outer variable)
-* Suspicious semicolon eg: while(<cond>);
 * Wrong argument count
 
 // From here: http://www.asp.net/ajaxlibrary/AjaxMinDefaultMin.ashx

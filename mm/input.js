@@ -4,7 +4,8 @@ function doSomething()
     
     var scope="";
     
-    var x;
+    var x=new Object();
+    var y=new Array();
     if (x==23);
     {
         alert("cool");
