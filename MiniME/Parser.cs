@@ -603,6 +603,10 @@ namespace MiniME
 			{
 				case Token.semicolon:
 				{
+					if (t.Warnings)
+					{
+						Console.WriteLine("{0}: warning: unnecessary semicolon", t.GetBookmark());
+					}
 					t.Next();
 					return null;
 				}

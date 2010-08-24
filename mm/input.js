@@ -5,7 +5,7 @@ function doSomething()
     var scope="";
     
     var x;
-    if (x==23)
+    if (x==23);
     {
         alert("cool");
     }

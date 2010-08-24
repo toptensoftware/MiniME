@@ -33,15 +33,15 @@
 
 - Warn on redundant block
 
+# Assignment in if/while expression
+
+- Warn on if (a=b), did you mean (a==b)
+
 # Variables
 
 * Warn on variable used before declared
 * Warn on variable declared multiple times (including hiding 
 * Warn on unused variable
-
-# Assignment in if/while expression
-
-* Warn on if (a=b), did you mean (a==b)
 
 # Labels
 
