@@ -1,14 +1,9 @@
-// Test script goes here
-
-alert("Hi there");
-alert("Again");
-
-var x;
-x=23;
-
-for (var x=0,y=0; x<10 && y<10; x++, y++)
+function doSomething()
 {
+    alert("Hello World");
 }
 
-doit();
-
+function doSomethingElse()
+{
+    blah();
+}

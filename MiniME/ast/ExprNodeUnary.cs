@@ -245,6 +245,13 @@ namespace MiniME.ast
 
 		public override bool HasSideEffects()
 		{
+			switch (Op)
+			{
+				case Token.kw_delete:
+				case Token.increment:
+				case Token.decrement:
+					return true;
+			}
 			return false;
 		}
 

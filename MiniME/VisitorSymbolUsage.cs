@@ -91,7 +91,8 @@ namespace MiniME
 							// Assignment to an identifier
 							if (currentScope.FindSymbol(identifier.Name) == null)
 							{
-								Console.WriteLine("{0}: warning: assignment to undeclared variable `{1}` introduces new global variable", identifier.Bookmark, identifier.Name);
+								if (n.Bookmark.warnings)
+									Console.WriteLine("{0}: warning: assignment to undeclared variable `{1}` introduces new global variable", identifier.Bookmark, identifier.Name);
 							}
 						}
 					}

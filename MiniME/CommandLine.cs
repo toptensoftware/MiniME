@@ -19,10 +19,12 @@ namespace MiniME
 		public CommandLine(Compiler c)
 		{
 			m_compiler = c;
+			m_warnings = true;
 		}
 
 		Compiler m_compiler;
 		Encoding m_useEncoding = null;
+		bool m_warnings;
 		public bool NoLogo = false;
 		public bool LogoShown = false;
 
@@ -187,6 +189,14 @@ namespace MiniME
 						m_compiler.UseOptionsFile = false;
 						break;
 
+					case "no-warnings":
+						m_warnings = false;
+						break;
+
+					case "warnings":
+						m_warnings = true;
+						break;
+
 					case "diag-formatted":
 						m_compiler.Formatted = true;
 						break;
@@ -211,7 +221,7 @@ namespace MiniME
 			}
 			else
 			{
-				m_compiler.AddFiles(a, m_useEncoding);
+				m_compiler.AddFiles(a, m_useEncoding, m_warnings);
 			}
 
 			return true;

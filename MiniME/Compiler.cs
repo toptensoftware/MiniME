@@ -168,13 +168,13 @@ namespace MiniME
 		}
 
 		// Add a file to be processed
-		public void AddFiles(string strFileName)
+		public void AddFiles(string strFileName, bool Warnings)
 		{
-			AddFile(strFileName, null);
+			AddFile(strFileName, null, Warnings);
 		}
 
 		// Add a file to be processed (with explicit character encoding specified)
-		public void AddFiles(string strFileName, System.Text.Encoding Encoding)
+		public void AddFiles(string strFileName, System.Text.Encoding Encoding, bool Warnings)
 		{
 			// Work out directory
 			string strDirectory=System.IO.Path.GetDirectoryName(strFileName);
@@ -199,22 +199,22 @@ namespace MiniME
 					if ((from fx in m_files where string.Compare(fx.filename, strThisFile, true) == 0 select fx).Count() > 0)
 						continue;
 
-					AddFile(strThisFile, Encoding);
+					AddFile(strThisFile, Encoding, Warnings);
 				}
 			}
 			else
 			{
-				AddFile(System.IO.Path.Combine(strDirectory, strFile), Encoding);
+				AddFile(System.IO.Path.Combine(strDirectory, strFile), Encoding, Warnings);
 			}
 		}
 
 		// Add a file to be processed
-		public void AddFile(string strFileName)
+		public void AddFile(string strFileName, bool Warnings)
 		{
-			AddFile(strFileName, null);
+			AddFile(strFileName, null, Warnings);
 		}
 
-		public void AddFile(string strFileName, System.Text.Encoding Encoding)
+		public void AddFile(string strFileName, System.Text.Encoding Encoding, bool Warnings)
 		{
 			// Work out auto file encoding
 			if (Encoding == null)
@@ -248,16 +248,18 @@ namespace MiniME
 			i.filename = strFileName;
 			i.content = File.ReadAllText(strFileName, Encoding);
 			i.encoding = Encoding;
+			i.warnings = Warnings;
 			m_files.Add(i);
 		}
 
 		// Add Javascript code to be processed, direct from string
-		public void AddScript(string strName, string strScript)
+		public void AddScript(string strName, string strScript, bool Warnings)
 		{
 			var i = new FileInfo();
 			i.filename = strName;
 			i.content = strScript;
 			i.encoding = Encoding.UTF8;
+			i.warnings = Warnings;
 			m_files.Add(i);
 		}
 
@@ -287,10 +289,10 @@ namespace MiniME
 			bool bNeedSemicolon = false;
 			foreach (var file in m_files)
 			{
-				Console.WriteLine("Processing {0}...", file.filename);
+				Console.WriteLine("Processing {0}...", System.IO.Path.GetFileName(file.filename));
 
 				// Create a tokenizer and parser
-				Tokenizer t = new Tokenizer(file.content, file.filename);
+				Tokenizer t = new Tokenizer(file.content, file.filename, file.warnings);
 				Parser p = new Parser(t);
 
 				// Create the global statement block
@@ -476,6 +478,7 @@ namespace MiniME
 			public string filename;
 			public string content;
 			public Encoding encoding;
+			public bool warnings;
 		}
 
 	}

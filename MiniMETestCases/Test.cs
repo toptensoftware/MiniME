@@ -45,7 +45,7 @@ namespace MiniMETestCases
 			c.SymbolInfo = t.Input.IndexOf("[SymbolInfo]") >= 0;
 			c.NoCredit = true;
 			c.MaxLineLength = 0;
-			c.AddScript(resourceName, t.Input);
+			c.AddScript(resourceName, t.Input, false);
 
 			// Render it
 			string strActual = c.CompileToString().Trim();

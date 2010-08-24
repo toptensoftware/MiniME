@@ -458,7 +458,7 @@ namespace MiniME
 			if (t.token != Token.comma)
 				return lhs;
 
-			if ((ctx & ParseContext.AllowCompositeExpressions) == 0)
+			if ((ctx & ParseContext.AllowCompositeExpressions) == 0 && t.Warnings)
 			{
 				Console.WriteLine("{0}: warning: use of composite expression - are you sure this is what you intended?", t.GetBookmark());
 			}
@@ -743,7 +743,7 @@ namespace MiniME
 					if (t.token != Token.semicolon)
 					{
 						// Initializers
-						init = ParseVarDeclStatement(ParseContext.DisableInOperator);
+						init = ParseVarDeclStatement(ParseContext.DisableInOperator | ParseContext.AllowCompositeExpressions);
 
 						// Foreach iterator
 						if (t.SkipOptional(Token.kw_in))
@@ -817,7 +817,7 @@ namespace MiniME
 					stmt.Code = ParseStatement();
 					t.SkipRequired(Token.kw_while);
 					t.SkipRequired(Token.openRound);
-					stmt.Condition = ParseCompositeExpression(0);
+					stmt.Condition = ParseCompositeExpression(ParseContext.AllowCompositeExpressions);
 					t.SkipRequired(Token.closeRound);
 					t.SkipRequired(Token.semicolon);
 					return stmt;
@@ -828,7 +828,7 @@ namespace MiniME
 					var stmt = new ast.StatementWhile(bmk);
 					t.Next();
 					t.SkipRequired(Token.openRound);
-					stmt.Condition = ParseCompositeExpression(0);
+					stmt.Condition = ParseCompositeExpression(ParseContext.AllowCompositeExpressions);
 					t.SkipRequired(Token.closeRound);
 					stmt.Code = ParseStatement();
 					return stmt;

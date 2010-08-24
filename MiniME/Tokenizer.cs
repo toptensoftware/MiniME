@@ -7,9 +7,18 @@ namespace MiniME
 {
 	class Bookmark
 	{
+		public Bookmark(StringScanner file, int position, Token token, bool warnings)
+		{
+			this.file = file;
+			this.position = position;
+			this.token = token;
+			this.warnings = warnings;
+		}
+
 		public StringScanner file;
 		public int position;
 		public Token token;
+		public bool warnings;
 
 		public override string ToString()
 		{
@@ -136,18 +145,21 @@ namespace MiniME
 		}
 
 		// Constructor
-		public Tokenizer(string str, string strFileName)
+		public Tokenizer(string str, string strFileName, bool bWarnings)
 		{
 			// Prep the string scanner
 			p = new StringScanner();
 			p.Reset(str);
 			p.FileName = strFileName;
 
+			m_bWarnings = bWarnings;
+
 			// Used to detect line breaks between tokens for automatic
 			// semicolon insertion
 			m_bPreceededByLineBreak = true;
 
 			// Queue up the first token
+			m_prevToken = Token.eof;
 			Next();
 		}
 
@@ -170,11 +182,15 @@ namespace MiniME
 
 		public Bookmark GetBookmark()
 		{
-			var b = new Bookmark();
-			b.file = this.p;
-			b.position = this.m_tokenStart;
-			b.token = this.token;
-			return b;
+			return new Bookmark(p, m_tokenStart, this.token, m_bWarnings);
+		}
+
+		public bool Warnings
+		{
+			get
+			{
+				return m_bWarnings;
+			}
 		}
 
 		// Rewind the tokenizer to a previously marked position
@@ -351,11 +367,17 @@ namespace MiniME
 		{
 			if (p.eof || token == Token.closeBrace || m_bPreceededByLineBreak)
 			{
-				var b=new Bookmark();
-				b.file = this.p;
-				b.position = this.m_prevTokenEnd;
-				b.token = this.token;
-				Console.WriteLine("{0}: warning: missing semicolon", b);
+				if (m_prevToken!=Token.closeBrace)
+				{
+					if (m_bWarnings)
+					{
+						var b = new Bookmark(p, m_prevTokenEnd, token, m_bWarnings);
+						b.file = this.p;
+						b.position = this.m_prevTokenEnd;
+						b.token = this.token;
+						Console.WriteLine("{0}: warning: missing semicolon", b);
+					}
+				}
 				return true;
 			}
 
@@ -463,6 +485,7 @@ namespace MiniME
 		// Get the next token, skipping comments as we go
 		public Token Next()
 		{
+			m_prevToken = m_currentToken;
 			do
 			{
 				m_currentToken = ParseToken();
@@ -1175,10 +1198,12 @@ namespace MiniME
 		StringScanner p;
 		Stack<StringScanner> m_IncludeStack=new Stack<StringScanner>();
 		Token m_currentToken;
+		bool m_bWarnings;
 		bool m_bPreceededByLineBreak;
 		string m_strIdentifier;
 		int m_tokenStart;
 		int m_tokenEnd;
+		Token m_prevToken;
 		int m_prevTokenEnd;
 		object m_literal;
 	}

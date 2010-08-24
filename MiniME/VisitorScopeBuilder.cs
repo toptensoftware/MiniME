@@ -36,7 +36,9 @@ namespace MiniME
 			// Is it an evil?
 			if (n.GetType() == typeof(ast.StatementWith))
 			{
-				Console.WriteLine("{0}: warning: use of `with` statement prevents local symbol obfuscation of all containing scopes", n.Bookmark);
+				if (n.Bookmark.warnings)
+					Console.WriteLine("{0}: warning: use of `with` statement prevents local symbol obfuscation of all containing scopes", n.Bookmark);
+
 				m_Scopes.Peek().DefaultAccessibility = Accessibility.Public;
 				return true;
 			}
@@ -47,7 +49,9 @@ namespace MiniME
 				var m = (ast.ExprNodeIdentifier)n;
 				if (m.Lhs == null && m.Name == "eval")
 				{
-					Console.WriteLine("{0}: warning: use of `eval` prevents local symbol obfuscation of all containing scopes", n.Bookmark);
+					if (n.Bookmark.warnings)
+						Console.WriteLine("{0}: warning: use of `eval` prevents local symbol obfuscation of all containing scopes", n.Bookmark);
+
 					m_Scopes.Peek().DefaultAccessibility = Accessibility.Public;
 				}
 				return true;
