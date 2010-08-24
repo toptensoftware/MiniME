@@ -11,6 +11,7 @@ namespace MiniME
 	{
 		DisableInOperator=0x0001,
 		NoFunctionCalls=0x0002,
+		AllowCompositeExpressions=0x0004,
 	}
 
 	// Implementation of the Javascript parser.
@@ -457,6 +458,11 @@ namespace MiniME
 			if (t.token != Token.comma)
 				return lhs;
 
+			if ((ctx & ParseContext.AllowCompositeExpressions) == 0)
+			{
+				Console.WriteLine("{0}: warning: use of composite expression - are you sure this is what you intended?", t.GetBookmark());
+			}
+
 			var expr = new ast.ExprNodeComposite(t.GetBookmark());
 			expr.Expressions.Add(lhs);
 
@@ -796,7 +802,7 @@ namespace MiniME
 
 					// Iterator
 					if (t.token!=Token.closeRound)
-						stmt.Increment = ParseCompositeExpression(0);
+						stmt.Increment = ParseCompositeExpression(ParseContext.AllowCompositeExpressions);
 					t.SkipRequired(Token.closeRound);
 
 					// Parse code block

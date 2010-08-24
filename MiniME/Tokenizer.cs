@@ -165,6 +165,7 @@ namespace MiniME
 			// Used to detect line breaks between tokens for automatic
 			// semicolon insertion
 			m_bPreceededByLineBreak = true;
+			m_prevTokenEnd = 0;
 		}
 
 		public Bookmark GetBookmark()
@@ -348,14 +349,15 @@ namespace MiniME
 		//  - before a line break
 		public bool IsAutoSemicolon()
 		{
-			if (p.eof)
+			if (p.eof || token == Token.closeBrace || m_bPreceededByLineBreak)
+			{
+				var b=new Bookmark();
+				b.file = this.p;
+				b.position = this.m_prevTokenEnd;
+				b.token = this.token;
+				Console.WriteLine("{0}: warning: missing semicolon", b);
 				return true;
-
-			if (token == Token.closeBrace)
-				return true;
-
-			if (m_bPreceededByLineBreak)
-				return true;
+			}
 
 			return false;
 		}
@@ -367,7 +369,9 @@ namespace MiniME
 			{
 				// Automatic semicolons?
 				if (t == Token.semicolon && IsAutoSemicolon())
+				{
 					return true;
+				}
 
 				return false;
 			}
@@ -467,6 +471,7 @@ namespace MiniME
 				{
 					// Pop include stack
 					p = m_IncludeStack.Pop();
+					m_prevTokenEnd = p.position;
 					return Next();
 				}
 
@@ -516,6 +521,7 @@ namespace MiniME
 
 			} while (m_currentToken == Token.comment);
 
+			m_prevTokenEnd = m_tokenEnd;
 			m_tokenEnd = p.position;
 			return m_currentToken;
 		}
@@ -1173,6 +1179,7 @@ namespace MiniME
 		string m_strIdentifier;
 		int m_tokenStart;
 		int m_tokenEnd;
+		int m_prevTokenEnd;
 		object m_literal;
 	}
 }
