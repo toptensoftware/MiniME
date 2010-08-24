@@ -24,6 +24,11 @@ namespace MiniME.ast
 		}
 		public override bool Render(RenderContext dest)
 		{
+			if (!Expression.RootNode.HasSideEffects())
+			{
+				Console.WriteLine("{0}: expression has no side effects", Bookmark);
+			}
+
 			return Expression.Render(dest);
 		}
 		public override void OnVisitChildNodes(IVisitor visitor)

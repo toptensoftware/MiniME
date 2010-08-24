@@ -115,6 +115,10 @@ namespace MiniME.ast
 			return this;
 		}
 
+		public override bool HasSideEffects()
+		{
+			return false;
+		}
 
 	}
 }

@@ -64,6 +64,14 @@ namespace MiniME.ast
 			return this;
 		}
 
-
+		public override bool HasSideEffects()
+		{
+			foreach (var n in Expressions)
+			{
+				if (!n.HasSideEffects())
+					return false;
+			}
+			return true;
+		}
 	}
 }

@@ -88,5 +88,7 @@ namespace MiniME.ast
 				}
 			}
 		}
+
+		public abstract bool HasSideEffects();
 	}
 }
