@@ -80,11 +80,14 @@ namespace MiniME.ast
 			for (int i = 0; i < nodes.Count; i++)
 			{
 				var v = nodes[i];
-				var vNew = v.Simplify();
-				if (v != vNew)
+				if (v != null)
 				{
-					nodes.RemoveAt(i);
-					nodes.Insert(i, vNew);
+					var vNew = v.Simplify();
+					if (v != vNew)
+					{
+						nodes.RemoveAt(i);
+						nodes.Insert(i, vNew);
+					}
 				}
 			}
 		}

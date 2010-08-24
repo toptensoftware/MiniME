@@ -122,6 +122,9 @@ namespace MiniME
 						// Trailing blank element?
 						if (t.token == Token.closeSquare)
 						{
+							if (t.Warnings)
+								Console.WriteLine("{0}: warning: trailing comma in array literal", t.GetBookmark());
+
 							temp.Values.Add(null);
 						}
 
@@ -166,6 +169,11 @@ namespace MiniME
 						// Another key/value pair
 						if (!t.SkipOptional(Token.comma))
 							break;
+
+						if (t.token == Token.closeBrace && t.Warnings)
+						{
+							Console.WriteLine("{0}: warning: trailing comma in object literal", t.GetBookmark());
+						}
 					}
 
 					t.SkipRequired(Token.closeBrace);

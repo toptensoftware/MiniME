@@ -57,7 +57,8 @@ namespace MiniME.ast
 					dest.Append(",");
 				else
 					bFirst = false;
-				WrapAndRender(dest, e, false);
+				if (e!=null)
+					WrapAndRender(dest, e, false);
 			}
 			dest.Append(']');
 			return true;
@@ -66,7 +67,10 @@ namespace MiniME.ast
 		public override void OnVisitChildNodes(IVisitor visitor)
 		{
 			foreach (var e in Values)
-				e.Visit(visitor);
+			{
+				if (e!=null)
+					e.Visit(visitor);
+			}
 		}
 
 
