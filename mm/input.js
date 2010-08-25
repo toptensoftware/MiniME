@@ -4,6 +4,11 @@ var z=function()
     {
         alert(y);
     }
+    
+    {
+        var x=23;
+    }
+    
  
     alert(x);
     x=23;

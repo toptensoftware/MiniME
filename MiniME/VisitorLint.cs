@@ -108,7 +108,8 @@ namespace MiniME
 			var ident = n as ast.ExprNodeIdentifier;
 			if (ident!=null && ident.Lhs == null)
 			{
-				if (currentScope.FindLocalSymbol(ident.Name)!=null)
+				var symbol=currentScope.FindLocalSymbol(ident.Name);
+				if (symbol!=null)
 				{
 					// Now walk the pseudo scopes and make sure that it's defined in the current scope too
 					// (and not in a child scope)
@@ -135,6 +136,10 @@ namespace MiniME
 					if (!bFound)
 					{
 						Console.WriteLine("{0}: warning: variable `{1}` used outside declaring pseudo scope", n.Bookmark, ident.Name);
+						foreach (var decl in symbol.Declarations)
+						{
+							Console.WriteLine("{0}: see also declaration of `{1}`", decl, ident.Name);
+						}
 					}
 				}
 			}
