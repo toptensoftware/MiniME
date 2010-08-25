@@ -24,11 +24,7 @@ namespace MiniME.ast
 
 		public override bool Render(RenderContext dest)
 		{
-			if (Bookmark.warnings)
-			{
-				Console.WriteLine("{0}: warning: use of debugger statement", Bookmark);
-			}
-
+			dest.Compiler.RecordWarning(Bookmark, "use of debugger statement");
 			dest.Append(Op.ToString().Substring(3));
 			return true;
 		}

@@ -24,9 +24,9 @@ namespace MiniME.ast
 		}
 		public override bool Render(RenderContext dest)
 		{
-			if (Bookmark.warnings && !Expression.RootNode.HasSideEffects())
+			if (!Expression.RootNode.HasSideEffects())
 			{
-				Console.WriteLine("{0}: warning: expression has no side effects", Bookmark);
+				dest.Compiler.RecordWarning(Bookmark, "expression has no side effects");
 			}
 
 			return Expression.Render(dest);

@@ -292,7 +292,8 @@ namespace MiniME
 				Console.WriteLine("Processing {0}...", System.IO.Path.GetFileName(file.filename));
 
 				// Create a tokenizer and parser
-				Tokenizer t = new Tokenizer(file.content, file.filename, file.warnings);
+				Warnings = new List<Warning>();
+				Tokenizer t = new Tokenizer(this, file.content, file.filename, file.warnings);
 				Parser p = new Parser(t);
 
 				// Create the global statement block
@@ -314,8 +315,8 @@ namespace MiniME
 
 				// Create the root symbol scope and build scopes for all 
 				// constained function scopes
-				SymbolScope rootScope = new SymbolScope(null, Accessibility.Public);
-				SymbolScope rootPseudoScope = new SymbolScope(null, Accessibility.Public);
+				SymbolScope rootScope = new SymbolScope(this, null, Accessibility.Public);
+				SymbolScope rootPseudoScope = new SymbolScope(this, null, Accessibility.Public);
 				code.Visit(new VisitorScopeBuilder(rootScope, rootPseudoScope));
 
 				// Combine consecutive var declarations into a single one
@@ -376,6 +377,23 @@ namespace MiniME
 				r.EnterScope(rootScope);
 				bNeedSemicolon=code.Render(r);
 				r.LeaveScope();
+
+				// Display warnings
+				Warnings.Sort(delegate(Warning w1, Warning w2)
+				{
+					int Compare = w1.Order.file.FileName.CompareTo(w2.Order.file.FileName);
+					if (Compare == 0)
+						Compare = w1.Order.position - w2.Order.position;
+					if (Compare == 0)
+						Compare = w1.OriginalOrder - w2.OriginalOrder;
+					return Compare;
+				});
+				foreach (var w in Warnings)
+				{
+					Console.WriteLine("{0}: {1}", w.Bookmark, w.Message);
+				}
+
+
 			}
 
 			// return the final script
@@ -475,6 +493,38 @@ namespace MiniME
 				}
 			}
 		}
+
+		internal void RecordWarning(Bookmark position, string message, params object[] args)
+		{
+			RecordWarning(position, position, message, args);
+		}
+
+		internal void RecordWarning(Bookmark position, Bookmark order, string message, params object[] args)
+		{
+			// Quit warnings disabled at this point
+			if (!position.warnings)
+				return;
+
+			// Create the warning record
+			var warning = new Warning();
+			warning.Bookmark = position;
+			warning.Order = order;
+			warning.Message = string.Format("warning: {0}", string.Format(message, args));
+			warning.OriginalOrder = Warnings.Count;
+
+			// Add to list
+			Warnings.Add(warning);
+		}
+
+		class Warning
+		{
+			public Bookmark Bookmark;
+			public Bookmark Order;
+			public string Message;
+			public int OriginalOrder;
+		}
+
+		List<Warning> Warnings;
 
 		// Stores information about a file to be processed
 		class FileInfo

@@ -122,8 +122,7 @@ namespace MiniME
 						// Trailing blank element?
 						if (t.token == Token.closeSquare)
 						{
-							if (t.Warnings)
-								Console.WriteLine("{0}: warning: trailing comma in array literal", t.GetBookmark());
+							t.Compiler.RecordWarning(t.GetBookmark(), "trailing comma in array literal");
 
 							temp.Values.Add(null);
 						}
@@ -170,9 +169,9 @@ namespace MiniME
 						if (!t.SkipOptional(Token.comma))
 							break;
 
-						if (t.token == Token.closeBrace && t.Warnings)
+						if (t.token == Token.closeBrace)
 						{
-							Console.WriteLine("{0}: warning: trailing comma in object literal", t.GetBookmark());
+							t.Compiler.RecordWarning(t.GetBookmark(), "trailing comma in object literal");
 						}
 					}
 
@@ -467,9 +466,9 @@ namespace MiniME
 			if (t.token != Token.comma)
 				return lhs;
 
-			if ((ctx & ParseContext.AllowCompositeExpressions) == 0 && t.Warnings)
+			if ((ctx & ParseContext.AllowCompositeExpressions) == 0)
 			{
-				Console.WriteLine("{0}: warning: use of composite expression - are you sure this is what you intended?", t.GetBookmark());
+				t.Compiler.RecordWarning(t.GetBookmark(), "use of composite expression - are you sure this is what you intended?");
 			}
 
 			var expr = new ast.ExprNodeComposite(t.GetBookmark());
@@ -613,10 +612,7 @@ namespace MiniME
 			{
 				case Token.semicolon:
 				{
-					if (t.Warnings)
-					{
-						Console.WriteLine("{0}: warning: unnecessary semicolon", t.GetBookmark());
-					}
+					t.Compiler.RecordWarning(t.GetBookmark(), "unnecessary semicolon");
 					t.Next();
 					return null;
 				}

@@ -76,11 +76,11 @@ namespace MiniME.ast
 				var s = Content[i];
 
 				// Unreachable code?
-				if (bUnreachable && s.Bookmark.warnings)
+				if (bUnreachable)
 				{
 					if (!s.IsDeclarationOnly())
 					{
-						Console.WriteLine("{0}: warning: unreachable code", Content[i].Bookmark);
+						dest.Compiler.RecordWarning(Content[i].Bookmark, "unreachable code");
 						bUnreachable = false;
 					}
 				}

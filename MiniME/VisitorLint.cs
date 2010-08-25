@@ -20,12 +20,9 @@ namespace MiniME
 			if (expr == null)
 				return;
 
-			if (!statement.Bookmark.warnings)
-				return;
-
 			if ((expr.RootNode as ast.ExprNodeAssignment)!=null)
 			{
-				Console.WriteLine("{0}: warning: assignment as condition of flow control statement (use parens to disable this warning)", expr.Bookmark);
+				currentScope.Compiler.RecordWarning(expr.Bookmark, "assignment as condition of flow control statement (use parens to disable this warning)");
 			}
 		}
 
@@ -39,7 +36,9 @@ namespace MiniME
 					int index = 1;
 					foreach (var d in s.Declarations)
 					{
-						Console.WriteLine("{0}: warning: in {1} symbol '{2}' has multiple declarations, instance {3}.", d, currentScope.Name, s.Name, index++);
+						currentScope.Compiler.RecordWarning(d, s.Declarations[0], "in {0} symbol '{1}' has multiple declarations, instance {2}", currentScope.Name, s.Name, index);
+						if (d.warnings)
+							index++;
 					}
 				}
 			}
@@ -88,18 +87,18 @@ namespace MiniME
 
 			// Check for new Object and new Array
 			var newStatement = n as ast.ExprNodeNew;
-			if (newStatement!=null && newStatement.Arguments.Count==0 && newStatement.Bookmark.warnings)
+			if (newStatement!=null && newStatement.Arguments.Count==0)
 			{
 				var id = newStatement.ObjectType as ast.ExprNodeIdentifier;
 				if (id != null && id.Lhs==null)
 				{
 					if (id.Name == "Object")
 					{
-						Console.WriteLine("{0}: warning: use of `new Object()`. Suggest using `{{}}` instead", newStatement.Bookmark);
+						currentScope.Compiler.RecordWarning(newStatement.Bookmark, "use of `new Object()`. Suggest using `{{}}` instead");
 					}
 					if (id.Name == "Array")
 					{
-						Console.WriteLine("{0}: warning: use of `new Array()`. Suggest using `[]` instead", newStatement.Bookmark);
+						currentScope.Compiler.RecordWarning(newStatement.Bookmark, "use of `new Array()`. Suggest using `[]` instead");
 					}
 				}
 			}
@@ -135,10 +134,10 @@ namespace MiniME
 
 					if (!bFound)
 					{
-						Console.WriteLine("{0}: warning: symbol `{1}` used outside declaring pseudo scope", n.Bookmark, ident.Name);
+						currentScope.Compiler.RecordWarning(n.Bookmark, "symbol `{0}` used outside declaring pseudo scope", ident.Name);
 						foreach (var decl in symbol.Declarations)
 						{
-							Console.WriteLine("{0}: see also declaration of `{1}`", decl, ident.Name);
+							currentScope.Compiler.RecordWarning(decl, n.Bookmark, "see also declaration of `{0}`", ident.Name);
 						}
 					}
 				}

@@ -5,5 +5,6 @@
 
 
 var q;
+var q;
 
 DoSomething("Hi");

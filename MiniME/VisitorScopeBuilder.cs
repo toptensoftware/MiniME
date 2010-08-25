@@ -19,10 +19,12 @@ namespace MiniME
 
 		public void EnterPseudoScope(ast.Node n)
 		{
-			n.PseudoScope = new SymbolScope(n, Accessibility.Private);
+			SymbolScope currentScope = m_PseudoScopes.Peek();
 
-			m_PseudoScopes.Peek().InnerScopes.Add(n.PseudoScope);
-			n.PseudoScope.OuterScope = m_PseudoScopes.Peek();
+			n.PseudoScope = new SymbolScope(currentScope.Compiler, n, Accessibility.Private);
+
+			currentScope.InnerScopes.Add(n.PseudoScope);
+			n.PseudoScope.OuterScope = currentScope;
 
 			m_PseudoScopes.Push(n.PseudoScope);
 		}
@@ -32,11 +34,13 @@ namespace MiniME
 			// New actual scope (function body or catch clause)
 			if (n.GetType() == typeof(ast.ExprNodeFunction) || n.GetType() == typeof(ast.CatchClause))
 			{
-				n.Scope = new SymbolScope(n, Accessibility.Private);
+				SymbolScope currentScope = m_Scopes.Peek();
+
+				n.Scope = new SymbolScope(currentScope.Compiler, n, Accessibility.Private);
 
 				// Add this function to the parent function's list of nested functions
-				m_Scopes.Peek().InnerScopes.Add(n.Scope);
-				n.Scope.OuterScope = m_Scopes.Peek();
+				currentScope.InnerScopes.Add(n.Scope);
+				n.Scope.OuterScope = currentScope;
 
 				// Enter scope
 				m_Scopes.Push(n.Scope);
@@ -58,9 +62,7 @@ namespace MiniME
 			// Is it an evil?
 			if (n.GetType() == typeof(ast.StatementWith))
 			{
-				if (n.Bookmark.warnings)
-					Console.WriteLine("{0}: warning: use of `with` statement prevents local symbol obfuscation of all containing scopes", n.Bookmark);
-
+				m_Scopes.Peek().Compiler.RecordWarning(n.Bookmark, "use of `with` statement prevents local symbol obfuscation of all containing scopes");
 				m_Scopes.Peek().DefaultAccessibility = Accessibility.Public;
 				return true;
 			}
@@ -71,9 +73,7 @@ namespace MiniME
 				var m = (ast.ExprNodeIdentifier)n;
 				if (m.Lhs == null && m.Name == "eval")
 				{
-					if (n.Bookmark.warnings)
-						Console.WriteLine("{0}: warning: use of `eval` prevents local symbol obfuscation of all containing scopes", n.Bookmark);
-
+					m_Scopes.Peek().Compiler.RecordWarning(n.Bookmark, "use of `eval` prevents local symbol obfuscation of all containing scopes");
 					m_Scopes.Peek().DefaultAccessibility = Accessibility.Public;
 				}
 				return true;

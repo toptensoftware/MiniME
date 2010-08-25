@@ -20,32 +20,29 @@ namespace MiniME
 
 		void DefineLocalSymbol(string Name, Bookmark bmk)
 		{
-			if (bmk.warnings)
+			// This check is for parameters that are allowed to hide symbols from the outer
+			// real scope
+			if (currentPseudoScope.Node != null && currentPseudoScope.Node.Scope == null)
 			{
-				// This check is for parameters that are allowed to hide symbols from the outer
-				// real scope
-				if (currentPseudoScope.Node != null && currentPseudoScope.Node.Scope == null)
+				var scope = currentPseudoScope.OuterScope;
+				while (scope != null)
 				{
-					var scope = currentPseudoScope.OuterScope;
-					while (scope != null)
+					var symbol = scope.FindLocalSymbol(Name);
+					if (symbol != null)
 					{
-						var symbol = scope.FindLocalSymbol(Name);
-						if (symbol != null)
+						scope.Compiler.RecordWarning(bmk, "symbol `{0}` hides previous declaration", Name);
+						foreach (var decl in symbol.Declarations)
 						{
-							Console.WriteLine("{0}: warning: symbol `{1}` hides previous declaration", bmk, Name);
-							foreach (var decl in symbol.Declarations)
-							{
-								Console.WriteLine("{0}: see previous declaration of `{1}`", decl, Name);
-							}
+							scope.Compiler.RecordWarning(decl, bmk, "see previous declaration of `{0}`", Name);
 						}
-
-						// Have we reached the real scope?
-						if (scope.Node == null || scope.Node.Scope != null)
-							break;
-
-						// Walk up
-						scope = scope.OuterScope;
 					}
+
+					// Have we reached the real scope?
+					if (scope.Node == null || scope.Node.Scope != null)
+						break;
+
+					// Walk up
+					scope = scope.OuterScope;
 				}
 			}
 

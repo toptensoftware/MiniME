@@ -147,8 +147,10 @@ namespace MiniME
 		}
 
 		// Constructor
-		public Tokenizer(string str, string strFileName, bool bWarnings)
+		public Tokenizer(Compiler Compiler, string str, string strFileName, bool bWarnings)
 		{
+			this.Compiler=Compiler;
+
 			// Prep the string scanner
 			p = new StringScanner();
 			p.Reset(str);
@@ -163,6 +165,12 @@ namespace MiniME
 			// Queue up the first token
 			m_prevToken = Token.eof;
 			Next();
+		}
+
+		public Compiler Compiler
+		{
+			get;
+			private set;
 		}
 
 
@@ -377,7 +385,7 @@ namespace MiniME
 						b.file = this.p;
 						b.position = this.m_prevTokenEnd;
 						b.token = this.token;
-						Console.WriteLine("{0}: warning: missing semicolon", b);
+						Compiler.RecordWarning(b, "missing semicolon");
 					}
 				}
 				return true;

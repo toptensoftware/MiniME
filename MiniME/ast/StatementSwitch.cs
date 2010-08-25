@@ -84,11 +84,11 @@ namespace MiniME.ast
 					bNeedSemicolon = c.Code.RenderIndented(dest);
 
 					// Check for no break between case blocks
-					if (Bookmark.warnings && c.Code.Content.Count > 0 && i!=Cases.Count-1)
+					if (c.Code.Content.Count > 0 && i!=Cases.Count-1)
 					{
 						if (!c.Code.Content[c.Code.Content.Count - 1].BreaksExecutionFlow())
 						{
-							Console.WriteLine("{0}: warning: execution falls through to next case.   Insert a comment \"// fall through\" to disable this warning", Cases[i+1].Code.Bookmark);
+							dest.Compiler.RecordWarning(Cases[i+1].Code.Bookmark, "execution falls through to next case.   Insert a comment \"// fall through\" to disable this warning");
 						}
 					}
 				}

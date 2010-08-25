@@ -108,5 +108,16 @@ namespace MiniME.ast
 
 		public List<Variable> Variables=new List<Variable>();
 
+		public override bool IsDeclarationOnly()
+		{
+			foreach (var v in Variables)
+			{
+				if (v.InitialValue != null)
+					return false;
+			}
+
+			return true;
+		}
+
 	}
 }

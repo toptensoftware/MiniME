@@ -11,12 +11,23 @@ namespace MiniME
 	class SymbolScope
 	{
 		// Constructor
-		public SymbolScope(ast.Node node, Accessibility defaultAccessibility)
+		public SymbolScope(Compiler Compiler, ast.Node node, Accessibility defaultAccessibility)
 		{
+			m_Compiler = Compiler;
 			Node = node;
 			DefaultAccessibility = defaultAccessibility;
 		}
 
+		public Compiler Compiler
+		{
+			get
+			{
+				return m_Compiler;
+			}
+		}
+
+		Compiler m_Compiler;
+	
 		public string Name
 		{
 			get
@@ -92,21 +103,6 @@ namespace MiniME
 
 				Members.UpdateRanks(merged.Sort());
 			}
-
-			/*
-			foreach (var i in Symbols)
-			{
-				var s = i.Value;
-				if (s.Scope == Symbol.ScopeType.local && s.Frequency <= s.Declarations.Count)
-				{
-					if (s.Declarations[0].warnings)
-					{
-						Console.WriteLine("{0}: warning: symbol '{1}' is declared but never referenced", s.Declarations[0], s.Name);
-					}
-				}
-			}
-			 */
-
 		}
 
 		// Claim all local symbols in this scope, preventing use
