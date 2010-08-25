@@ -24,6 +24,18 @@ namespace MiniME.ast
 		public string Name;
 		public List<Parameter> Parameters = new List<Parameter>();
 		public CodeBlock Code;
+		public string AssignedToName;
+
+		public string Describe()
+		{
+			if (Name != null)
+				return String.Format("function '{0}'", Name);
+
+			if (AssignedToName != null)
+				return String.Format("function '{0}'", AssignedToName);
+
+			return "anonymous function";
+		}
 
 
 		public override string ToString()

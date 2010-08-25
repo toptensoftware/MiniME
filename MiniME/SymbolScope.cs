@@ -17,6 +17,28 @@ namespace MiniME
 			DefaultAccessibility = defaultAccessibility;
 		}
 
+		public string Name
+		{
+			get
+			{
+				if (OuterScope == null)
+				{
+					return "global scope";
+				}
+				else
+				{
+					var fn = Node as ast.ExprNodeFunction;
+					if (fn != null)
+						return fn.Describe();
+
+					if ((Node as ast.CatchClause)!=null)
+						return "catch block";
+
+					return "unknown scope";
+				}
+			}
+		}
+
 		// Get/set default accessibility
 		public Accessibility DefaultAccessibility
 		{
@@ -250,18 +272,18 @@ namespace MiniME
 			Symbol s;
 			if (spec.IsMemberSpec())
 			{
-				s = Members.DefineSymbol(spec.GetExplicitName());
+				s = Members.DefineSymbol(spec.GetExplicitName(), bmk);
 			}
 			else
 			{
-				s = Symbols.DefineSymbol(spec.GetExplicitName());
+				s = Symbols.DefineSymbol(spec.GetExplicitName(), bmk);
 			}
 
 			// Mark obfuscation for this symbol
 			s.Accessibility = spec.GetAccessibility();
 		}
 
-		public void ProcessAccessibilitySpecs(string identifier)
+		public void ProcessAccessibilitySpecs(string identifier, Bookmark bmk)
 		{
 			// Check accessibility specs
 			for (int i=m_AccessibilitySpecs.Count-1; i>=0; i--)
@@ -270,7 +292,7 @@ namespace MiniME
 
 				if (spec.IsWildcard() && spec.DoesMatch(identifier))
 				{
-					var symbol=Symbols.DefineSymbol(identifier);
+					var symbol=Symbols.DefineSymbol(identifier, bmk);
 					if (symbol.Accessibility==Accessibility.Default)
 						symbol.Accessibility = spec.GetAccessibility();
 					return;
@@ -279,10 +301,10 @@ namespace MiniME
 
 			// Pass to outer scope
 			if (OuterScope!=null)
-				OuterScope.ProcessAccessibilitySpecs(identifier);
+				OuterScope.ProcessAccessibilitySpecs(identifier, bmk);
 		}
 
-		public void ProcessAccessibilitySpecs(ast.ExprNodeIdentifier target, string identifier)
+		public void ProcessAccessibilitySpecs(ast.ExprNodeIdentifier target, string identifier, Bookmark bmk)
 		{
 			// Check accessibility specs
 			for (int i = m_AccessibilitySpecs.Count - 1; i >= 0; i--)
@@ -290,7 +312,7 @@ namespace MiniME
 				var spec = m_AccessibilitySpecs[i];
 				if (spec.IsWildcard() && spec.DoesMatch(target, identifier))
 				{
-					var symbol=Members.DefineSymbol(identifier);
+					var symbol=Members.DefineSymbol(identifier, bmk);
 					if (symbol.Accessibility == Accessibility.Default)
 						symbol.Accessibility = spec.GetAccessibility();
 					return;
@@ -299,7 +321,7 @@ namespace MiniME
 
 			// Pass to outer scope
 			if (OuterScope!=null)
-				OuterScope.ProcessAccessibilitySpecs(target, identifier);
+				OuterScope.ProcessAccessibilitySpecs(target, identifier, bmk);
 		}
 
 		public ast.Node Node;

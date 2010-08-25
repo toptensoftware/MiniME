@@ -506,6 +506,8 @@ namespace MiniME
 		// Parse a single variable declaration
 		void ParseVarDecl(ParseContext ctx, ast.StatementVariableDeclaration decl)
 		{
+			var bmk = t.GetBookmark();
+
 			// Variable name
 			t.Require(Token.identifier);
 			var name = t.identifier;
@@ -519,7 +521,7 @@ namespace MiniME
 			}
 
 			// Store it
-			decl.AddDeclaration(name, InitialValue);
+			decl.AddDeclaration(bmk, name, InitialValue);
 		}
 
 		// Parse a variable declaration statement 

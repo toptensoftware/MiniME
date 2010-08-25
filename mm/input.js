@@ -1,2 +1,5 @@
-var x=[1,,,2,3,];
-var y={1:1,2:2,};
+var z=function()
+{
+    var x;
+    var x;
+}

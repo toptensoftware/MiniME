@@ -14,13 +14,15 @@ namespace MiniME
 		}
 
 		// Define a new local symbol
-		public Symbol DefineSymbol(string str)
+		public Symbol DefineSymbol(string str, Bookmark bmk)
 		{
 			Symbol s;
 			if (!FindSymbol(str, Symbol.ScopeType.local, out s))
 			{
 				s = AddSymbol(new Symbol(str, Symbol.ScopeType.local));
 			}
+
+			s.Declarations.Add(bmk);
 
 			return s;
 		}

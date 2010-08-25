@@ -41,32 +41,25 @@
 
 - Suspicious semicolon eg: while(<cond>);
 - Suggest [] and {} instead of `new Object` and `new Array`
-
+- Warn on trailing comma eg: [1,2,]
+* Function masks variable  (function name same as outer variable)
 
 # Variables
 
 * Warn on variable used before declared
-* Warn on variable declared multiple times (including hiding 
+* Warn on variable declared multiple times (including hiding) 
 * Warn on unused variable
 
 # Labels
 
 * Warn on duplicate label, or conflict with variable/parameter
 * Warn on label on something other than a loop statement
-
-# Objects and arrays
-
-* Warn on trailing comma eg: [1,2,]
+* Check labels exist
 
 # Members
 
 * Display a list of non-obfuscated member names
 * Display a list of obfuscated member names
-
-# Other
-
-* Function masks variable  (function name same as outer variable)
-* Wrong argument count
 
 // From here: http://www.asp.net/ajaxlibrary/AjaxMinDefaultMin.ashx
 * Make sure all throw statements are semicolon terminated (causes error in Safari if not)

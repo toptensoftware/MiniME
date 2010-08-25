@@ -67,8 +67,56 @@ namespace MiniME
 				}
 			}
 
-			return true;
+			// Try to guess name of function by assignment in variable declaration
+			var decl = n as ast.StatementVariableDeclaration;
+			if (decl != null)
+			{
+				foreach (var i in decl.Variables)
+				{
+					if (i.InitialValue!=null)
+					{
+						var fn = i.InitialValue.RootNode as ast.ExprNodeFunction;
+						if (fn != null)
+						{
+							fn.AssignedToName = i.Name;
+						}
+					}
+				}
+			}
 
+			// For any functions that are assigned to something else, store the target
+			// of that assignment. We use this to guess the name of anonymous functions.
+			var assignment = n as ast.ExprNodeAssignment;
+			if (assignment != null)
+			{
+				var fn = assignment.Rhs as ast.ExprNodeFunction;
+				if (fn != null)
+				{
+					var id = assignment.Lhs as ast.ExprNodeIdentifier;
+					if (id!=null)
+						fn.AssignedToName = id.Name;
+				}
+			}
+
+			// Find functions assigned to object literals
+			var objLiteral = n as ast.ExprNodeObjectLiteral;
+			if (objLiteral != null)
+			{
+				foreach (var i in objLiteral.Values)
+				{
+					var fn = i.Value as ast.ExprNodeFunction;
+					if (fn != null)
+					{
+						var id = i.Key as ast.ExprNodeIdentifier;
+						if (id != null)
+						{
+							fn.AssignedToName = id.Name;
+						}
+					}
+				}
+			}
+
+			return true;
 		}
 
 		public void OnLeaveNode(MiniME.ast.Node n)

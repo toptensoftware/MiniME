@@ -52,5 +52,6 @@ namespace MiniME
 		public object ConstValue;
 		public bool ConstAllowed;
 		public Accessibility Accessibility;
+		public List<Bookmark> Declarations = new List<Bookmark>();
 	}
 }

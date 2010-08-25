@@ -27,8 +27,8 @@ namespace MiniME
 				// Define a symbol for the new function
 				if (!String.IsNullOrEmpty(fn.Name))
 				{
-					currentScope.Symbols.DefineSymbol(fn.Name);
-					currentScope.ProcessAccessibilitySpecs(fn.Name);
+					currentScope.Symbols.DefineSymbol(fn.Name, fn.Bookmark);
+					currentScope.ProcessAccessibilitySpecs(fn.Name, fn.Bookmark);
 				}
 			}
 
@@ -43,7 +43,7 @@ namespace MiniME
 			if (n.GetType() == typeof(ast.CatchClause))
 			{
 				var cc = (ast.CatchClause)n;
-				currentScope.Symbols.DefineSymbol(cc.ExceptionVariable);
+				currentScope.Symbols.DefineSymbol(cc.ExceptionVariable, n.Bookmark);
 				return true;
 			}
 
@@ -53,8 +53,8 @@ namespace MiniME
 				var vardecl = (ast.StatementVariableDeclaration)n;
 				foreach (var v in vardecl.Variables)
 				{
-					currentScope.Symbols.DefineSymbol(v.Name);
-					currentScope.ProcessAccessibilitySpecs(v.Name);
+					currentScope.Symbols.DefineSymbol(v.Name, v.Bookmark);
+					currentScope.ProcessAccessibilitySpecs(v.Name, v.Bookmark);
 
 					if (v.InitialValue!=null && v.InitialValue.RootNode.GetType()==typeof(ast.ExprNodeObjectLiteral))
 					{
@@ -70,7 +70,7 @@ namespace MiniME
 							var identifierKey=x.Key as ast.ExprNodeIdentifier;
 							if (identifierKey!=null && identifierKey.Lhs==null)
 							{
-								currentScope.ProcessAccessibilitySpecs(target, identifierKey.Name);
+								currentScope.ProcessAccessibilitySpecs(target, identifierKey.Name, identifierKey.Bookmark);
 							}
 						}
 					}
@@ -83,8 +83,8 @@ namespace MiniME
 			if (n.GetType() == typeof(ast.Parameter))
 			{
 				var p = (ast.Parameter)n;
-				currentScope.Symbols.DefineSymbol(p.Name);
-				currentScope.ProcessAccessibilitySpecs(p.Name);
+				currentScope.Symbols.DefineSymbol(p.Name, p.Bookmark);
+				currentScope.ProcessAccessibilitySpecs(p.Name, p.Bookmark);
 				return true;
 			}
 
@@ -109,7 +109,7 @@ namespace MiniME
 								if (identifier.Lhs.GetType() != typeof(ast.ExprNodeIdentifier))
 									return false;
 
-								currentScope.ProcessAccessibilitySpecs((ast.ExprNodeIdentifier)identifier.Lhs, identifier.Name);
+								currentScope.ProcessAccessibilitySpecs((ast.ExprNodeIdentifier)identifier.Lhs, identifier.Name, identifier.Bookmark);
 							}
 						}
 
@@ -128,7 +128,7 @@ namespace MiniME
 									var identifierKey=x.Key as ast.ExprNodeIdentifier;
 									if (identifierKey!=null && identifierKey.Lhs==null)
 									{
-										currentScope.ProcessAccessibilitySpecs(target, identifierKey.Name);
+										currentScope.ProcessAccessibilitySpecs(target, identifierKey.Name, identifierKey.Bookmark);
 									}
 								}
 							

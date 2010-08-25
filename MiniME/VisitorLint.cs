@@ -10,6 +10,8 @@ namespace MiniME
 		// Constructor
 		public VisitorLint(SymbolScope rootScope)
 		{
+			currentScope = rootScope;
+			DetectMultipleDeclarations();
 		}
 
 		public void CheckControlCondition(ast.Statement statement, ast.Expression expr)
@@ -26,11 +28,28 @@ namespace MiniME
 			}
 		}
 
+		public void DetectMultipleDeclarations()
+		{
+			foreach (var i in currentScope.Symbols)
+			{
+				var s = i.Value;
+				if (s.Scope==Symbol.ScopeType.local && s.Declarations.Count > 1)
+				{
+					int index = 1;
+					foreach (var d in s.Declarations)
+					{
+						Console.WriteLine("{0}: warning: in {1} symbol '{2}' has multiple declarations, instance {3}.", d, currentScope.Name, s.Name, index++);
+					}
+				}
+			}
+		}
+
 		public bool OnEnterNode(MiniME.ast.Node n)
 		{
 			if (n.Scope != null)
 			{
 				currentScope = n.Scope;
+				DetectMultipleDeclarations();
 			}
 
 			// Check 'if' statement

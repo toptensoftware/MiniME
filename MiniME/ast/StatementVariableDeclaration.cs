@@ -14,9 +14,10 @@ namespace MiniME.ast
 		}
 
 		// Add another variable declaration
-		public void AddDeclaration(string Name, ast.Expression InitialValue)
+		public void AddDeclaration(Bookmark bookmark, string Name, ast.Expression InitialValue)
 		{
 			var v = new Variable();
+			v.Bookmark = bookmark;
 			v.Name = Name;
 			v.InitialValue = InitialValue;
 			Variables.Add(v);
@@ -100,6 +101,7 @@ namespace MiniME.ast
 		// Represents a single variable declaration
 		public class Variable
 		{
+			public Bookmark Bookmark;
 			public string Name;
 			public Expression InitialValue;
 		}
