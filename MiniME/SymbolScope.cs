@@ -259,6 +259,11 @@ namespace MiniME
 			return null;
 		}
 
+		public Symbol FindLocalSymbol(string Name)
+		{
+			return Symbols.FindLocalSymbol(Name);
+		}
+
 		public void AddAccessibilitySpec(Bookmark bmk, AccessibilitySpec spec)
 		{
 			// Just store wildcards for now

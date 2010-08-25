@@ -315,16 +315,17 @@ namespace MiniME
 				// Create the root symbol scope and build scopes for all 
 				// constained function scopes
 				SymbolScope rootScope = new SymbolScope(null, Accessibility.Public);
-				code.Visit(new VisitorScopeBuilder(rootScope));
+				SymbolScope rootPseudoScope = new SymbolScope(null, Accessibility.Public);
+				code.Visit(new VisitorScopeBuilder(rootScope, rootPseudoScope));
 
 				// Combine consecutive var declarations into a single one
 				code.Visit(new VisitorCombineVarDecl(rootScope));
 
 				// Find all variable declarations
-				code.Visit(new VisitorSymbolDeclaration(rootScope));
+				code.Visit(new VisitorSymbolDeclaration(rootScope, rootPseudoScope));
 
 				// Do lint stuff
-				code.Visit(new VisitorLint(rootScope));
+				code.Visit(new VisitorLint(rootScope, rootPseudoScope));
 
 				// Try to eliminate const declarations
 				if (DetectConsts && !NoObfuscate)

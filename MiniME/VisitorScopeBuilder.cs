@@ -11,14 +11,25 @@ namespace MiniME
 	class VisitorScopeBuilder : ast.IVisitor
 	{
 		// Constructor
-		public VisitorScopeBuilder(SymbolScope rootScope)
+		public VisitorScopeBuilder(SymbolScope rootScope, SymbolScope rootPseudoScope)
 		{
 			m_Scopes.Push(rootScope);
+			m_PseudoScopes.Push(rootPseudoScope);
 		}
 
-		public bool OnEnterNode(MiniME.ast.Node n)
+		public void EnterPseudoScope(ast.Node n)
 		{
-			// Is it a function?
+			n.PseudoScope = new SymbolScope(n, Accessibility.Private);
+
+			m_PseudoScopes.Peek().InnerScopes.Add(n.PseudoScope);
+			n.PseudoScope.OuterScope = m_PseudoScopes.Peek();
+
+			m_PseudoScopes.Push(n.PseudoScope);
+		}
+
+		public bool OnEnterNode(ast.Node n)
+		{
+			// New actual scope (function body or catch clause)
 			if (n.GetType() == typeof(ast.ExprNodeFunction) || n.GetType() == typeof(ast.CatchClause))
 			{
 				n.Scope = new SymbolScope(n, Accessibility.Private);
@@ -30,6 +41,17 @@ namespace MiniME
 				// Enter scope
 				m_Scopes.Push(n.Scope);
 
+				// Also create a pseudo scope
+				EnterPseudoScope(n);
+
+				return true;
+			}
+
+			// New pseudo scope (statement body or braced code block)
+			if (n.GetType() == typeof(ast.CodeBlock) || n.GetType() == typeof(ast.StatementBlock) || n.GetType()==typeof(ast.StatementFor) || n.GetType()==typeof(ast.StatementForIn))
+			{
+				// Create pseudo scope
+				EnterPseudoScope(n);
 				return true;
 			}
 
@@ -84,8 +106,7 @@ namespace MiniME
 				}
 			}
 
-			// For any functions that are assigned to something else, store the target
-			// of that assignment. We use this to guess the name of anonymous functions.
+			// Try to guess name of function by assignment
 			var assignment = n as ast.ExprNodeAssignment;
 			if (assignment != null)
 			{
@@ -98,7 +119,7 @@ namespace MiniME
 				}
 			}
 
-			// Find functions assigned to object literals
+			// Try to guess name of function in object literal
 			var objLiteral = n as ast.ExprNodeObjectLiteral;
 			if (objLiteral != null)
 			{
@@ -135,8 +156,15 @@ namespace MiniME
 				if (innerAccessibility==Accessibility.Public)
 					m_Scopes.Peek().DefaultAccessibility = Accessibility.Public;
 			}
+
+			if (n.PseudoScope != null)
+			{
+				System.Diagnostics.Debug.Assert(m_PseudoScopes.Peek() == n.PseudoScope);
+				m_PseudoScopes.Pop();
+			}
 		}
 
-		public Stack<SymbolScope> m_Scopes=new Stack<SymbolScope>();
+		public Stack<SymbolScope> m_Scopes = new Stack<SymbolScope>();
+		public Stack<SymbolScope> m_PseudoScopes = new Stack<SymbolScope>();
 	}
 }

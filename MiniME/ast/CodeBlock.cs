@@ -152,23 +152,11 @@ namespace MiniME.ast
 
 		public void AddStatement(Statement stmt)
 		{
-			// Ignore if null (typical from extra semicolon in source)
+			// Ignore if null (typically from extra semicolon in source)
 			if (stmt == null)
 				return;
 
-			// Collapse child statement blocks into single block
-			var block = stmt as StatementBlock;
-			if (block != null)
-			{
-				foreach (var s in block.Content)
-				{
-					AddStatement(s);
-				}
-			}
-			else
-			{
-				Content.Add(stmt);
-			}
+			Content.Add(stmt);
 		}
 
 	}

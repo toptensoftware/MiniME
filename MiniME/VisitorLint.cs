@@ -8,9 +8,10 @@ namespace MiniME
 	class VisitorLint : ast.IVisitor
 	{
 		// Constructor
-		public VisitorLint(SymbolScope rootScope)
+		public VisitorLint(SymbolScope rootScope, SymbolScope rootPseudoScope)
 		{
 			currentScope = rootScope;
+			currentPseudoScope = rootPseudoScope;
 			DetectMultipleDeclarations();
 		}
 
@@ -30,7 +31,7 @@ namespace MiniME
 
 		public void DetectMultipleDeclarations()
 		{
-			foreach (var i in currentScope.Symbols)
+			foreach (var i in currentPseudoScope.Symbols)
 			{
 				var s = i.Value;
 				if (s.Scope==Symbol.ScopeType.local && s.Declarations.Count > 1)
@@ -49,6 +50,11 @@ namespace MiniME
 			if (n.Scope != null)
 			{
 				currentScope = n.Scope;
+			}
+
+			if (n.PseudoScope!=null)
+			{
+				currentPseudoScope=n.PseudoScope;
 				DetectMultipleDeclarations();
 			}
 
@@ -98,6 +104,41 @@ namespace MiniME
 				}
 			}
 
+			// Check for variable used outself declaring pseudo scope
+			var ident = n as ast.ExprNodeIdentifier;
+			if (ident!=null && ident.Lhs == null)
+			{
+				if (currentScope.FindLocalSymbol(ident.Name)!=null)
+				{
+					// Now walk the pseudo scopes and make sure that it's defined in the current scope too
+					// (and not in a child scope)
+
+					var scope = currentPseudoScope;
+					bool bFound=false;
+					while (scope != null && !bFound)
+					{
+						// Check scope
+						if (scope.FindLocalSymbol(ident.Name) != null)
+						{
+							bFound = true;
+							break;
+						}
+
+						// Are we finished on the actual local scope
+						if (scope.Node.Scope != null)
+							break;
+
+						// Get next outer scope
+						scope = scope.OuterScope;
+					}
+
+					if (!bFound)
+					{
+						Console.WriteLine("{0}: warning: variable `{1}` used outside declaring pseudo scope", n.Bookmark, ident.Name);
+					}
+				}
+			}
+
 
 			return true;
 
@@ -109,8 +150,13 @@ namespace MiniME
 			{
 				currentScope = n.Scope.OuterScope;
 			}
+			if (n.PseudoScope != null)
+			{
+				currentPseudoScope = n.PseudoScope.OuterScope;
+			}
 		}
 
 		public SymbolScope currentScope = null;
+		public SymbolScope currentPseudoScope = null;
 	}
 }

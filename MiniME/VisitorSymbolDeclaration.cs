@@ -12,10 +12,12 @@ namespace MiniME
 	class VisitorSymbolDeclaration : ast.IVisitor
 	{
 		// Constructor
-		public VisitorSymbolDeclaration(SymbolScope rootScope)
+		public VisitorSymbolDeclaration(SymbolScope rootScope, SymbolScope rootPseudoScope)
 		{
 			currentScope = rootScope;
+			currentPseudoScope = rootPseudoScope;
 		}
+
 
 		public bool OnEnterNode(MiniME.ast.Node n)
 		{
@@ -29,6 +31,7 @@ namespace MiniME
 				{
 					currentScope.Symbols.DefineSymbol(fn.Name, fn.Bookmark);
 					currentScope.ProcessAccessibilitySpecs(fn.Name, fn.Bookmark);
+					currentPseudoScope.Symbols.DefineSymbol(fn.Name, fn.Bookmark);
 				}
 			}
 
@@ -39,11 +42,19 @@ namespace MiniME
 				currentScope = n.Scope;
 			}
 
+			// Descending into an inner pseudo scope
+			if (n.PseudoScope != null)
+			{
+				System.Diagnostics.Debug.Assert(n.PseudoScope.OuterScope == currentPseudoScope);
+				currentPseudoScope = n.PseudoScope;
+			}
+
 			// Define catch clause exception variables in the inner scope
 			if (n.GetType() == typeof(ast.CatchClause))
 			{
 				var cc = (ast.CatchClause)n;
 				currentScope.Symbols.DefineSymbol(cc.ExceptionVariable, n.Bookmark);
+				currentPseudoScope.Symbols.DefineSymbol(cc.ExceptionVariable, n.Bookmark);
 				return true;
 			}
 
@@ -55,6 +66,7 @@ namespace MiniME
 				{
 					currentScope.Symbols.DefineSymbol(v.Name, v.Bookmark);
 					currentScope.ProcessAccessibilitySpecs(v.Name, v.Bookmark);
+					currentPseudoScope.Symbols.DefineSymbol(v.Name, v.Bookmark);
 
 					if (v.InitialValue!=null && v.InitialValue.RootNode.GetType()==typeof(ast.ExprNodeObjectLiteral))
 					{
@@ -85,6 +97,7 @@ namespace MiniME
 				var p = (ast.Parameter)n;
 				currentScope.Symbols.DefineSymbol(p.Name, p.Bookmark);
 				currentScope.ProcessAccessibilitySpecs(p.Name, p.Bookmark);
+				currentPseudoScope.Symbols.DefineSymbol(p.Name, p.Bookmark);
 				return true;
 			}
 
@@ -154,8 +167,14 @@ namespace MiniME
 			{
 				currentScope = n.Scope.OuterScope;
 			}
+
+			if (n.PseudoScope != null)
+			{
+				currentPseudoScope = n.PseudoScope.OuterScope;
+			}
 		}
 
 		SymbolScope currentScope;
+		SymbolScope currentPseudoScope;
 	}
 }

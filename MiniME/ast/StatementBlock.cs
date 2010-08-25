@@ -32,29 +32,42 @@ namespace MiniME.ast
 
 		public override void OnVisitChildNodes(IVisitor visitor)
 		{
-			System.Diagnostics.Debug.Assert(false);
+			foreach (var n in Content)
+			{
+				n.Visit(visitor);
+			}
 		}
 
 		public void AddStatement(Statement stmt)
 		{
-			// Ignore if null (typical from extra semicolon in source)
+			// Ignore if null (typically from extra semicolon in source)
 			if (stmt == null)
 				return;
 
-			// Collapse child statement blocks into single block
-			var block = stmt as StatementBlock;
-			if (block != null)
-			{
-				foreach (var s in block.Content)
-				{
-					AddStatement(s);
-				}
-			}
-			else
-			{
-				Content.Add(stmt);
-			}
+			Content.Add(stmt);
 		}
 
+		public static void CollapseStatementBlocks(List<Statement> Statements)
+		{
+			for (int i = 0; i < Statements.Count; i++)
+			{
+				var block = Statements[i] as ast.StatementBlock;
+				if (block != null)
+				{
+					// Remove the child block
+					Statements.RemoveAt(i);
+
+					// Insert child block statements in place
+					for (int j=0; j<block.Content.Count; j++)
+					{
+						Statements.Insert(i+j, block.Content[j]);
+					}
+
+					// Rewind one since the first inserted child statement might
+					// also be a statement block that needs to be collapsed
+					i--;
+				}
+			}
+		}
 	}
 }

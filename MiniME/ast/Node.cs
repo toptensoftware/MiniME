@@ -68,6 +68,7 @@ namespace MiniME.ast
 		// Scope that this node introduces.
 		// Only used by function and CatchClause nodes
 		public SymbolScope Scope;
+		public SymbolScope PseudoScope;
 		public Bookmark m_Bookmark;
 	}
 

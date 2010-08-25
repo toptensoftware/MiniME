@@ -104,6 +104,8 @@ namespace MiniME.ast
 			{
 				p.Visit(visitor);
 			}
+
+			// Visit the code first 
 			Code.Visit(visitor);
 		}
 

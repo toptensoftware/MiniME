@@ -19,12 +19,25 @@ namespace MiniME
 		{
 			// Is it an expression?
 			var expr = n as ast.Expression;
-			if (expr==null)
-				return true;
+			if (expr != null)
+			{
+				// Simplify
+				expr.RootNode = expr.RootNode.Simplify();
+			}
 
-			// Simplify
-			expr.RootNode = expr.RootNode.Simplify();
+			// Collapse statement blocks
+			var statementBlock = n as ast.StatementBlock;
+			if (statementBlock != null)
+			{
+				ast.StatementBlock.CollapseStatementBlocks(statementBlock.Content);
+			}
 
+			// Collapse code blocks
+			var codeBlock = n as ast.CodeBlock;
+			if (codeBlock != null)
+			{
+				ast.StatementBlock.CollapseStatementBlocks(codeBlock.Content);
+			}
 
 			return true;	// NB: Need to recurse into expressions in case it's a ExprNodeFunction which has a code block
 							//		which will almost certainly contain deeper expressions that also could use simplification.
