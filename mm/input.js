@@ -1,7 +1,9 @@
-var x;
+	function DoSomething(x)
+	{
+	alert(x);
+	}
 
-var z=function(x)
-{
-    var x;  
-    alert(x);
-}
+
+var q;
+
+DoSomething("Hi");

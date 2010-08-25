@@ -93,6 +93,20 @@ namespace MiniME
 				Members.UpdateRanks(merged.Sort());
 			}
 
+			/*
+			foreach (var i in Symbols)
+			{
+				var s = i.Value;
+				if (s.Scope == Symbol.ScopeType.local && s.Frequency <= s.Declarations.Count)
+				{
+					if (s.Declarations[0].warnings)
+					{
+						Console.WriteLine("{0}: warning: symbol '{1}' is declared but never referenced", s.Declarations[0], s.Name);
+					}
+				}
+			}
+			 */
+
 		}
 
 		// Claim all local symbols in this scope, preventing use

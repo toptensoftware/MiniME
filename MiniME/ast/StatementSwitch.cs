@@ -88,7 +88,7 @@ namespace MiniME.ast
 					{
 						if (!c.Code.Content[c.Code.Content.Count - 1].BreaksExecutionFlow())
 						{
-							Console.WriteLine("{0}: warning: execution falls through 'case'.   Insert a comment \"// fall through\" to disable this warning", Cases[i+1].Code.Bookmark);
+							Console.WriteLine("{0}: warning: execution falls through to next case.   Insert a comment \"// fall through\" to disable this warning", Cases[i+1].Code.Bookmark);
 						}
 					}
 				}

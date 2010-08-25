@@ -623,11 +623,6 @@ namespace MiniME
 
 				case Token.openBrace:
 				{
-//					if (t.Warnings)
-//					{
-//						Console.WriteLine("{0}: warning: code block doesn't provide variable scope", t.GetBookmark());
-//					}
-
 					t.Next();
 					var stmt = new ast.StatementBlock(t.GetBookmark());
 					while (!t.SkipOptional(Token.closeBrace))

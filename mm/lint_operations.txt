@@ -42,12 +42,11 @@
 - Suspicious semicolon eg: while(<cond>);
 - Suggest [] and {} instead of `new Object` and `new Array`
 - Warn on trailing comma eg: [1,2,]
-* Function masks variable  (function name same as outer variable)
+- Function masks variable  (function name same as outer variable)
 
 # Variables
 
-* Warn on variable used before declared
-* Warn on variable declared multiple times (including hiding) 
+- Warn on variable declared multiple times (including hiding) 
 * Warn on unused variable
 
 # Labels

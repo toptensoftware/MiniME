@@ -189,6 +189,22 @@ namespace MiniME
 				}
 			}
 
+			// Normally accessibility specs are already processed in the scope builder, but this
+			// is a special case for declaring external symbols.  We need to pick up the explicit
+			// symbol declaration and add it to the pseudo scope to avoid incorrect warnings.
+			// Use case is declaring `x` as an external global var by:
+			//
+			//			// public:x
+			//
+			if (n.GetType() == typeof(ast.StatementAccessibility))
+			{
+				var p = (ast.StatementAccessibility)n;
+				foreach (var s in p.Specs)
+				{
+					if (!s.IsWildcard() && !s.IsMemberSpec())
+						currentPseudoScope.Symbols.DefineSymbol(s.GetExplicitName(), n.Bookmark);
+				}
+			}
 			return true;
 
 		}

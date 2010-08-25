@@ -488,6 +488,15 @@ namespace MiniME.ast
 
 		public override bool HasSideEffects()
 		{
+			if (Lhs.HasSideEffects())
+				return true;
+
+			foreach (var i in Terms)
+			{
+				if (i.Rhs.HasSideEffects())
+					return true;
+			}
+
 			return false;
 		}
 

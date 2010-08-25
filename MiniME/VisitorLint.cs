@@ -25,7 +25,7 @@ namespace MiniME
 
 			if ((expr.RootNode as ast.ExprNodeAssignment)!=null)
 			{
-				Console.WriteLine("{0}: warning: assignment as condition of control statement (use parens to disable this warning)", expr.Bookmark);
+				Console.WriteLine("{0}: warning: assignment as condition of flow control statement (use parens to disable this warning)", expr.Bookmark);
 			}
 		}
 
@@ -126,7 +126,7 @@ namespace MiniME
 						}
 
 						// Are we finished on the actual local scope
-						if (scope.Node.Scope != null)
+						if (scope.Node!=null && scope.Node.Scope != null)
 							break;
 
 						// Get next outer scope
@@ -135,7 +135,7 @@ namespace MiniME
 
 					if (!bFound)
 					{
-						Console.WriteLine("{0}: warning: variable `{1}` used outside declaring pseudo scope", n.Bookmark, ident.Name);
+						Console.WriteLine("{0}: warning: symbol `{1}` used outside declaring pseudo scope", n.Bookmark, ident.Name);
 						foreach (var decl in symbol.Declarations)
 						{
 							Console.WriteLine("{0}: see also declaration of `{1}`", decl, ident.Name);
