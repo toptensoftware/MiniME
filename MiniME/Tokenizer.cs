@@ -526,7 +526,43 @@ namespace MiniME
 						break;
 					}
 
-					if (str.StartsWith("private:"))
+					if (str == "warnings:on")
+					{
+						m_bWarnings = true;
+					}
+
+					if (str == "warnings:off")
+					{
+						m_bWarnings = false;
+					}
+
+					if (str == "warnings:push:on")
+					{
+						Compiler.WarningsEnabledStack.Push(m_bWarnings);
+						m_bWarnings = true;
+					}
+
+					if (str == "warnings:push:off")
+					{
+						Compiler.WarningsEnabledStack.Push(m_bWarnings);
+						m_bWarnings = false;
+					}
+					if (str == "warnings:pop")
+					{
+						if (Compiler.WarningsEnabledStack.Count > 0)
+						{
+							m_bWarnings = Compiler.WarningsEnabledStack.Pop();
+						}
+						else
+						{
+							m_bWarnings = true;
+							Compiler.RecordWarning(GetBookmark(), "can't pop warning state.");
+						}
+					}
+
+
+					if (str == "warnings:off")
+						if (str.StartsWith("private:"))
 					{
 						m_currentToken = Token.directive_private;
 						m_strIdentifier = str.Substring(8);

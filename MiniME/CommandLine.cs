@@ -258,6 +258,8 @@ namespace MiniME
 			Console.WriteLine("   -D:<directory>         Set the current directory");
 			Console.WriteLine("   -check-filetimes       Only compile if one or more input files has changed");
 			Console.WriteLine("   -no-options-file       Don't save .minime options file when using -check-filetimes");
+			Console.WriteLine("   -no-warnings           Don't show warnings for following files");
+			Console.WriteLine("   -warnings              Do show warnings for following files");
 			Console.WriteLine("   -h, -?                 Show this help");
 			Console.WriteLine("   -v                     Show version number");
 			Console.WriteLine("   -nologo                Don't show logo");

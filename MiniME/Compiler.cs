@@ -293,6 +293,7 @@ namespace MiniME
 
 				// Create a tokenizer and parser
 				Warnings = new List<Warning>();
+				WarningsEnabledStack = new Stack<bool>();
 				Tokenizer t = new Tokenizer(this, file.content, file.filename, file.warnings);
 				Parser p = new Parser(t);
 
@@ -525,6 +526,7 @@ namespace MiniME
 		}
 
 		List<Warning> Warnings;
+		public Stack<bool> WarningsEnabledStack;
 
 		// Stores information about a file to be processed
 		class FileInfo
@@ -534,6 +536,7 @@ namespace MiniME
 			public Encoding encoding;
 			public bool warnings;
 		}
+
 
 	}
 }
