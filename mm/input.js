@@ -1,15 +1,7 @@
-var z=function()
+var x;
+
+var z=function(x)
 {
-    for (var x=0; x<10; x++)
-    {
-        alert(y);
-    }
-    
-    {
-        var x=23;
-    }
-    
- 
+    var x;  
     alert(x);
-    x=23;
 }

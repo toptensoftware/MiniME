@@ -18,6 +18,42 @@ namespace MiniME
 			currentPseudoScope = rootPseudoScope;
 		}
 
+		void DefineLocalSymbol(string Name, Bookmark bmk)
+		{
+			if (bmk.warnings)
+			{
+				// This check is for parameters that are allowed to hide symbols from the outer
+				// real scope
+				if (currentPseudoScope.Node != null && currentPseudoScope.Node.Scope == null)
+				{
+					var scope = currentPseudoScope.OuterScope;
+					while (scope != null)
+					{
+						var symbol = scope.FindLocalSymbol(Name);
+						if (symbol != null)
+						{
+							Console.WriteLine("{0}: warning: symbol `{1}` hides previous declaration", bmk, Name);
+							foreach (var decl in symbol.Declarations)
+							{
+								Console.WriteLine("{0}: see previous declaration of `{1}`", decl, Name);
+							}
+						}
+
+						// Have we reached the real scope?
+						if (scope.Node == null || scope.Node.Scope != null)
+							break;
+
+						// Walk up
+						scope = scope.OuterScope;
+					}
+				}
+			}
+
+			// First check we're not hiding an outer declared symbol
+			currentScope.Symbols.DefineSymbol(Name, bmk);
+			currentPseudoScope.Symbols.DefineSymbol(Name, bmk);
+		}
+
 
 		public bool OnEnterNode(MiniME.ast.Node n)
 		{
@@ -29,9 +65,8 @@ namespace MiniME
 				// Define a symbol for the new function
 				if (!String.IsNullOrEmpty(fn.Name))
 				{
-					currentScope.Symbols.DefineSymbol(fn.Name, fn.Bookmark);
+					DefineLocalSymbol(fn.Name, fn.Bookmark);
 					currentScope.ProcessAccessibilitySpecs(fn.Name, fn.Bookmark);
-					currentPseudoScope.Symbols.DefineSymbol(fn.Name, fn.Bookmark);
 				}
 			}
 
@@ -53,8 +88,7 @@ namespace MiniME
 			if (n.GetType() == typeof(ast.CatchClause))
 			{
 				var cc = (ast.CatchClause)n;
-				currentScope.Symbols.DefineSymbol(cc.ExceptionVariable, n.Bookmark);
-				currentPseudoScope.Symbols.DefineSymbol(cc.ExceptionVariable, n.Bookmark);
+				DefineLocalSymbol(cc.ExceptionVariable, n.Bookmark);
 				return true;
 			}
 
@@ -64,9 +98,8 @@ namespace MiniME
 				var vardecl = (ast.StatementVariableDeclaration)n;
 				foreach (var v in vardecl.Variables)
 				{
-					currentScope.Symbols.DefineSymbol(v.Name, v.Bookmark);
+					DefineLocalSymbol(v.Name, v.Bookmark);
 					currentScope.ProcessAccessibilitySpecs(v.Name, v.Bookmark);
-					currentPseudoScope.Symbols.DefineSymbol(v.Name, v.Bookmark);
 
 					if (v.InitialValue!=null && v.InitialValue.RootNode.GetType()==typeof(ast.ExprNodeObjectLiteral))
 					{
@@ -95,9 +128,8 @@ namespace MiniME
 			if (n.GetType() == typeof(ast.Parameter))
 			{
 				var p = (ast.Parameter)n;
-				currentScope.Symbols.DefineSymbol(p.Name, p.Bookmark);
+				DefineLocalSymbol(p.Name, p.Bookmark);
 				currentScope.ProcessAccessibilitySpecs(p.Name, p.Bookmark);
-				currentPseudoScope.Symbols.DefineSymbol(p.Name, p.Bookmark);
 				return true;
 			}
 
