@@ -85,24 +85,6 @@ namespace MiniME
 				CheckControlCondition(forStatement, forStatement.Condition);
 			}
 
-			// Check for new Object and new Array
-			var newStatement = n as ast.ExprNodeNew;
-			if (newStatement!=null && newStatement.Arguments.Count==0)
-			{
-				var id = newStatement.ObjectType as ast.ExprNodeIdentifier;
-				if (id != null && id.Lhs==null)
-				{
-					if (id.Name == "Object")
-					{
-						currentScope.Compiler.RecordWarning(newStatement.Bookmark, "use of `new Object()`. Suggest using `{{}}` instead");
-					}
-					if (id.Name == "Array")
-					{
-						currentScope.Compiler.RecordWarning(newStatement.Bookmark, "use of `new Array()`. Suggest using `[]` instead");
-					}
-				}
-			}
-
 			// Check for variable used outself declaring pseudo scope
 			var ident = n as ast.ExprNodeIdentifier;
 			if (ident!=null && ident.Lhs == null)

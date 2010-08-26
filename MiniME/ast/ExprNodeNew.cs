@@ -43,16 +43,50 @@ namespace MiniME.ast
 
 		public override bool Render(RenderContext dest)
 		{
+			// Check for new Object and new Array
+			var id = ObjectType as ast.ExprNodeIdentifier;
+			if (id != null && id.Lhs == null)
+			{
+				if (id.Name == "Object" && Arguments.Count==0)
+				{
+					dest.Append("{}");
+					return true;
+				}
+				if (id.Name == "Array")
+				{
+					if (Arguments.Count!=1)
+					{
+						dest.Append("[");
+						bool first = true;
+						foreach (var a in Arguments)
+						{
+							if (!first)
+								dest.Append(",");
+							a.Render(dest);
+							first = false;
+						}
+						dest.Append("]");
+						return true;
+					}
+					else
+					{
+						dest.Compiler.RecordWarning(Bookmark, "use of `new Array()` with one argument creates a sized array - are you sure?");
+					}
+				}
+			}
+
+
+
 			dest.Append("new");
 			WrapAndRender(dest, ObjectType, false);
 			dest.Append("(");
-			bool first = true;
+			bool bFirst = true;
 			foreach (var a in Arguments)
 			{
-				if (!first)
+				if (!bFirst)
 					dest.Append(",");
 				a.Render(dest);
-				first = false;
+				bFirst = false;
 			}
 			dest.Append(")");
 			return true;

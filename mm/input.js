@@ -1,16 +1,4 @@
-	function DoSomething(x)
-	{
-	alert(x);
-	}
+var x=new Array(10);
 
-// warnings:off
+alert(x);
 
-// warnings:push:on
-var q;
-var q;
-// warnings:pop
-
-var z;
-var z;
-
-DoSomething("Hi");
