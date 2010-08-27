@@ -561,8 +561,7 @@ namespace MiniME
 					}
 
 
-					if (str == "warnings:off")
-						if (str.StartsWith("private:"))
+					if (str.StartsWith("private:"))
 					{
 						m_currentToken = Token.directive_private;
 						m_strIdentifier = str.Substring(8);
