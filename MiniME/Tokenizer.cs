@@ -176,6 +176,9 @@ namespace MiniME
 
 		public void OpenIncludeFile(string text, string fileName)
 		{
+			// Register the included file
+			Compiler.RegisterIncludedFile(fileName);
+
 			// Save the current string parser
 			m_IncludeStack.Push(p);
 

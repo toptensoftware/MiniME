@@ -21,6 +21,7 @@ namespace MiniME
 		// Attributes
 		List<FileInfo> m_files = new List<FileInfo>();
 		List<string> m_ResponseFiles = new List<string>();
+		List<string> m_IncludedFiles = new List<string>();
 
 		// Maximum line length before wrap
 		//  - set to zero for no line breaks
@@ -123,7 +124,7 @@ namespace MiniME
 			set;
 		}
 
-		public string CaptureOptions()
+		public string CaptureOptions(bool bWithIncludedFiles)
 		{
 			var buf = new StringBuilder();
 
@@ -142,6 +143,18 @@ namespace MiniME
 				buf.Append(f.filename);
 				buf.Append(System.IO.Path.PathSeparator);
 				buf.Append(f.encoding==null ? "null" : f.encoding.ToString());
+				buf.Append("\n");
+			}
+
+			// Included file list
+			if (bWithIncludedFiles)
+			{
+				buf.Append("included:\n");
+				foreach (var f in m_IncludedFiles)
+				{
+					buf.Append(f);
+					buf.Append("\n");
+				}
 			}
 
 			return buf.ToString();
@@ -165,6 +178,11 @@ namespace MiniME
 		public void RegisterResponseFile(string strFileName)
 		{
 			m_ResponseFiles.Add(strFileName);
+		}
+
+		public void RegisterIncludedFile(string strFileName)
+		{
+			m_IncludedFiles.Add(strFileName);
 		}
 
 		// Add a file to be processed
@@ -442,7 +460,36 @@ namespace MiniME
 					if (File.Exists(OptionsFile))
 					{
 						string oldOptions = File.ReadAllText(OptionsFile, Encoding.UTF8);
-						bNeedCompile = oldOptions != CaptureOptions();
+
+						int splitpos = oldOptions.IndexOf("included:");
+
+						string included_files = "";
+						if (splitpos>=0)
+						{
+							included_files = oldOptions.Substring(splitpos + 10);
+							oldOptions = oldOptions.Substring(0, splitpos);
+						}
+
+						bNeedCompile = oldOptions != CaptureOptions(false);
+
+						if (!bNeedCompile)
+						{
+							// Check if any included files changed
+							foreach (var f in included_files.Split('\n', '\r'))
+							{
+								try
+								{
+									if (System.IO.File.GetLastWriteTimeUtc(f) > dtOutput)
+									{
+										bNeedCompile = true;
+										break;
+									}
+								}
+								catch (Exception)
+								{
+								}
+							}
+						}
 					}
 					else
 					{
@@ -484,7 +531,7 @@ namespace MiniME
 				if (CheckFileTimes)
 				{
 					// Save options
-					File.WriteAllText(OptionsFile, CaptureOptions(), Encoding.UTF8);
+					File.WriteAllText(OptionsFile, CaptureOptions(true), Encoding.UTF8);
 				}
 				else
 				{
