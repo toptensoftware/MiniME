@@ -1059,6 +1059,13 @@ namespace MiniME
 					return false;
 			}
 
+			// If it's a keyword, escape it
+			if (m_mapKeywords.ContainsKey(str))
+				return false;
+
+			if (str == "null")
+				return false;
+
 			return true;
 		}
 

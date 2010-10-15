@@ -378,6 +378,7 @@ namespace MiniME.ast
 						}
 					}
 
+					/*
 					// Nested LTR add operation
 					// eg: x-(a+b) => x-a-b
 					var ltrTerm = t.Rhs as ExprNodeLtr;
@@ -404,10 +405,11 @@ namespace MiniME.ast
 						//      need to reprocess this term to get		x+a+b
 						i--;
 					}
+					 */
 				}
 			}
 
-			// Combine add/subtract subterms
+			// Combine multiply subterms
 			if (GetPrecedence() == OperatorPrecedence.multiply)
 			{
 				// Remove negatives on any modulus ops  eg: a%-b => a%b
@@ -425,6 +427,7 @@ namespace MiniME.ast
 
 				// Nested LTR multiply operation
 				// eg: x*(a*b) => x*a*b
+				/*
 				for (int i = 0; i < Terms.Count; i++)
 				{
 					var t = Terms[i];
@@ -459,6 +462,7 @@ namespace MiniME.ast
 						}
 					}
 				}
+				 */
 
 				// Remove -ve * -ve    eg: -a * -b => a*b
 

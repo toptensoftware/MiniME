@@ -87,11 +87,14 @@ namespace MiniME
 		// Claimed symbols are also never obfuscated.
 		public void ClaimSymbol(string symbol)
 		{
-			// Map symbol to itself
-			CurrentScope.SymbolMap.Add(symbol, symbol);
+			if (!CurrentScope.SymbolMap.ContainsKey(symbol))
+			{
+				// Map symbol to itself
+				CurrentScope.SymbolMap.Add(symbol, symbol);
 
-			// Add to the claimed map
-			CurrentScope.ClaimedSymbols.Add(symbol, true);
+				// Add to the claimed map
+				CurrentScope.ClaimedSymbols.Add(symbol, true);
+			}
 		}
 
 		// Allocate the next shortest symbol
