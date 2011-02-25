@@ -188,7 +188,7 @@ namespace MiniME
 						m_compiler.NoObfuscate = true;
 						break;
 
-					case "ive-dontated":
+					case "ive-donated":
 						m_compiler.NoCredit = true;
 						break;
 
