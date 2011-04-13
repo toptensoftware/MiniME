@@ -1,0 +1,17 @@
+﻿/*[CSS]*/
+
+div 
+{ 
+	/* Remove double trailing semicolon */
+	float:left;;
+	
+	/* Remove triple trailing semicolon */
+	float:right;;;
+	
+	/* Remove trailing semicolons */
+	float:left;
+} 
+
+-----
+div{float:left;float:right;float:left} 
+-----

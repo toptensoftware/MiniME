@@ -1,0 +1,79 @@
+/* This is a block comment */
+
+/* Basic */
+a.whatever
+{
+	background-color:Blue;
+}
+
+/* Semicolon missing after red*/
+a.whatever:hover
+{
+	background-color:Red
+}
+
+/* Box model hack should be preserved and not interfere */
+div.boxmodelhack { 
+  voice-family: "\"}\"";	
+} 
+
+/* Space before :link should be preserved */
+p :link	
+{
+	float:left;
+}
+
+/* Should be moved to top */
+@charset "UTF-8";
+
+/* Space between "and (" should be preserved */
+@media screen and (-webkit-min-device-pixel-ratio:0)
+{
+}
+
+div
+{
+	/* Units from zero dimension should be removed */
+	margin:0px;
+	padding:0em;
+	height:0%;
+
+	/* Replace with single 0 */
+	margin:0 0 0 0;
+	padding:0 0 0;
+	whatever:0 0;
+	background-position:0px 0px;
+
+	/* Make sure ":0 0;" preserved on this*/
+	background-position:0px 0px;
+
+	/* Remove leading zeros on decimals */
+	line-height:0.6em;
+
+	/* Should be shortened to #6496C8 */
+	color:rgb(100,150,200);
+	
+	/* Hex should be uppercased */
+	color:#abcdef;
+	
+	/* Shorten color strings -> #1af*/
+	color:#11aaff;
+	
+	/* Remove duplicate semicolons */
+	color:Red;;
+	color:Blue;
+
+	/* Final semicolon before close brace can be removed */
+	color:green; /* <-- ie, this one */
+}
+
+/* Remove empty rules */
+div
+{
+}
+
+div.final
+{
+	color:Blue;
+}
+

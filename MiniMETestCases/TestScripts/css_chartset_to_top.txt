@@ -1,0 +1,16 @@
+﻿/*[CSS]*/
+
+/* Basic test - comments and while space removed */
+
+/* Space before :link should be preserved */
+div
+{
+	float:left;
+}
+
+/* Should be moved to top */
+@charset "UTF-8";
+
+-----
+@charset "UTF-8";div{float:left}
+-----

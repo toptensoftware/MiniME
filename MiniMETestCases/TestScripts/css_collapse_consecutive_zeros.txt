@@ -1,0 +1,16 @@
+﻿/*[CSS]*/
+
+div 
+{ 
+	/* Replace with single 0 */
+	margin:0 0 0 0;
+	padding:0 0 0;
+	whatever:0 0;
+
+	/* Except on this */
+	background-position:0px 0px;
+} 
+
+-----
+div{margin:0;padding:0;whatever:0;background-position:0 0} 
+-----

@@ -1,0 +1,11 @@
+﻿/*[CSS]*/
+
+div 
+{ 
+	/* Remove leading zeros on decimals */
+	margin-top:0.6em;
+} 
+
+-----
+div{margin-top:.6em} 
+-----

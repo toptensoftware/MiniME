@@ -1,0 +1,11 @@
+﻿/*[CSS]*/
+
+/* Basic test - comments and while space removed */
+div
+{
+	color:blue
+}
+
+-----
+div{color:blue}
+-----

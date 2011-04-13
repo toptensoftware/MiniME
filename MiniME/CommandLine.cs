@@ -121,6 +121,14 @@ namespace MiniME
 						m_compiler.StdOut = true;
 						break;
 
+					case "js":
+						m_compiler.MinifyKind = MinifyKind.JS;
+						break;
+
+					case "css":
+						m_compiler.MinifyKind = MinifyKind.CSS;
+						break;
+
 					case "linelen":
 						if (Value == null)
 						{
@@ -261,6 +269,8 @@ namespace MiniME
 			Console.WriteLine("   -o:<file>              Output filename (defaults to <file1name>.min.js)");
 			Console.WriteLine("   -stdout                Send output to stdout instead of a file (use with -nologo)");
 			Console.WriteLine("   -linelen:<chars>       Set the maximum line length (defaults to 0 which means no line breaks)");
+			Console.WriteLine("   -css                   Force CSS minifier");
+			Console.WriteLine("   -js                    Force Javascript minifier");
 			Console.WriteLine("   -no-obfuscate          Don't obfuscate symbols");
 			Console.WriteLine("   -ive-donated           Don't add 'Minified by MiniME' credit comment (enforced by Karma)");
 			Console.WriteLine("   -inputencoding:<name>  Set input file encoding (defaults to `auto`, applies to subsequent filename args)");

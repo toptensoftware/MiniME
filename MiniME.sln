@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiniME", "MiniME\MiniME.csproj", "{947703CB-0944-4609-A4C3-B85B90DF50E1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mm", "mm\mm.csproj", "{692B99CE-C938-43AE-9F1F-1DA24557FD14}"

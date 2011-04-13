@@ -1,0 +1,17 @@
+﻿/*[CSS]*/
+
+div 
+{ 
+	/* Should be shortened to #6496C8 */
+	color:rgb(100,150,200);
+	
+	/* Hex should be uppercased */
+	color:#abcdef;
+	
+	/* Shorten color strings -> #1AF*/
+	color:#11aaff;
+} 
+
+-----
+div{color:#6496C8;color:#ABCDEF;color:#1AF} 
+-----

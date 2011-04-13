@@ -17,6 +17,13 @@ using System.IO;
 
 namespace MiniME
 {
+	public enum MinifyKind
+	{
+		Auto,
+		JS,
+		CSS,
+	}
+
 	// Main api into the MiniME minifier/obfuscator
 	public class Compiler
 	{
@@ -27,6 +34,12 @@ namespace MiniME
 			DetectConsts = true;
 			UseOptionsFile = true;
 			MaxLineLength = 120;
+			MinifyKind=MinifyKind.Auto;
+		}
+
+		public MinifyKind MinifyKind
+		{
+			get; set;
 		}
 
 		// Attributes
@@ -262,14 +275,13 @@ namespace MiniME
 				Encoding = Encoding.UTF8;
 			}
 
-
-			// Automatic output filename
-			if (String.IsNullOrEmpty(OutputFileName))
+			// Workout minify kind
+			if (MinifyKind == MinifyKind.Auto)
 			{
-				int dotpos = strFileName.LastIndexOf('.');
-				if (dotpos >= 0)
-					OutputFileName = strFileName.Substring(0, dotpos);
-				OutputFileName += ".min.js";
+				if (strFileName.EndsWith(".js", StringComparison.InvariantCultureIgnoreCase))
+					MinifyKind = MinifyKind.JS;
+				else if (strFileName.EndsWith(".css", StringComparison.InvariantCultureIgnoreCase))
+					MinifyKind = MinifyKind.CSS;
 			}
 
 			// Add file info
@@ -292,8 +304,39 @@ namespace MiniME
 			m_files.Add(i);
 		}
 
-		// Compile all loaded script to a string
 		public string CompileToString()
+		{
+			if (MinifyKind == MinifyKind.CSS)
+			{
+				return CompileCssToString();
+			}
+			else
+			{
+				return CompileJavascriptToString();
+			}
+		}
+
+		// Compile all loaded script to a string
+		public string CompileCssToString()
+		{
+			// Step 1, concatenate all files
+			var sb = new StringBuilder();
+			foreach (var file in m_files)
+			{
+				Console.WriteLine("Processing {0}...", System.IO.Path.GetFileName(file.filename));
+				sb.Append(file.content);
+				sb.Append("\n");
+			}
+
+			// Do the CSS compression
+			var minified = new CssMin().Minify(sb.ToString(), MaxLineLength);
+
+			// Return it
+			return minified;
+		}
+
+		// Compile all loaded script to a string
+		public string CompileJavascriptToString()
 		{
 			// Create a symbol allocator
 			SymbolAllocator SymbolAllocator = new SymbolAllocator(this);
@@ -434,6 +477,23 @@ namespace MiniME
 		// Compile all loaded files and write to the output file
 		public void Compile()
 		{
+			// Automatic output filename
+			if (String.IsNullOrEmpty(OutputFileName) && m_files.Count>0)
+			{
+				string strFileName = m_files[0].filename;
+
+				int dotpos = strFileName.LastIndexOf('.');
+				if (dotpos >= 0)
+					OutputFileName = strFileName.Substring(0, dotpos);
+
+				OutputFileName += ".min.";
+
+				if (MinifyKind == MinifyKind.CSS)
+					OutputFileName += "css";
+				else
+					OutputFileName += "js";
+			}
+
 			string OptionsFile = OutputFileName + ".minime-options";
 
 			if (!StdOut && CheckFileTimes && File.Exists(OutputFileName))

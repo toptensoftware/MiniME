@@ -43,6 +43,7 @@ namespace MiniMETestCases
 			c.Formatted = t.Input.IndexOf("[Formatted]") >= 0;
 			c.NoObfuscate = t.Input.IndexOf("[NoObfuscate]") >= 0;
 			c.SymbolInfo = t.Input.IndexOf("[SymbolInfo]") >= 0;
+			c.MinifyKind = t.Input.IndexOf("[CSS]") >= 0 ? MinifyKind.CSS : MinifyKind.JS;
 			c.NoCredit = true;
 			c.MaxLineLength = 0;
 			c.AddScript(resourceName, t.Input, false);

@@ -1,0 +1,13 @@
+﻿/*[CSS]*/
+
+/* Basic test - comments and while space removed */
+
+/* Space between "and (" should be preserved */
+@media screen and (-webkit-min-device-pixel-ratio:0)
+{
+	something
+}
+
+-----
+@media screen and (-webkit-min-device-pixel-ratio:0){something}
+-----

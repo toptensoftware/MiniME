@@ -1,0 +1,14 @@
+﻿/*[CSS]*/
+
+/* Basic test - comments and while space removed */
+
+div
+{
+	/* Units from zero dimension should be removed */
+	margin:0px;
+	padding:0em;
+	height:0%;
+}
+-----
+div{margin:0;padding:0;height:0} 
+-----

@@ -1,0 +1,12 @@
+﻿/*[CSS]*/
+
+/* Basic test - comments and while space removed */
+
+/* Box model hack should be preserved and not interfere */
+div { 
+  voice-family: "\"}\"";	
+} 
+
+-----
+div{voice-family:"\"}\""} 
+-----

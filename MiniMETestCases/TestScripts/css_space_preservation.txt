@@ -1,0 +1,13 @@
+﻿/*[CSS]*/
+
+/* Basic test - comments and while space removed */
+
+/* Space before :link should be preserved */
+p :link	
+{
+	float:left;
+}
+
+-----
+p :link{float:left} 
+-----

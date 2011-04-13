@@ -1,0 +1,25 @@
+﻿/*[CSS]*/
+
+div.pre
+{
+	float:left;
+}
+
+/* This rule should be removed */
+div.redundant
+{
+}
+
+/* This rule should be removed too */
+div.redundant2
+{
+}
+
+div.post
+{
+	float:left;
+}
+
+-----
+div.pre{float:left}div.post{float:left} 
+-----
