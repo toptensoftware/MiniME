@@ -1,7 +1,5 @@
 ﻿/*[CSS]*/
 
-/* Basic test - comments and while space removed */
-
 div
 {
 	/* Units from zero dimension should be removed */

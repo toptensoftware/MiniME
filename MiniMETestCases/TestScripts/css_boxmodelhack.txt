@@ -1,11 +1,11 @@
 ﻿/*[CSS]*/
 
-/* Basic test - comments and while space removed */
-div
-{
-	color:blue
-}
+/* Box model hack should be preserved and not interfere */
+div 
+{ 
+  voice-family: "\"}\"";	
+} 
 
 -----
-div{color:blue}
+div{voice-family:"\"}\""} 
 -----

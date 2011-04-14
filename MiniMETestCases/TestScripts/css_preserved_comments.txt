@@ -1,0 +1,13 @@
+﻿/*[CSS]*/
+
+/*! This comment should be preserved */
+/* This one shouldn't */
+div 
+{ 
+  float:left;
+} 
+
+-----
+/* This comment should be preserved */
+div{float:left} 
+-----

@@ -32,6 +32,15 @@ namespace MiniME
 
 		public string Minify(string input, int MaxLineLength)
 		{
+			var PreservedComments = new List<string>();
+			// remove preserved comments
+			input = Regex(@"\/\*!(.*?)\*\/").Replace(input, m =>
+					{
+						PreservedComments.Add(m.Groups[1].Value);
+						return string.Format("___PRESERVED_COMMENT_{0}___", PreservedComments.Count - 1);
+					}
+			);
+
 			// remove comment blocks, everything between /* and */
 			input = Regex(@"\/\*(.*?)\*\/").Replace(input, "");
 
@@ -48,7 +57,7 @@ namespace MiniME
 					{
 						return m.Value.Replace(":", "___SELECTORCOLON___");
 					}
-				);
+			);
 			input = Regex(@"\s+([!{};:>+\(\)\],])").Replace(input, "$1");
 			input = input.Replace("___SELECTORCOLON___", ":");
 
@@ -123,6 +132,12 @@ namespace MiniME
 
 			// And trim
 			input = input.Trim();
+
+			// Put back preserved comments
+			for (int i = 0; i < PreservedComments.Count; i++)
+			{
+				input = Regex(string.Format(@"___PRESERVED_COMMENT_{0}___[ ]?", i)).Replace(input, "/*" + PreservedComments[i] + "*/\n");
+			}
 
 			// Insert line breaks
 			input = InsertLineBreaks(input, MaxLineLength);

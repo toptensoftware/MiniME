@@ -1,7 +1,5 @@
 ﻿/*[CSS]*/
 
-/* Basic test - comments and while space removed */
-
 /* Space before :link should be preserved */
 p :link	
 {
