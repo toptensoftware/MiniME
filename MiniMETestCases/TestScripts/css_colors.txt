@@ -12,6 +12,11 @@ div
 	color:#11aaff;
 } 
 
+div#feedback
+{
+	color:#feedba;
+}
+
 -----
-div{color:#6496C8;color:#ABCDEF;color:#1AF} 
+div{color:#6496C8;color:#ABCDEF;color:#1AF}div#feedback{color:#FEEDBA}
 -----

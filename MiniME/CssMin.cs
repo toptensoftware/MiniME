@@ -107,7 +107,7 @@ namespace MiniME
 				);
 
 			// normalize #aBc to #ABC.  These will be in groups of either 3 or 6
-			input = Regex(@"#([a-fA-F0-9]{3}){1,2}").Replace(input, m => m.Value.ToUpperInvariant());
+			input = Regex(@"#([a-fA-F0-9]{3}){1,2}\b").Replace(input, m => m.Value.ToUpperInvariant());
 
 			// Shorten colors from #AABBCC to #ABC. Note that we want to make sure
 			// the color is not preceded by either ", " or =. Indeed, the property
@@ -115,7 +115,7 @@ namespace MiniME
 			// would become
 			//     filter: chroma(color="#FFF");
 			// which makes the filter break in IE.
-			input = Regex(@"([^""'=\s])(\s*)#([0-9A-F])\3([0-9A-F])\4([0-9A-F])\5").Replace(input, "$1$2#$3$4$5");
+			input = Regex(@"([^""'=\s])(\s*)#([0-9A-F])\3([0-9A-F])\4([0-9A-F])\5\b").Replace(input, "$1$2#$3$4$5");
 
 			// Replace multiple semi-colons in a row by a single one
 			// See SF bug #1980989
