@@ -245,7 +245,7 @@ namespace MiniME
 				case Token.subtractAssign: return "-=";
 				case Token.multiplyAssign: return "*=";
 				case Token.divideAssign: return "/=";
-				case Token.modulusAssign: return "*=";
+				case Token.modulusAssign: return "%=";
 				case Token.shlAssign: return "<<=";
 				case Token.shrAssign: return ">>=";
 				case Token.shrzAssign: return ">>>=";
