@@ -48,11 +48,11 @@ namespace MiniME
 		List<string> m_IncludedFiles = new List<string>();
 
 		/// <summary>
-    /// Maximum line length before wrap
-    ///  - set to zero for no line breaks
-    ///  - no guarantees, long strings won't be broken
-    ///    to enforce this, some operators may overhang
-    ///    by a character or two.
+		/// Maximum line length before wrap
+		///  - set to zero for no line breaks
+		///  - no guarantees, long strings won't be broken
+		///    to enforce this, some operators may overhang
+		///    by a character or two.
 		/// </summary>
 		public int MaxLineLength
 		{
@@ -60,9 +60,9 @@ namespace MiniME
 			set;
 		}
 
-    /// <summary>
-    /// Enable/disable obfuscation of local symbols inside function closures
-    /// </summary>
+		/// <summary>
+		/// Enable/disable obfuscation of local symbols inside function closures
+		/// </summary>
 		public bool NoObfuscate
 		{
 			get;
@@ -70,7 +70,7 @@ namespace MiniME
 		}
 
 		/// <summary>
-    ///  Enable/disable replacement of consts variables
+		///  Enable/disable replacement of consts variables
 		/// </summary>
 		public bool DetectConsts
 		{
@@ -78,10 +78,10 @@ namespace MiniME
 			set;
 		}
 
-    /// <summary>
-    /// Enable/disable formatted output very rough formatting, just 
-    /// enough to be vaguely readable for diagnostic purposes
-    /// </summary>
+		/// <summary>
+		/// Enable/disable formatted output very rough formatting, just 
+		/// enough to be vaguely readable for diagnostic purposes
+		/// </summary>
 		public bool Formatted
 		{
 			get;
@@ -89,7 +89,7 @@ namespace MiniME
 		}
 
 		/// <summary>
-    ///  Set to include diagnostic information about symbol obfuscation
+		///  Set to include diagnostic information about symbol obfuscation
 		/// </summary>
 		public bool SymbolInfo
 		{
@@ -98,7 +98,7 @@ namespace MiniME
 		}
 
 		/// <summary>
-    ///  Set to dump the abstract syntax tree to stdout
+		///  Set to dump the abstract syntax tree to stdout
 		/// </summary>
 		public bool DumpAST
 		{
@@ -107,7 +107,7 @@ namespace MiniME
 		}
 
 		/// <summary>
-    /// Set to dump scope information about all function scopes to stdout
+		/// Set to dump scope information about all function scopes to stdout
 		/// </summary>
 		public bool DumpScopes
 		{
@@ -115,20 +115,20 @@ namespace MiniME
 			set;
 		}
 
-    /// <summary>
-    /// Set to an encoding for the output file - defaults to the same encoding 
-    /// as the first input file
-    /// </summary>
+		/// <summary>
+		/// Set to an encoding for the output file - defaults to the same encoding 
+		/// as the first input file
+		/// </summary>
 		public Encoding OutputEncoding
 		{
 			get;
 			set;
 		}
 
-    /// <summary>
-    /// Set the output file name defaults to the name of the input file 
-    /// with `.js` removed and `.js.min` appended
-    /// </summary>
+		/// <summary>
+		/// Set the output file name defaults to the name of the input file 
+		/// with `.js` removed and `.js.min` appended
+		/// </summary>
 		public string OutputFileName
 		{
 			get;
@@ -136,7 +136,7 @@ namespace MiniME
 		}
 
 		/// <summary>
-    ///  Write to stdout instead of output file
+		///  Write to stdout instead of output file
 		/// </summary>
 		public bool StdOut
 		{
@@ -145,7 +145,7 @@ namespace MiniME
 		}
 
 		/// <summary>
-    ///  When true, doesn't include the "Minified by MiniME" credit comment
+		///  When true, doesn't include the "Minified by MiniME" credit comment
 		/// </summary>
 		public bool NoCredit
 		{
@@ -168,23 +168,23 @@ namespace MiniME
 			set;
 		}
 
-    /// <summary>
-    /// Sets the <see cref="System.IO.TextWriter"/> for all output. Defaults to stdout.
-    /// </summary>
-    public TextWriter StdOutWriter {
-      get { return _outWriter; } 
-      set { 
-        _outWriter = value;
-        Console.SetOut(_outWriter);
-      } 
-    }
-	  private TextWriter _outWriter = Console.Out;
+		/// <summary>
+		/// Sets the <see cref="System.IO.TextWriter"/> for all output. Defaults to stdout.
+		/// </summary>
+		public TextWriter StdOutWriter {
+			get { return _outWriter; } 
+			set { 
+				_outWriter = value;
+				Console.SetOut(_outWriter);
+			} 
+		}
+		private TextWriter _outWriter = Console.Out;
 
-    /// <summary>
-    /// Get the supported option parameters and their default values.
-    /// </summary>
-    /// <param name="bWithIncludedFiles"></param>
-    /// <returns>Supported option parameters and their default values</returns>
+		/// <summary>
+		/// Get the supported option parameters and their default values.
+		/// </summary>
+		/// <param name="bWithIncludedFiles"></param>
+		/// <returns>Supported option parameters and their default values</returns>
 		public string CaptureOptions(bool bWithIncludedFiles)
 		{
 			var buf = new StringBuilder();
@@ -290,7 +290,7 @@ namespace MiniME
 		}
 
 		/// <summary>
-    /// Add a file to be processed
+		/// Add a file to be processed
 		/// </summary>
 		/// <param name="strFileName">The file path</param>
 		/// <param name="Warnings">Enable lint warnings</param>
@@ -299,13 +299,13 @@ namespace MiniME
 			AddFile(strFileName, null, Warnings);
 		}
 
-	  /// <summary>
-	  /// Add a file to be processed
-	  /// </summary>
-	  /// <param name="strFileName">The file path</param>
-    /// <param name="Encoding">The encoding. Defaults to an encoding detection algorithm, and then <see cref="Encoding.UTF8"/> </param>
-	  /// <param name="Warnings">Enable lint warnings</param>
-	  public void AddFile(string strFileName, System.Text.Encoding Encoding, bool Warnings)
+		/// <summary>
+		/// Add a file to be processed
+		/// </summary>
+		/// <param name="strFileName">The file path</param>
+		/// <param name="Encoding">The encoding. Defaults to an encoding detection algorithm, and then <see cref="Encoding.UTF8"/> </param>
+		/// <param name="Warnings">Enable lint warnings</param>
+		public void AddFile(string strFileName, System.Text.Encoding Encoding, bool Warnings)
 		{
 			// Work out auto file encoding
 			if (Encoding == null)
@@ -341,12 +341,12 @@ namespace MiniME
 			m_files.Add(i);
 		}
 
-    /// <summary>
-    /// Add javascript to be processed.
-    /// </summary>
-    /// <param name="strName">What you want to call the script.</param>
-    /// <param name="strScript">The script contents. </param>
-    /// <param name="Warnings">Enable lint warnings</param>
+		/// <summary>
+		/// Add javascript to be processed.
+		/// </summary>
+		/// <param name="strName">What you want to call the script.</param>
+		/// <param name="strScript">The script contents. </param>
+		/// <param name="Warnings">Enable lint warnings</param>
 		public void AddScript(string strName, string strScript, bool Warnings)
 		{
 			var i = new FileInfo();
@@ -357,19 +357,19 @@ namespace MiniME
 			m_files.Add(i);
 		}
 
-    /// <summary>
-    /// Compile all loaded scripts to a string. Can only compile EITHER JS or CSS, not both.
-    /// </summary>
-    /// <returns>The compiled scripts or styles.</returns>
+		/// <summary>
+		/// Compile all loaded scripts to a string. Can only compile EITHER JS or CSS, not both.
+		/// </summary>
+		/// <returns>The compiled scripts or styles.</returns>
 		public string CompileToString()
-    {
-      return MinifyKind == MinifyKind.CSS ? CompileCssToString() : CompileJavascriptToString();
-    }
+		{
+			return MinifyKind == MinifyKind.CSS ? CompileCssToString() : CompileJavascriptToString();
+		}
 
-    /// <summary>
-    /// Compile all loaded scripts to a string, using the css minifier.
-    /// </summary>
-    /// <returns>The compiled styles.</returns>
+		/// <summary>
+		/// Compile all loaded scripts to a string, using the css minifier.
+		/// </summary>
+		/// <returns>The compiled styles.</returns>
 		public string CompileCssToString()
 		{
 			// Step 1, concatenate all files
@@ -531,7 +531,7 @@ namespace MiniME
 		}
 
 		/// <summary>
-    ///  Compile all loaded files and write to the output file using default options
+		///  Compile all loaded files and write to the output file using default options
 		/// </summary>
 		public void Compile()
 		{
