@@ -161,11 +161,24 @@ namespace MiniME
 			set;
 		}
 
+
 		public bool UseOptionsFile
 		{
 			get;
 			set;
 		}
+
+    /// <summary>
+    /// Sets the <see cref="System.IO.TextWriter"/> for all output. Defaults to stdout.
+    /// </summary>
+    public TextWriter StdOutWriter {
+      get { return _outWriter; } 
+      set { 
+        _outWriter = value;
+        Console.SetOut(_outWriter);
+      } 
+    }
+	  private TextWriter _outWriter = Console.Out;
 
     /// <summary>
     /// Get the supported option parameters and their default values.
@@ -626,7 +639,7 @@ namespace MiniME
 			// StdOut?
 			if (StdOut)
 			{
-				Console.Write(str);
+				Console.WriteLine(str);
 				Console.WriteLine("");
 				return;
 			}
