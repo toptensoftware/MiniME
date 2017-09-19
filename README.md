@@ -38,7 +38,7 @@ var minified=mm.CompileToString();
 ## More Information ##
 
 * [Command Line](Doc/usage.md)
-* [API](Doc/api.md)
+* [API](Doc/usage-api.md)
 * [In-script Directives](Doc/usage-directives.md)
 * [Combining Multiple Files](Doc/usage-multifile.md)
 * [Preserved Comments](Doc/usage-comments.md)
