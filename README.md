@@ -30,9 +30,9 @@ Use it from the command line:
 or programatically from .NET code:
 
 ```C#
-	var mm = new MiniME.Compiler();
-	mm.AddFile("MyJavaScriptFile.js");
-	var minified=mm.CompileToString();
+var mm = new MiniME.Compiler();
+mm.AddFile("MyJavaScriptFile.js");
+var minified=mm.CompileToString();
 ```
 
 ## More Information ##

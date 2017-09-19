@@ -12,11 +12,13 @@ post-build command.
 	
 	Here's a typical example:
 
-		-nologo
-		-check-filetimes
-		*.js
-		-o:scripts.min.js
-		
+	```
+	-nologo
+	-check-filetimes
+	*.js
+	-o:scripts.min.js 
+	```
+
 		
 	In this example, MiniME will process all `.js` files in the same folder as `MiniME.txt` and
 	generate a single output script `scripts.min.js`.  Modify the above example to suit your

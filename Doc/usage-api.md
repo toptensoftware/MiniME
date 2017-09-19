@@ -10,39 +10,45 @@ please consult the documentation for your development tool.
 
 2. Create an instance of the MiniMI Compiler object.  eg:
 
-		{{C#}}
-		// Create an instance of the MiniME minifier
-		var mm = new MiniME.Compiler();
+	```C#
+	// Create an instance of the MiniME minifier
+	var mm = new MiniME.Compiler();
+	```
     
 3. Set MiniME options. eg:
 
-		{{C#}}
-		// Setup options
-		mm.MaxLineLength = 0;
+	```C#
+	// Setup options
+	mm.MaxLineLength = 0;
+	```
 	
 4. Add files to process:
 
-		{{C#}}
-		// Add files
-		mm.AddFile("MyJavaScriptFile.js", Encoding.UTF8)
+	```C#
+	// Add files
+	mm.AddFile("MyJavaScriptFile.js", Encoding.UTF8)
+	```
 		
 	or, add script directly
 	
-		{{C#}}
-		mm.AddScript("snippet", "<javascript code here>");
+	```C#
+	mm.AddScript("snippet", "<javascript code here>");
+	```
 		
 5. Compile the script
 
-		{{C#}}
-		// Compile and write to an output file
-		mm.OutputFileName="MyMinifiedFile.js";
-		mm.OutputEncoding=Encoding.UTF8;
-		mm.Compile();
+	```C#
+	// Compile and write to an output file
+	mm.OutputFileName="MyMinifiedFile.js";
+	mm.OutputEncoding=Encoding.UTF8;
+	mm.Compile();
+	```
 		
 	or, compile to a string
 	
-		{{C#}}
-		var ObfuscatedScript=mm.CompileToString();
+	```C#
+	var ObfuscatedScript=mm.CompileToString();
+	```
 		
 6. That's it!
 
