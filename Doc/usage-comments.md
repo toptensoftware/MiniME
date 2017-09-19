@@ -21,4 +21,4 @@ It also works with C-style comments:
 After minification, the comments will be preserved and the exclamation point be removed.
 
 	   
-See also [In-script Directives](usage-directives).
+See also [In-script Directives](usage-directives.md).

@@ -22,7 +22,7 @@ post-build command.
 	generate a single output script `scripts.min.js`.  Modify the above example to suit your
 	own needs.   
 	
-	See [Using the Command Line](usage) for available options.
+	See [Using the Command Line](usage.md) for available options.
 		
 2. In Solution Explorer, right click on your project and select Properties.
 

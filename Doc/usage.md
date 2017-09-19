@@ -109,4 +109,4 @@ de-obfuscating previously obfuscated scripts - good luck with that!
 
 
 
-See also [API](usage-api) and [In-script Directives](usage-directives).
+See also [API](usage-api.md) and [In-script Directives](usage-directives.md).

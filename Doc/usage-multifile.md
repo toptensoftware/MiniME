@@ -42,4 +42,4 @@ You can use the include directive in any .js file, but usually it will be used o
 in a single file to declare a JavaScript library - a minified set of related scripts.
 
 
-See also [Command Line](usage) and [API](usage-api).
+See also [Command Line](usage.md) and [API](usage-api.md).

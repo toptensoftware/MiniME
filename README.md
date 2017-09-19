@@ -1,11 +1,3 @@
-
----
-title: "MiniME"
-subtitle: ""
-merge:
-    before: "header.page"
----
-
 # MiniME - Open-source JavaScript Minifier
 
 MiniME is an open-source JavaScript minifier that runs on the .NET platform (Windows or Mono).
@@ -43,16 +35,16 @@ or programatically from .NET code:
 
 ## More Information ##
 
-* [Command Line](Docs/usage.md)
-* [API](Docs/api.md)
-* [In-script Directives](Docs/usage-directives.md)
-* [Combining Multiple Files](Docs/usage-multifile.md)
-* [Preserved Comments](Docs/usage-comments.md)
-* [Build Integration](Docs/usage-build.md)
-* [Code Quality (lint)](Docs/lint.md)
-* [CSS Compression](Docs/css.md)
-* [Implementation Notes](Docs/implementation.md)
-* [Support](Docs/support.md);
+* [Command Line](Doc/usage.md)
+* [API](Doc/api.md)
+* [In-script Directives](Doc/usage-directives.md)
+* [Combining Multiple Files](Doc/usage-multifile.md)
+* [Preserved Comments](Doc/usage-comments.md)
+* [Build Integration](Doc/usage-build.md)
+* [Code Quality (lint)](Doc/lint.md)
+* [CSS Compression](Doc/css.md)
+* [Implementation Notes](Doc/implementation.md)
+* [Support](Doc/support.md);
 
 ## License ##
 

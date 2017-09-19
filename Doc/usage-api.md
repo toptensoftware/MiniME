@@ -47,4 +47,4 @@ please consult the documentation for your development tool.
 6. That's it!
 
 
-See also [Command Line](usage) and [MiniME In-script Directives](usage-directives).
+See also [Command Line](usage.md) and [MiniME In-script Directives](usage-directives.md).

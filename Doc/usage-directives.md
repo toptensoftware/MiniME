@@ -17,7 +17,7 @@ about what symbols can be obfuscated. These directives follow the general form:
 The follow sections provide examples of symbol specifiers.
 
 Note: This section covers directives for controlling obfuscation.  There are also directives 
-for [comment preservation](usage-comments) and for controlling [lint warnings](lint).
+for [comment preservation](usage-comments.md) and for controlling [lint warnings](lint.md).
 
 
 ### Obfuscating a Specific Global Scope Symbol ###
@@ -211,5 +211,5 @@ To prevent obfuscation, use a string index:
 	someOtherObject["x"]=24;	// This reference to member x will never be obfuscated
 								// (but will be optimized down to `someOtherObject.x`)
 	
-See also [Combining Multiple Files](usage-multifile) and [Preserved Comments](usage-comments).
+See also [Combining Multiple Files](usage-multifile.md) and [Preserved Comments](usage-comments.md).
 	
