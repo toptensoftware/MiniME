@@ -1,5 +1,7 @@
 # MiniME - Open-source JavaScript Minifier
 
+**Sorry :( This Project is not longer under development or maintenance.  The repo is kept here for posterity only. **
+
 MiniME is an open-source JavaScript minifier that runs on the .NET platform (Windows or Mono).
 
 If you don't know what a JavaScript minifier is, you probably don't need one but 
