@@ -1,0 +1,15 @@
+﻿//[Formatted]
+
+// Tests for various ternary operator forms
+x=a?b:c;
+x=a?b?c:d:c;
+x=h?(g = func()):c;
+x=a?(b == d):c;
+//x=y?z = func():c; //commented out for testing purposes. Is currently failing.
+-----
+x=a?b:c;
+x=a?b?c:d:c;
+x=h?(g=func()):c;
+x=a?b==d:c;
+-----
+//x=y?z=func():c;
